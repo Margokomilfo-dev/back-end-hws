@@ -10,8 +10,11 @@ const port = 3999
 app.use(bodyParser({}))
 app.use('/videos', videosRouter)
 
+app.get('/', (req: Request, res: Response) => {
+    res.send('Hello back-end HomeWorks in it-incubator!!!')
+})
 app.delete('/testing/all-data', (req: Request, res: Response) => {
-    const videos_ = videos.splice(0, videos.length)
+    videos.splice(0, videos.length)
     res.send(CodeResponsesEnum.Not_content_204)
 })
 
