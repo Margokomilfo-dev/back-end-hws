@@ -49,7 +49,6 @@ videosRouter.post('/', (req: Request, res: Response) => {
         errorsArray.push({ field: 'author', message: 'no author' })
     }
     if (author && author.trim().length > 20) {
-        console.log('!!!herrerererer')
         errorsArray.push({
             field: 'author',
             message: 'more than 20 symbols',
@@ -61,7 +60,17 @@ videosRouter.post('/', (req: Request, res: Response) => {
             message: 'no author',
         })
     }
-
+    if (availableResolutions && availableResolutions.length) {
+        availableResolutions.forEach((resolution: string) => {
+            if (!Object.keys(ResolutionsEnum).includes(resolution)) {
+                errorsArray.push({
+                    field: 'availableResolutions',
+                    message: 'exist not valid value',
+                })
+                return
+            }
+        })
+    }
     if (errorsArray.length > 0) {
         const errors_ = errorResponse(errorsArray)
         res.status(CodeResponsesEnum.Incorrect_values_400).send(errors_)
@@ -117,6 +126,10 @@ videosRouter.put('/:id', (req: Request, res: Response) => {
     }
     const title = req.body.title
     const author = req.body.author
+    const availableResolutions = req.body.availableResolutions
+    const canBeDownloaded = req.body.canBeDownloaded //only boolean
+    const minAgeRestriction = req.body.minAgeRestriction // from 1 to 18, null, not required
+
     //------------------errors-------------------------------
 
     const errorsArray = []
@@ -152,6 +165,33 @@ videosRouter.put('/:id', (req: Request, res: Response) => {
         })
     }
 
+    if (availableResolutions && availableResolutions.length) {
+        availableResolutions.forEach((resolution: string) => {
+            if (!Object.keys(ResolutionsEnum).includes(resolution)) {
+                errorsArray.push({
+                    field: 'availableResolutions',
+                    message: 'exist not valid value',
+                })
+                return
+            }
+        })
+    }
+    if (canBeDownloaded && typeof canBeDownloaded !== 'boolean') {
+        errorsArray.push({
+            field: 'canBeDownloaded',
+            message: 'not boolean',
+        })
+    }
+    if (minAgeRestriction) {
+        const res = parseInt(minAgeRestriction)
+        if (!res || (res && res < 1) || (res && res > 18)) {
+            errorsArray.push({
+                field: 'minAgeRestriction',
+                message: 'not correct',
+            })
+        }
+    }
+
     if (errorsArray.length > 0) {
         const errors_ = errorResponse(errorsArray)
         res.status(CodeResponsesEnum.Incorrect_values_400).send(errors_)
@@ -170,6 +210,29 @@ videosRouter.put('/:id', (req: Request, res: Response) => {
     res.sendStatus(CodeResponsesEnum.Not_content_204)
 })
 
+videosRouter.delete('/:id', (req: Request, res: Response) => {
+    const id = parseInt(req.params.id) //if NaN - return !id === false
+    if (!id) {
+        // если Ваня внесет в доку (раздизейблить след 2 строки и задизейблить 7 третью
+        // const errors_ = errorResponse(['id'])
+        // res.status(CodeResponsesEnum.Incorrect_values_400).send(errors_)
+        res.sendStatus(CodeResponsesEnum.Not_found_404) //если send не сделать - тест будет бесконечный
+        return
+    }
+    const video = videos.find((video) => video.id === id)
+    if (video) {
+        for (let i = 0; i < videos.length; i++) {
+            if (videos[i].id === id) {
+                videos.splice(i, 1)
+                res.sendStatus(CodeResponsesEnum.Not_content_204)
+                return
+            }
+        }
+    } else {
+        res.sendStatus(CodeResponsesEnum.Not_found_404)
+    }
+})
+
 type CreateVideoBodyType = {
     title: 'string'
     author: 'string'
@@ -184,4 +247,14 @@ export type VideoType = {
     createdAt: string
     publicationDate: string
     availableResolutions: Array<string> | null
+}
+enum ResolutionsEnum {
+    'P144' = 'P144',
+    'P240' = 'P240',
+    'P360' = 'P360',
+    'P480' = 'P480',
+    'P720' = 'P720',
+    'P1080' = 'P1080',
+    'P1440' = 'P1440',
+    'P2160' = 'P2160',
 }

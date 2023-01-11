@@ -111,6 +111,7 @@ describe('/videos', function () {
             .send({
                 title: 'title more then forty symbols. It is the biiig error =)',
                 author: 'author more 20 symbols',
+                availableResolutions: ['P144', 'P720'],
             })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
                 errorsMessages: [
@@ -128,6 +129,33 @@ describe('/videos', function () {
         const res = await request(app).get('/videos/')
         expect(res.body).toEqual([])
     })
+    it('- POST does not create the video with incorrect data (title more 40, notCorrect availableResolutions )', async function () {
+        await request(app)
+            .post('/videos/')
+            .send({
+                title: 'title more then forty symbols. It is the biiig error =)',
+                author: 'author',
+                availableResolutions: ['P144', 'Invalid', 'P720'],
+                canBeDownloaded: true,
+                minAgeRestriction: null,
+            })
+            .expect(CodeResponsesEnum.Incorrect_values_400, {
+                errorsMessages: [
+                    {
+                        message: 'more than 40 symbols',
+                        field: 'title',
+                    },
+                    {
+                        message: 'exist not valid value',
+                        field: 'availableResolutions',
+                    },
+                ],
+            })
+
+        const res = await request(app).get('/videos/')
+        expect(res.body).toEqual([])
+    })
+
     let newVideo: VideoType | null = null
     it('+ POST create the video with correct data', async function () {
         const res = await request(app)
@@ -196,12 +224,44 @@ describe('/videos', function () {
         const res = await request(app).get('/videos/')
         expect(res.body[0]).toEqual(newVideo)
     })
-    it('- PUT product by ID with incorrect data (no title)', async () => {
+    it('- PUT product by ID with incorrect data (no title, not correct minAgeRestriction)', async () => {
         await request(app)
             .put('/videos/' + newVideo!.id)
-            .send({ author: 'new author =)' })
+            .send({ author: 'new author =)', minAgeRestriction: 47 })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
-                errorsMessages: [{ message: 'no title', field: 'title' }],
+                errorsMessages: [
+                    { message: 'no title', field: 'title' },
+                    {
+                        field: 'minAgeRestriction',
+                        message: 'not correct',
+                    },
+                ],
+            })
+
+        const res = await request(app).get('/videos/')
+        expect(res.body[0]).toEqual(newVideo)
+    })
+    it('- PUT product by ID with incorrect data (no title, notCorrect availableResolutions, not valid canBeDownloaded )', async () => {
+        await request(app)
+            .put('/videos/' + newVideo!.id)
+            .send({
+                author: 'new author =)',
+                availableResolutions: ['P144', 'Invalid', 'P720'],
+                canBeDownloaded: 'hello',
+                minAgeRestriction: 18,
+            })
+            .expect(CodeResponsesEnum.Incorrect_values_400, {
+                errorsMessages: [
+                    { message: 'no title', field: 'title' },
+                    {
+                        field: 'availableResolutions',
+                        message: 'exist not valid value',
+                    },
+                    {
+                        field: 'canBeDownloaded',
+                        message: 'not boolean',
+                    },
+                ],
             })
 
         const res = await request(app).get('/videos/')
