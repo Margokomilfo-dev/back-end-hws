@@ -6,12 +6,7 @@ module.exports = {
         es2021: true,
     },
     root: true,
-    extends: [
-        'eslint:recommended',
-        'prettier',
-        'prettier/prettier',
-        'plugin:prettier/recommended',
-    ],
+    extends: ['prettier', 'prettier/prettier', 'plugin:prettier/recommended'],
     parser: '@typescript-eslint/parser',
     parserOptions: {
         ecmaFeatures: {
@@ -35,7 +30,6 @@ module.exports = {
             },
         ],
     },
-
     settings: {
         react: {
             version: 'detect',

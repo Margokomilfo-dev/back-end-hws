@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "app",
+  "name": "hws",
   "builds": [
     { "src": "src/index.ts", "use": "@vercel/node" }
   ],
