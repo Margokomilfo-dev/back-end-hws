@@ -2,6 +2,13 @@ import addDays from 'date-fns/addDays'
 import { Router, Request, Response } from 'express'
 import { CodeResponsesEnum } from '../types'
 import { errorResponse } from '../assets/errorResponse'
+import {
+    authorFieldValidator,
+    availableResolutionsFieldValidator,
+    canBeDownloadedFieldValidator,
+    minAgeRestrictionFieldValidator,
+    titleFieldValidator,
+} from '../assets/field-validator'
 
 export const videosRouter = Router({})
 export let videos: Array<VideoType> = [
@@ -28,49 +35,11 @@ videosRouter.post('/', (req: Request, res: Response) => {
 
     //------------------errors-------------------------------
 
-    const errorsArray = []
-    if (!title) {
-        errorsArray.push({ field: 'title', message: 'no title' })
-    }
-    if (title && title.trim().length > 40) {
-        errorsArray.push({
-            field: 'title',
-            message: 'more than 40 symbols',
-        })
-    }
-    if (title && title.trim().length < 1) {
-        errorsArray.push({
-            field: 'title',
-            message: 'no title',
-        })
-    }
+    const errorsArray: Array<{ field: string; message: string }> = []
+    titleFieldValidator(title, errorsArray)
+    authorFieldValidator(author, errorsArray)
+    availableResolutionsFieldValidator(availableResolutions, errorsArray)
 
-    if (!author) {
-        errorsArray.push({ field: 'author', message: 'no author' })
-    }
-    if (author && author.trim().length > 20) {
-        errorsArray.push({
-            field: 'author',
-            message: 'more than 20 symbols',
-        })
-    }
-    if (author && author.trim().length < 1) {
-        errorsArray.push({
-            field: 'author',
-            message: 'no author',
-        })
-    }
-    if (availableResolutions && availableResolutions.length) {
-        availableResolutions.forEach((resolution: string) => {
-            if (!Object.keys(ResolutionsEnum).includes(resolution)) {
-                errorsArray.push({
-                    field: 'availableResolutions',
-                    message: 'exist not valid value',
-                })
-                return
-            }
-        })
-    }
     if (errorsArray.length > 0) {
         const errors_ = errorResponse(errorsArray)
         res.status(CodeResponsesEnum.Incorrect_values_400).send(errors_)
@@ -132,65 +101,12 @@ videosRouter.put('/:id', (req: Request, res: Response) => {
 
     //------------------errors-------------------------------
 
-    const errorsArray = []
-    if (!title) {
-        errorsArray.push({ field: 'title', message: 'no title' })
-    }
-    if (title && title.trim().length > 40) {
-        errorsArray.push({
-            field: 'title',
-            message: 'more than 40 symbols',
-        })
-    }
-    if (title && title.trim().length < 1) {
-        errorsArray.push({
-            field: 'title',
-            message: 'no title',
-        })
-    }
-
-    if (!author) {
-        errorsArray.push({ field: 'author', message: 'no author' })
-    }
-    if (author && author.trim().length > 20) {
-        errorsArray.push({
-            field: 'author',
-            message: 'more than 20 symbols',
-        })
-    }
-    if (author && author.trim().length < 1) {
-        errorsArray.push({
-            field: 'author',
-            message: 'no author',
-        })
-    }
-
-    if (availableResolutions && availableResolutions.length) {
-        availableResolutions.forEach((resolution: string) => {
-            if (!Object.keys(ResolutionsEnum).includes(resolution)) {
-                errorsArray.push({
-                    field: 'availableResolutions',
-                    message: 'exist not valid value',
-                })
-                return
-            }
-        })
-    }
-    if (canBeDownloaded && typeof canBeDownloaded !== 'boolean') {
-        errorsArray.push({
-            field: 'canBeDownloaded',
-            message: 'not boolean',
-        })
-    }
-    if (minAgeRestriction) {
-        const res = parseInt(minAgeRestriction)
-        if (!res || (res && res < 1) || (res && res > 18)) {
-            errorsArray.push({
-                field: 'minAgeRestriction',
-                message: 'not correct',
-            })
-        }
-    }
+    const errorsArray: Array<{ field: string; message: string }> = []
+    titleFieldValidator(title, errorsArray)
+    authorFieldValidator(author, errorsArray)
+    availableResolutionsFieldValidator(availableResolutions, errorsArray)
+    canBeDownloadedFieldValidator(canBeDownloaded, errorsArray)
+    minAgeRestrictionFieldValidator(minAgeRestriction, errorsArray)
 
     if (errorsArray.length > 0) {
         const errors_ = errorResponse(errorsArray)
@@ -233,11 +149,11 @@ videosRouter.delete('/:id', (req: Request, res: Response) => {
     }
 })
 
-type CreateVideoBodyType = {
-    title: 'string'
-    author: 'string'
-    availableResolutions: Array<string>
-}
+// type CreateVideoBodyType = {
+//     title: 'string'
+//     author: 'string'
+//     availableResolutions: Array<string>
+// }
 export type VideoType = {
     id: number
     title: string
@@ -248,7 +164,7 @@ export type VideoType = {
     publicationDate: string
     availableResolutions: Array<string> | null
 }
-enum ResolutionsEnum {
+export enum ResolutionsEnum {
     'P144' = 'P144',
     'P240' = 'P240',
     'P360' = 'P360',
