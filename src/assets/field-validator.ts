@@ -83,3 +83,27 @@ export const minAgeRestrictionFieldValidator = (
         }
     }
 }
+
+export const publicationDateFieldValidator = (
+    publicationDate: any | undefined,
+    errorsArray: Array<{ field: string; message: string }>
+) => {
+    if (
+        publicationDate &&
+        publicationDate.toString() == parseInt(publicationDate).toString()
+    ) {
+        errorsArray.push({
+            field: 'publicationDate',
+            message: 'not correct',
+        })
+    }
+
+    let tryDate = new Date(publicationDate)
+    // @ts-ignore
+    if (tryDate && tryDate.toString() == 'NaN' && tryDate == 'Invalid Date') {
+        errorsArray.push({
+            field: 'publicationDate',
+            message: 'not correct',
+        })
+    }
+}

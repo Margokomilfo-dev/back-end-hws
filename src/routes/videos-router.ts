@@ -7,6 +7,7 @@ import {
     availableResolutionsFieldValidator,
     canBeDownloadedFieldValidator,
     minAgeRestrictionFieldValidator,
+    publicationDateFieldValidator,
     titleFieldValidator,
 } from '../assets/field-validator'
 
@@ -98,6 +99,7 @@ videosRouter.put('/:id', (req: Request, res: Response) => {
     const availableResolutions = req.body.availableResolutions
     const canBeDownloaded = req.body.canBeDownloaded //only boolean
     const minAgeRestriction = req.body.minAgeRestriction // from 1 to 18, null, not required
+    const publicationDate = req.body.publicationDate // string, not required
 
     //------------------errors-------------------------------
 
@@ -107,6 +109,7 @@ videosRouter.put('/:id', (req: Request, res: Response) => {
     availableResolutionsFieldValidator(availableResolutions, errorsArray)
     canBeDownloadedFieldValidator(canBeDownloaded, errorsArray)
     minAgeRestrictionFieldValidator(minAgeRestriction, errorsArray)
+    publicationDateFieldValidator(publicationDate, errorsArray)
 
     if (errorsArray.length > 0) {
         const errors_ = errorResponse(errorsArray)

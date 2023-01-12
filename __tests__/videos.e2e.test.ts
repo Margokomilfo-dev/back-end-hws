@@ -1,7 +1,7 @@
 import request from 'supertest'
 
 import { app } from '../src'
-import { videos, VideoType } from '../src/routes/videos-router'
+import { VideoType } from '../src/routes/videos-router'
 import { CodeResponsesEnum } from '../src/types'
 
 //от этой ошибки! -> thrown: "Exceeded timeout of 5000 ms for a test. go to the jest.config.js
@@ -267,10 +267,34 @@ describe('/videos', function () {
         const res = await request(app).get('/videos/')
         expect(res.body[0]).toEqual(newVideo)
     })
+    it('- PUT product by ID with incorrect data (publicationDate)', async () => {
+        await request(app)
+            .put('/videos/' + newVideo!.id)
+            .send({
+                title: 'hello title',
+                author: 'hello author',
+                publicationDate: 12345,
+            })
+            .expect(CodeResponsesEnum.Incorrect_values_400, {
+                errorsMessages: [
+                    {
+                        field: 'publicationDate',
+                        message: 'not correct',
+                    },
+                ],
+            })
+        const res = await request(app).get('/videos/')
+        expect(res.body[0]).toEqual(newVideo)
+    })
+
     it('+ PUT product by ID with correct data', async () => {
         await request(app)
             .put('/videos/' + newVideo!.id)
-            .send({ title: 'hello title', author: 'hello author' })
+            .send({
+                title: 'hello title',
+                author: 'hello author',
+                publicationDate: '2023-01-12T08:12:39.261Z',
+            })
             .expect(CodeResponsesEnum.Not_content_204)
 
         const res = await request(app).get('/videos/')
@@ -278,6 +302,32 @@ describe('/videos', function () {
             ...newVideo,
             title: 'hello title',
             author: 'hello author',
+            publicationDate: '2023-01-12T08:12:39.261Z',
         })
+        newVideo = res.body[0]
+    })
+    it('- DELETE product by incorrect ID', async () => {
+        await request(app)
+            .delete('/videos/1kcnsdk')
+            .expect(CodeResponsesEnum.Not_found_404)
+
+        const res = await request(app).get('/videos/')
+        expect(res.body[0]).toEqual(newVideo)
+    })
+    it('- DELETE product by incorrect ID', async () => {
+        await request(app)
+            .delete('/videos/876328')
+            .expect(CodeResponsesEnum.Not_found_404)
+
+        const res = await request(app).get('/videos/')
+        expect(res.body[0]).toEqual(newVideo)
+    })
+    it('+ DELETE product by correct ID', async () => {
+        await request(app)
+            .delete('/videos/' + newVideo!.id)
+            .expect(CodeResponsesEnum.Not_content_204)
+
+        const res = await request(app).get('/videos/')
+        expect(res.body.length).toBe(0)
     })
 })
