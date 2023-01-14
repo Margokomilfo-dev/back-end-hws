@@ -264,7 +264,7 @@ describe('/videos', function () {
             .send({
                 title: 'hello title',
                 author: 'hello author',
-                publicationDate: 12345,
+                publicationDate: 1995,
             })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
                 errorsMessages: [

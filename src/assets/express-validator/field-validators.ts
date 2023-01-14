@@ -1,4 +1,4 @@
-import { body, check } from 'express-validator'
+import { body } from 'express-validator'
 
 export const titleValidator = body('title')
     .trim()
@@ -24,8 +24,8 @@ export const minAgeRestrictionValidator = body('minAgeRestriction')
     .isInt({ min: 1, max: 18 })
     .withMessage('not correct')
 
-export const publicationDateValidator = check('publicationDate')
+export const publicationDateValidator = body('publicationDate')
     .optional()
     .isISO8601()
-    .toDate()
+    .matches(/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}Z/g)
     .withMessage('not correct')

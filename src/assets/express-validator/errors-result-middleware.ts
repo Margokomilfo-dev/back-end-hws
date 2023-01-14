@@ -23,6 +23,7 @@ export const errorsResultMiddleware = (
         })
     }
     if (!errors.isEmpty()) {
+        console.log(errors)
         res.status(400).send({
             errorsMessages: errors
                 .array({ onlyFirstError: true })
