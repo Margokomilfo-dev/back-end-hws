@@ -20,8 +20,8 @@ describe('/videos', function () {
             .send({ title: '', author: '' })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
                 errorsMessages: [
-                    { message: 'no title', field: 'title' },
-                    { message: 'no author', field: 'author' },
+                    { message: 'title is required', field: 'title' },
+                    { message: 'author is required', field: 'author' },
                 ],
             })
 
@@ -33,7 +33,9 @@ describe('/videos', function () {
             .post('/videos/')
             .send({ title: '', author: 'author' })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
-                errorsMessages: [{ message: 'no title', field: 'title' }],
+                errorsMessages: [
+                    { message: 'title is required', field: 'title' },
+                ],
             })
 
         const res = await request(app).get('/videos/')
@@ -44,7 +46,9 @@ describe('/videos', function () {
             .post('/videos/')
             .send({ title: 'title', author: '' })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
-                errorsMessages: [{ message: 'no author', field: 'author' }],
+                errorsMessages: [
+                    { message: 'author is required', field: 'author' },
+                ],
             })
 
         const res = await request(app).get('/videos/')
@@ -69,14 +73,8 @@ describe('/videos', function () {
             .send({ author: 'author more 20 symbols' })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
                 errorsMessages: [
-                    {
-                        message: 'no title',
-                        field: 'title',
-                    },
-                    {
-                        message: 'more than 20 symbols',
-                        field: 'author',
-                    },
+                    { message: 'title is required', field: 'title' },
+                    { message: 'more than 20 symbols', field: 'author' },
                 ],
             })
 
@@ -92,13 +90,10 @@ describe('/videos', function () {
             .expect(CodeResponsesEnum.Incorrect_values_400, {
                 errorsMessages: [
                     {
-                        message: 'more than 40 symbols',
+                        message: 'title should contain  1 - 40 symbols',
                         field: 'title',
                     },
-                    {
-                        message: 'no author',
-                        field: 'author',
-                    },
+                    { message: 'author is required', field: 'author' },
                 ],
             })
 
@@ -116,13 +111,10 @@ describe('/videos', function () {
             .expect(CodeResponsesEnum.Incorrect_values_400, {
                 errorsMessages: [
                     {
-                        message: 'more than 40 symbols',
+                        message: 'title should contain  1 - 40 symbols',
                         field: 'title',
                     },
-                    {
-                        message: 'more than 20 symbols',
-                        field: 'author',
-                    },
+                    { message: 'more than 20 symbols', field: 'author' },
                 ],
             })
 
@@ -142,7 +134,7 @@ describe('/videos', function () {
             .expect(CodeResponsesEnum.Incorrect_values_400, {
                 errorsMessages: [
                     {
-                        message: 'more than 40 symbols',
+                        message: 'title should contain  1 - 40 symbols',
                         field: 'title',
                     },
                     {
@@ -174,7 +166,7 @@ describe('/videos', function () {
             .expect(404)
     })
     it('- GET product by ID with incorrect id', async () => {
-        await request(app).get('/videos/helloWorld').expect(404)
+        await request(app).get('/videos/helloWorld').expect(400)
     })
     it('+ GET product by ID with correct id', async () => {
         await request(app)
@@ -206,8 +198,8 @@ describe('/videos', function () {
             .send({ title: '', author: '' })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
                 errorsMessages: [
-                    { message: 'no title', field: 'title' },
-                    { message: 'no author', field: 'author' },
+                    { message: 'title is required', field: 'title' },
+                    { message: 'author is required', field: 'author' },
                 ],
             })
         const res = await request(app).get('/videos/')
@@ -218,7 +210,9 @@ describe('/videos', function () {
             .put('/videos/' + newVideo!.id)
             .send({ title: 'new Title =)', author: '' })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
-                errorsMessages: [{ message: 'no author', field: 'author' }],
+                errorsMessages: [
+                    { message: 'author is required', field: 'author' },
+                ],
             })
 
         const res = await request(app).get('/videos/')
@@ -230,7 +224,7 @@ describe('/videos', function () {
             .send({ author: 'new author =)', minAgeRestriction: 47 })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
                 errorsMessages: [
-                    { message: 'no title', field: 'title' },
+                    { message: 'title is required', field: 'title' },
                     {
                         field: 'minAgeRestriction',
                         message: 'not correct',
@@ -246,20 +240,17 @@ describe('/videos', function () {
             .put('/videos/' + newVideo!.id)
             .send({
                 author: 'new author =)',
-                availableResolutions: ['P144', 'Invalid', 'P720'],
                 canBeDownloaded: 'hello',
+                availableResolutions: ['P144', 'Invalid', 'P720'],
                 minAgeRestriction: 18,
             })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
                 errorsMessages: [
-                    { message: 'no title', field: 'title' },
+                    { message: 'title is required', field: 'title' },
+                    { message: 'not boolean', field: 'canBeDownloaded' },
                     {
-                        field: 'availableResolutions',
                         message: 'exist not valid value',
-                    },
-                    {
-                        field: 'canBeDownloaded',
-                        message: 'not boolean',
+                        field: 'availableResolutions',
                     },
                 ],
             })

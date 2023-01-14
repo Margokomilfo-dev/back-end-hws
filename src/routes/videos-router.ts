@@ -1,15 +1,16 @@
 import { Request, Response, Router } from 'express'
 import { CodeResponsesEnum } from '../types'
-import { errorResponse } from '../assets/errorResponse'
-import {
-    authorFieldValidator,
-    availableResolutionsFieldValidator,
-    canBeDownloadedFieldValidator,
-    minAgeRestrictionFieldValidator,
-    publicationDateFieldValidator,
-    titleFieldValidator,
-} from '../assets/field-validator'
 import { videosRepository } from '../repositores/videos-repository'
+
+import {
+    authorValidator,
+    canBeDownloadedValidator,
+    minAgeRestrictionValidator,
+    publicationDateValidator,
+    titleValidator,
+} from '../assets/express-validator/field-validators'
+import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
+import { idParamValidationMiddleware } from '../assets/express-validator/id-param-validation-middleware'
 
 export const videosRouter = Router({})
 
@@ -18,110 +19,80 @@ videosRouter.get('/', (req: Request, res: Response) => {
     res.status(CodeResponsesEnum.Success_200).send(videos)
 })
 
-videosRouter.post('/', (req: Request, res: Response) => {
-    const title = req.body.title
-    const author = req.body.author
-    const availableResolutions = req.body.availableResolutions
+videosRouter.post(
+    '/',
+    titleValidator,
+    authorValidator,
+    errorsResultMiddleware,
+    (req: Request, res: Response) => {
+        const title = req.body.title
+        const author = req.body.author
+        const availableResolutions = req.body.availableResolutions
 
-    //------------------errors-------------------------------
+        const newVideo = videosRepository.createVideo(
+            title,
+            author,
+            availableResolutions
+        )
 
-    const errorsArray: Array<{ field: string; message: string }> = []
-    titleFieldValidator(title, errorsArray)
-    authorFieldValidator(author, errorsArray)
-    availableResolutionsFieldValidator(availableResolutions, errorsArray)
-
-    if (errorsArray.length > 0) {
-        const errors_ = errorResponse(errorsArray)
-        res.status(CodeResponsesEnum.Incorrect_values_400).send(errors_)
-        return
+        if (newVideo) {
+            res.status(CodeResponsesEnum.Created_201).send(newVideo) //если сделать sendStatus - не дойдем до send
+        } else {
+            res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
+        }
     }
-    //------------------errors-------------------------------
+)
+//здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
+videosRouter.get(
+    '/:id',
+    idParamValidationMiddleware,
+    (req: Request, res: Response) => {
+        const id = +req.params.id //if NaN - return !id === false
 
-    const newVideo = videosRepository.createVideo(
-        title,
-        author,
-        availableResolutions
-    )
-
-    if (newVideo) {
-        res.status(CodeResponsesEnum.Created_201).send(newVideo) //если сделать sendStatus - не дойдем до send
-    } else {
-        res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
+        const video = videosRepository.getVideoById(id)
+        if (video) {
+            res.status(CodeResponsesEnum.Success_200).send(video)
+        } else {
+            res.sendStatus(CodeResponsesEnum.Not_found_404)
+        }
     }
-})
+)
 
-videosRouter.get('/:id', (req: Request, res: Response) => {
-    const id = parseInt(req.params.id) //if NaN - return !id === false
-    if (!id) {
-        // если Ваня внесет в доку (раздизейблить след 2 строки и задизейблить 7 третью
-        // const errors_ = errorResponse(['id'])
-        // res.status(CodeResponsesEnum.Incorrect_values_400).send(errors_)
-        res.sendStatus(CodeResponsesEnum.Not_found_404) //если send не сделать - тест будет бесконечный
-        return
-    }
-
-    const video = videosRepository.getVideoById(id)
-    if (video) {
-        res.status(CodeResponsesEnum.Success_200).send(video)
-    } else {
-        res.sendStatus(CodeResponsesEnum.Not_found_404)
-    }
-})
-
-videosRouter.put('/:id', (req: Request, res: Response) => {
-    const id = parseInt(req.params.id) //if NaN - return !id === false
-    if (!id) {
-        res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
-        return
-    }
-    const title = req.body.title
-    const author = req.body.author
-    const availableResolutions = req.body.availableResolutions
-    const canBeDownloaded = req.body.canBeDownloaded //only boolean
-    const minAgeRestriction = req.body.minAgeRestriction // from 1 to 18, null, not required
-    const publicationDate = req.body.publicationDate // string, not required
-
-    //------------------errors-------------------------------
-
-    const errorsArray: Array<{ field: string; message: string }> = []
-    titleFieldValidator(title, errorsArray)
-    authorFieldValidator(author, errorsArray)
-    availableResolutionsFieldValidator(availableResolutions, errorsArray)
-    canBeDownloadedFieldValidator(canBeDownloaded, errorsArray)
-    minAgeRestrictionFieldValidator(minAgeRestriction, errorsArray)
-    publicationDateFieldValidator(publicationDate, errorsArray)
-
-    if (errorsArray.length > 0) {
-        const errors_ = errorResponse(errorsArray)
-        res.status(CodeResponsesEnum.Incorrect_values_400).send(errors_)
-        return
-    }
-    //------------------errors-------------------------------
-
-    const isUpdated = videosRepository.updateVideo(id, req.body)
-    if (!isUpdated) {
-        res.sendStatus(CodeResponsesEnum.Not_found_404)
-        return
-    }
-    res.sendStatus(CodeResponsesEnum.Not_content_204)
-})
-
-videosRouter.delete('/:id', (req: Request, res: Response) => {
-    const id = parseInt(req.params.id) //if NaN - return !id === false
-    if (!id) {
-        // если Ваня внесет в доку (раздизейблить след 2 строки и задизейблить 7 третью
-        // const errors_ = errorResponse(['id'])
-        // res.status(CodeResponsesEnum.Incorrect_values_400).send(errors_)
-        res.sendStatus(CodeResponsesEnum.Not_found_404) //если send не сделать - тест будет бесконечный
-        return
-    }
-    const isDeleted = videosRepository.deleteVideo(id)
-    if (isDeleted) {
+//здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
+videosRouter.put(
+    '/:id',
+    idParamValidationMiddleware,
+    titleValidator,
+    authorValidator,
+    canBeDownloadedValidator,
+    minAgeRestrictionValidator,
+    publicationDateValidator,
+    errorsResultMiddleware,
+    (req: Request, res: Response) => {
+        const id = +req.params.id
+        const isUpdated = videosRepository.updateVideo(id, req.body)
+        if (!isUpdated) {
+            res.sendStatus(CodeResponsesEnum.Not_found_404)
+            return
+        }
         res.sendStatus(CodeResponsesEnum.Not_content_204)
-    } else {
-        res.sendStatus(CodeResponsesEnum.Not_found_404)
     }
-})
+)
+
+//здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
+videosRouter.delete(
+    '/:id',
+    idParamValidationMiddleware,
+    (req: Request, res: Response) => {
+        const id = +req.params.id
+        const isDeleted = videosRepository.deleteVideo(id)
+        if (isDeleted) {
+            res.sendStatus(CodeResponsesEnum.Not_content_204)
+        } else {
+            res.sendStatus(CodeResponsesEnum.Not_found_404)
+        }
+    }
+)
 
 // type CreateVideoBodyType = {
 //     title: 'string'
