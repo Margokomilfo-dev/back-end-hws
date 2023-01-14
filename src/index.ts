@@ -1,8 +1,9 @@
 import bodyParser from 'body-parser'
 import express, { Response, Request } from 'express'
 
-import { videos, videosRouter } from './routes/videos-router'
+import { videosRouter } from './routes/videos-router'
 import { CodeResponsesEnum } from './types'
+import { videosRepository } from './repositores/videos-repository'
 
 export const app = express()
 const port = 3999
@@ -14,8 +15,8 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello back-end HomeWorks in it-incubator!!!')
 })
 app.delete('/testing/all-data', (req: Request, res: Response) => {
-    videos.splice(0, videos.length)
-    res.send(CodeResponsesEnum.Not_content_204)
+    const videos = videosRepository.deleteAll()
+    res.status(CodeResponsesEnum.Not_content_204).send(videos)
 })
 
 app.listen(port, () => {

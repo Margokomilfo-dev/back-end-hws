@@ -1,5 +1,4 @@
-import addDays from 'date-fns/addDays'
-import { Router, Request, Response } from 'express'
+import { Request, Response, Router } from 'express'
 import { CodeResponsesEnum } from '../types'
 import { errorResponse } from '../assets/errorResponse'
 import {
@@ -10,22 +9,12 @@ import {
     publicationDateFieldValidator,
     titleFieldValidator,
 } from '../assets/field-validator'
+import { videosRepository } from '../repositores/videos-repository'
 
 export const videosRouter = Router({})
-export let videos: Array<VideoType> = [
-    {
-        id: 1,
-        title: 'video 1',
-        author: 'Margo',
-        canBeDownloaded: false, //By default - false
-        minAgeRestriction: 18, //maximum: 18, minimum: 1, default: null, nullable: true - null - no restriction
-        createdAt: new Date().toISOString(),
-        publicationDate: addDays(new Date(), 3).toISOString(), //By default - +1 day from CreatedAt
-        availableResolutions: [],
-    },
-]
 
 videosRouter.get('/', (req: Request, res: Response) => {
+    const videos = videosRepository.getVideos()
     res.status(CodeResponsesEnum.Success_200).send(videos)
 })
 
@@ -48,22 +37,13 @@ videosRouter.post('/', (req: Request, res: Response) => {
     }
     //------------------errors-------------------------------
 
-    const newVideo = {
-        id: new Date().getTime(),
-        title: 'created new Video',
-        author: 'Margo=)',
-        canBeDownloaded: false, //By default - false
-        minAgeRestriction: null, //maximum: 18, minimum: 1, default: null, nullable: true - null - no restriction
-        createdAt: new Date().toISOString(),
-        publicationDate: addDays(new Date(), 1).toISOString(), //By default - +1 day from CreatedAt
-        availableResolutions: availableResolutions
-            ? availableResolutions
-            : null,
-    }
+    const newVideo = videosRepository.createVideo(
+        title,
+        author,
+        availableResolutions
+    )
 
-    videos.push(newVideo)
-
-    if (videos.find((video) => video.id === newVideo.id)) {
+    if (newVideo) {
         res.status(CodeResponsesEnum.Created_201).send(newVideo) //если сделать sendStatus - не дойдем до send
     } else {
         res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
@@ -80,7 +60,7 @@ videosRouter.get('/:id', (req: Request, res: Response) => {
         return
     }
 
-    const video = videos.find((video) => video.id === id)
+    const video = videosRepository.getVideoById(id)
     if (video) {
         res.status(CodeResponsesEnum.Success_200).send(video)
     } else {
@@ -118,14 +98,11 @@ videosRouter.put('/:id', (req: Request, res: Response) => {
     }
     //------------------errors-------------------------------
 
-    const ourVideo = videos.find((video) => video.id === id)
-    if (!ourVideo) {
+    const isUpdated = videosRepository.updateVideo(id, req.body)
+    if (!isUpdated) {
         res.sendStatus(CodeResponsesEnum.Not_found_404)
         return
     }
-    videos = videos.map((video) =>
-        video.id === id ? { ...video, ...req.body } : video
-    )
     res.sendStatus(CodeResponsesEnum.Not_content_204)
 })
 
@@ -138,15 +115,9 @@ videosRouter.delete('/:id', (req: Request, res: Response) => {
         res.sendStatus(CodeResponsesEnum.Not_found_404) //если send не сделать - тест будет бесконечный
         return
     }
-    const video = videos.find((video) => video.id === id)
-    if (video) {
-        for (let i = 0; i < videos.length; i++) {
-            if (videos[i].id === id) {
-                videos.splice(i, 1)
-                res.sendStatus(CodeResponsesEnum.Not_content_204)
-                return
-            }
-        }
+    const isDeleted = videosRepository.deleteVideo(id)
+    if (isDeleted) {
+        res.sendStatus(CodeResponsesEnum.Not_content_204)
     } else {
         res.sendStatus(CodeResponsesEnum.Not_found_404)
     }

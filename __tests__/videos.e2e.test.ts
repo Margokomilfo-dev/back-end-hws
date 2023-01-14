@@ -286,7 +286,6 @@ describe('/videos', function () {
         const res = await request(app).get('/videos/')
         expect(res.body[0]).toEqual(newVideo)
     })
-
     it('+ PUT product by ID with correct data', async () => {
         await request(app)
             .put('/videos/' + newVideo!.id)
@@ -306,6 +305,7 @@ describe('/videos', function () {
         })
         newVideo = res.body[0]
     })
+
     it('- DELETE product by incorrect ID', async () => {
         await request(app)
             .delete('/videos/1kcnsdk')
