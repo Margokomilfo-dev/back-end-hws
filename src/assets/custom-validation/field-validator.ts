@@ -1,4 +1,4 @@
-import { ResolutionsEnum } from '../routes/videos-router'
+import { ResolutionsEnum } from '../../routes/videos-router'
 
 export const titleFieldValidator = (
     title: string | undefined,

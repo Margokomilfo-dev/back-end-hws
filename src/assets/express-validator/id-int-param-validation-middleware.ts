@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { CodeResponsesEnum } from '../../types'
 
-export const idParamValidationMiddleware = (
+export const idIntParamValidationMiddleware = (
     req: Request,
     res: Response,
     next: NextFunction
@@ -13,4 +13,16 @@ export const idParamValidationMiddleware = (
         res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
         return
     }
+}
+export const idStringParamValidationMiddleware = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const id = req.params.id?.toString().trim()
+    console.log(id)
+    if (!id) {
+        res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
+        return
+    } else next()
 }

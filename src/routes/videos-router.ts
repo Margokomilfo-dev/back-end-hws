@@ -3,14 +3,14 @@ import { CodeResponsesEnum } from '../types'
 import { videosRepository } from '../repositores/videos-repository'
 
 import {
-    authorValidator,
-    canBeDownloadedValidator,
-    minAgeRestrictionValidator,
-    publicationDateValidator,
-    titleValidator,
+    videoAuthorValidator,
+    videoCanBeDownloadedValidator,
+    videoMinAgeRestrictionValidator,
+    videoPublicationDateValidator,
+    videoTitleValidator,
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
-import { idParamValidationMiddleware } from '../assets/express-validator/id-param-validation-middleware'
+import { idIntParamValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
 
 export const videosRouter = Router({})
 
@@ -21,8 +21,8 @@ videosRouter.get('/', (req: Request, res: Response) => {
 
 videosRouter.post(
     '/',
-    titleValidator,
-    authorValidator,
+    videoTitleValidator,
+    videoAuthorValidator,
     errorsResultMiddleware,
     (req: Request, res: Response) => {
         const title = req.body.title
@@ -45,7 +45,7 @@ videosRouter.post(
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
 videosRouter.get(
     '/:id',
-    idParamValidationMiddleware,
+    idIntParamValidationMiddleware,
     (req: Request, res: Response) => {
         const id = +req.params.id //if NaN - return !id === false
 
@@ -61,12 +61,12 @@ videosRouter.get(
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
 videosRouter.put(
     '/:id',
-    idParamValidationMiddleware,
-    titleValidator,
-    authorValidator,
-    canBeDownloadedValidator,
-    minAgeRestrictionValidator,
-    publicationDateValidator,
+    idIntParamValidationMiddleware,
+    videoTitleValidator,
+    videoAuthorValidator,
+    videoCanBeDownloadedValidator,
+    videoMinAgeRestrictionValidator,
+    videoPublicationDateValidator,
     errorsResultMiddleware,
     (req: Request, res: Response) => {
         const id = +req.params.id
@@ -82,7 +82,7 @@ videosRouter.put(
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
 videosRouter.delete(
     '/:id',
-    idParamValidationMiddleware,
+    idIntParamValidationMiddleware,
     (req: Request, res: Response) => {
         const id = +req.params.id
         const isDeleted = videosRepository.deleteVideo(id)
