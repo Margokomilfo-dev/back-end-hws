@@ -37,7 +37,7 @@ blogsRouter.post(
         )
 
         if (newBlog) {
-            res.status(CodeResponsesEnum.Success_200).send(newBlog) //если сделать sendStatus - не дойдем до send
+            res.status(CodeResponsesEnum.Created_201).send(newBlog) //если сделать sendStatus - не дойдем до send
         } else {
             res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
         }

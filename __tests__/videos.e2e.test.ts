@@ -444,7 +444,7 @@ describe('all tests', function () {
                     description: 'valid description',
                     websiteUrl: 'https://margocommm.pl.com',
                 })
-                .expect(CodeResponsesEnum.Success_200)
+                .expect(CodeResponsesEnum.Created_201)
             newBlog = res_.body
 
             const res = await request(app).get('/blogs/')

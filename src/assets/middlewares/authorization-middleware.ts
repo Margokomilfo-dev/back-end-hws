@@ -13,7 +13,9 @@ export const authorizationMiddleware = (
             .split(':')
     }
     if (!auth || auth[0] !== 'admin' || auth[1] !== 'qwerty') {
-        res.sendStatus(CodeResponsesEnum.Not_Authorized)
-        return
-    } else next()
+        res.status(CodeResponsesEnum.Not_Authorized)
+        res.end('Unauthorized')
+    } else {
+        next()
+    }
 }
