@@ -326,8 +326,8 @@ describe('all tests', function () {
         it('- POST does not create the blog with incorrect data (authorized, no name, no description, no websiteUrl)', async function () {
             await request(app)
                 .post('/blogs/')
-                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .send({})
+                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
                         { message: 'name is required', field: 'name' },
@@ -357,8 +357,8 @@ describe('all tests', function () {
         it('- POST does not create the blog with incorrect data (auth, no name, no websiteUrl)', async function () {
             await request(app)
                 .post('/blogs/')
-                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .send({ description: 'description' })
+                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
                         { message: 'name is required', field: 'name' },
@@ -375,12 +375,12 @@ describe('all tests', function () {
         it('- POST does not create the blog with incorrect data (auth, incorrect name, incorrect websiteUrl)', async function () {
             await request(app)
                 .post('/blogs/')
-                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .send({
                     name: 'name more then 15 symbols',
                     description: 'description',
                     websiteUrl: 'http://margocommarm.pl.com',
                 })
+                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
                         {
@@ -400,13 +400,13 @@ describe('all tests', function () {
         it('- POST does not create the blog with incorrect data (not correct token, incorrect websiteUrl)', async function () {
             await request(app)
                 .post('/blogs/')
-                .set('authorization', 'Basic 123')
                 .send({
                     name: 'valid title',
                     description: 'description',
                     websiteUrl:
                         'http://margocommargocommargocommargocommargocommargocommargocommargocommargocommargocommargocommarm.pl.com',
                 })
+                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Not_Authorized)
 
             const res = await request(app).get('/blogs/')
@@ -415,13 +415,14 @@ describe('all tests', function () {
         it('- POST does not create the blog with incorrect data (auth, not correct token, incorrect websiteUrl)', async function () {
             await request(app)
                 .post('/blogs/')
-                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
+
                 .send({
                     name: 'valid title',
                     description: 'description',
                     websiteUrl:
                         'http://margocommargocommargocommargocommargocommargocommargocommargocommargocommargocommargocommarm.pl.com',
                 })
+                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
                         {
@@ -438,12 +439,12 @@ describe('all tests', function () {
         it('+ POST create the blog with correct data', async function () {
             const res_ = await request(app)
                 .post('/blogs/')
-                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .send({
                     name: 'valid title',
                     description: 'valid description',
                     websiteUrl: 'https://margocommm.pl.com',
                 })
+                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Created_201)
             newBlog = res_.body
 
@@ -486,7 +487,7 @@ describe('all tests', function () {
         it('- PUT does not update with incorrect data (auth, not valid body)', async () => {
             await request(app)
                 .put('/blogs/' + newBlog!.id)
-                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
+                .set('authorization', 'Basic SDGSNstnsdgn')
                 .send({ name: 'name' })
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
@@ -504,7 +505,7 @@ describe('all tests', function () {
         it('+ PUT update with correct data', async () => {
             await request(app)
                 .put('/blogs/' + newBlog!.id)
-                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
+                .set('authorization', 'Basic SDGSNstnsdgn')
                 .send({
                     name: 'name123',
                     description: 'description123',
@@ -531,7 +532,7 @@ describe('all tests', function () {
         it('- DELETE does not deleted with (auth,notExisted id)', async () => {
             await request(app)
                 .delete('/blogs/hhh-we34')
-                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
+                .set('authorization', 'Basic SDGSNstnsdgn')
                 .expect(CodeResponsesEnum.Not_found_404)
 
             const res = await request(app).get('/blogs/')
