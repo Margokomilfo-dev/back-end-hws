@@ -9,7 +9,7 @@ export const authorizationMiddleware = (
 ) => {
     let auth
     if (req.headers.authorization) {
-        auth = new Buffer(req.headers.authorization.substring(7), 'base64')
+        auth = new Buffer(req.headers.authorization.substring(6), 'base64')
             .toString()
             .split(':')
     }
@@ -18,6 +18,20 @@ export const authorizationMiddleware = (
     } else {
         next()
     }
+    // const credentials = {
+    //     login: 'admin',
+    //     password: 'qwerty',
+    // }
+    // let data = `${credentials.login}:${credentials.password}`
+    // let buff = Buffer.from(data) //string from auth - hcsakj23nj
+    // let base64data = buff.toString('base64') //закодированная string под base64
+    // const validAuthValue = `Basic ${base64data}` //вся кодировка 'Basic  SDGSNstnsdgn' (admin:qwerty)
+    //
+    // let authHeader = req.headers.authorization
+    //
+    // if (authHeader && authHeader === validAuthValue) {
+    //     next()
+    // } else res.sendStatus(CodeResponsesEnum.Not_Authorized)
 }
 
 //2
