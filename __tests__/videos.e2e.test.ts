@@ -5,12 +5,16 @@ import { app } from '../src'
 import { VideoType } from '../src/routes/videos-router'
 import { CodeResponsesEnum } from '../src/types'
 import { BlogType } from '../src/routes/blogs-router'
+import { PostType } from '../src/routes/posts-router'
 
 //от этой ошибки! -> thrown: "Exceeded timeout of 5000 ms for a test. go to the jest.config.js
 describe('all tests', function () {
     beforeAll(async () => {
         await request(app).delete('/testing/all-data').expect(204)
     })
+    let newVideo: VideoType | null = null
+    let newBlog: BlogType | null = null
+    let newPost: PostType | null = null
     describe('/videos', () => {
         it('GET products = []', async () => {
             await request(app).get('/videos/').expect([])
@@ -150,7 +154,6 @@ describe('all tests', function () {
             expect(res.body).toEqual([])
         })
 
-        let newVideo: VideoType | null = null
         it('+ POST create the video with correct data', async function () {
             const res = await request(app)
                 .post('/videos/')
@@ -315,14 +318,6 @@ describe('all tests', function () {
             const res = await request(app).get('/videos/')
             expect(res.body[0]).toEqual(newVideo)
         })
-        it('+ DELETE product by correct ID', async () => {
-            await request(app)
-                .delete('/videos/' + newVideo!.id)
-                .expect(CodeResponsesEnum.Not_content_204)
-
-            const res = await request(app).get('/videos/')
-            expect(res.body.length).toBe(0)
-        })
     })
     describe('/blogs', () => {
         it('GET blogs = []', async () => {
@@ -412,8 +407,6 @@ describe('all tests', function () {
             const res = await request(app).get('/blogs/')
             expect(res.body).toEqual([])
         })
-
-        let createdBlog: BlogType | null = null
         it('+ POST create the blog with correct data', async function () {
             const res_ = await request(app)
                 .post('/blogs/')
@@ -423,10 +416,10 @@ describe('all tests', function () {
                     websiteUrl: 'https://margocommm.pl.com',
                 })
                 .expect(CodeResponsesEnum.Success_200)
-            createdBlog = res_.body
+            newBlog = res_.body
 
             const res = await request(app).get('/blogs/')
-            expect(res.body).toEqual([createdBlog])
+            expect(res.body).toEqual([newBlog])
         })
 
         it('- GET:id- not existed id', async () => {
@@ -436,8 +429,8 @@ describe('all tests', function () {
         })
         it('+ GET:id- correct id', async () => {
             await request(app)
-                .get('/blogs/' + createdBlog!.id)
-                .expect(CodeResponsesEnum.Success_200, createdBlog)
+                .get('/blogs/' + newBlog!.id)
+                .expect(CodeResponsesEnum.Success_200, newBlog)
         })
 
         it('- PUT does not update with incorrect data (not existed id)', async () => {
@@ -453,7 +446,7 @@ describe('all tests', function () {
 
         it('- PUT does not update with incorrect data (not valid body)', async () => {
             await request(app)
-                .put('/blogs/' + createdBlog!.id)
+                .put('/blogs/' + newBlog!.id)
                 .send({ name: 'name' })
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
@@ -470,7 +463,7 @@ describe('all tests', function () {
         })
         it('+ PUT update with correct data', async () => {
             await request(app)
-                .put('/blogs/' + createdBlog!.id)
+                .put('/blogs/' + newBlog!.id)
                 .send({
                     name: 'name123',
                     description: 'description123',
@@ -478,11 +471,12 @@ describe('all tests', function () {
                 })
                 .expect(CodeResponsesEnum.Not_content_204)
 
-            const res_ = await request(app).get('/blogs/' + createdBlog!.id)
+            const res_ = await request(app).get('/blogs/' + newBlog!.id)
             const updatedBlog = res_.body
 
             const res = await request(app).get('/blogs/')
             expect(res.body).toEqual([updatedBlog])
+            newBlog = updatedBlog
         })
         it('- DELETE does not deleted with notExisted id', async () => {
             await request(app)
@@ -492,29 +486,237 @@ describe('all tests', function () {
             const res = await request(app).get('/blogs/')
             expect(res.body.length).toBe(1)
         })
-        it('+ DELETE deleted with valid id', async () => {
-            await request(app)
-                .delete('/blogs/' + createdBlog!.id)
-                .expect(CodeResponsesEnum.Not_content_204)
-
-            const res = await request(app).get('/blogs/')
-            expect(res.body).toEqual([])
-        })
     })
     describe('/posts', () => {
         it('GET posts = []', async () => {
             await request(app).get('/posts/').expect([])
         })
-        // it('- POST does not create the post with incorrect data', async function () {
-        //     await request(app)
-        //         .post('/posts/')
-        //         .send({})
-        //         .expect(CodeResponsesEnum.Incorrect_values_400, {
-        //             errorsMessages: [],
-        //         })
-        //
-        //     const res = await request(app).get('/posts/')
-        //     expect(res.body).toEqual([])
-        // })
+        it('- POST does not create the post with no data', async function () {
+            await request(app)
+                .post('/posts/')
+                .send({})
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        {
+                            message: 'title is required',
+                            field: 'title',
+                        },
+                        {
+                            message: 'shortDescription is required',
+                            field: 'shortDescription',
+                        },
+                        {
+                            message: 'content is required',
+                            field: 'content',
+                        },
+                        {
+                            message: 'blogId is required',
+                            field: 'blogId',
+                        },
+                    ],
+                })
+
+            const res = await request(app).get('/posts/')
+            expect(res.body).toEqual([])
+        })
+        it('- POST does not create the post with incorrect data (not correct title, no description,no blogId ', async function () {
+            await request(app)
+                .post('/posts/')
+                .send({
+                    title: 'title more then 30 symbols and it is a big problem',
+                    shortDescription: '',
+                    content: 'content',
+                    blogId: '',
+                })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        {
+                            message: 'title should contain  2 - 30 symbols',
+                            field: 'title',
+                        },
+                        {
+                            message: 'shortDescription is required',
+                            field: 'shortDescription',
+                        },
+                        {
+                            message: 'blogId is required',
+                            field: 'blogId',
+                        },
+                    ],
+                })
+
+            const res = await request(app).get('/posts/')
+            expect(res.body).toEqual([])
+        })
+        it('- POST does not create the post with incorrect data no blog with this blogId ', async function () {
+            await request(app)
+                .post('/posts/')
+                .send({
+                    title: 'title123',
+                    shortDescription: 'description123',
+                    content: 'content123',
+                    blogId: '1235',
+                })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        {
+                            message: 'no blog with this blogId',
+                            field: 'blogId',
+                        },
+                    ],
+                })
+
+            const res = await request(app).get('/posts/')
+            expect(res.body).toEqual([])
+        })
+
+        it('POST  create the post with correct data', async function () {
+            const res_ = await request(app)
+                .post('/posts/')
+                .send({
+                    title: 'title123',
+                    shortDescription: 'description123',
+                    content: 'content123',
+                    blogId: newBlog!.id,
+                })
+                .expect(CodeResponsesEnum.Created_201)
+            newPost = res_.body
+            const res = await request(app).get('/posts/')
+            expect(res.body).toEqual([newPost])
+        })
+
+        it('- GET post by ID with incorrect id', async () => {
+            await request(app)
+                .get('/posts/182018')
+                .expect(CodeResponsesEnum.Not_found_404)
+        })
+        it('- GET post by ID with incorrect id', async () => {
+            await request(app)
+                .get('/posts/helloWorld')
+                .expect(CodeResponsesEnum.Not_found_404)
+        })
+        it('+ GET post by ID with correct id', async () => {
+            await request(app)
+                .get('/posts/' + newPost!.id)
+                .expect(200, newPost)
+        })
+
+        it('- PUT update post by ID with incorrect data (no all field)', async () => {
+            await request(app)
+                .put('/posts/helloWorld')
+                .send({
+                    title: '',
+                    shortDescription: '',
+                    content: '',
+                    blogId: '',
+                })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        {
+                            message: 'title is required',
+                            field: 'title',
+                        },
+                        {
+                            message: 'shortDescription is required',
+                            field: 'shortDescription',
+                        },
+                        {
+                            message: 'content is required',
+                            field: 'content',
+                        },
+                        {
+                            message: 'blogId is required',
+                            field: 'blogId',
+                        },
+                    ],
+                })
+
+            const res = await request(app).get('/posts/')
+            expect(res.body[0]).toEqual(newPost)
+        })
+        it('- PUT update post by ID with incorrect data (blog with this blogId not exist)', async () => {
+            await request(app)
+                .put('/posts/132-hsj-11')
+                .send({
+                    title: 'title',
+                    shortDescription: 'string',
+                    content: 'string',
+                    blogId: 'string',
+                })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        {
+                            message: 'no blog with this blogId',
+                            field: 'blogId',
+                        },
+                    ],
+                })
+
+            const res = await request(app).get('/posts/')
+            expect(res.body[0]).toEqual(newPost)
+        })
+        it('+ PUT update post by ID with correct data', async () => {
+            await request(app)
+                .put('/posts/' + newPost!.id)
+                .send({
+                    title: 'title123',
+                    shortDescription: 'string123',
+                    content: 'string123',
+                    blogId: newBlog!.id,
+                })
+                .expect(CodeResponsesEnum.Not_content_204)
+
+            const res = await request(app).get('/posts/')
+            expect(res.body[0]).toEqual({
+                ...newPost,
+                title: 'title123',
+                shortDescription: 'string123',
+                content: 'string123',
+            })
+            newPost = res.body[0]
+        })
+
+        it('- DELETE post by incorrect ID', async () => {
+            await request(app)
+                .delete('/posts/1kcnsdk')
+                .expect(CodeResponsesEnum.Not_found_404)
+
+            const res = await request(app).get('/posts/')
+            expect(res.body[0]).toEqual(newPost)
+        })
+        it('- DELETE post by incorrect ID', async () => {
+            await request(app)
+                .delete('/posts/876328')
+                .expect(CodeResponsesEnum.Not_found_404)
+
+            const res = await request(app).get('/posts/')
+            expect(res.body[0]).toEqual(newPost)
+        })
+    })
+    describe('deleted all data', () => {
+        it('+ DELETE deleted with valid id', async () => {
+            await request(app)
+                .delete('/blogs/' + newBlog!.id)
+                .expect(CodeResponsesEnum.Not_content_204)
+
+            const res = await request(app).get('/blogs/')
+            expect(res.body).toEqual([])
+        })
+        it('+ DELETE product by correct ID', async () => {
+            await request(app)
+                .delete('/videos/' + newVideo!.id)
+                .expect(CodeResponsesEnum.Not_content_204)
+
+            const res = await request(app).get('/videos/')
+            expect(res.body.length).toBe(0)
+        })
+        it('+ DELETE post by correct ID', async () => {
+            await request(app)
+                .delete('/posts/' + newPost!.id)
+                .expect(CodeResponsesEnum.Not_content_204)
+
+            const res = await request(app).get('/posts/')
+            expect(res.body.length).toBe(0)
+        })
     })
 })

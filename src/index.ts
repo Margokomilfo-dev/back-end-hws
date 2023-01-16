@@ -5,9 +5,9 @@ import { videosRouter } from './routes/videos-router'
 import { CodeResponsesEnum } from './types'
 import { videosRepository } from './repositores/videos-repository'
 import { blogsRepository } from './repositores/blogs-repository'
+import { postsRepository } from './repositores/posts-repository'
 import { blogsRouter } from './routes/blogs-router'
 import { postsRouter } from './routes/posts-router'
-import { postsRepository } from './repositores/posts-repository'
 
 export const app = express()
 const port = 3999

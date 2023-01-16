@@ -63,6 +63,7 @@ export const postsRepository = {
         posts = posts.map((p) => (p.id === id ? { ...p, ...body } : p))
         return true
     },
+
     deletePost(id: string): boolean {
         const post = posts.find((p) => p.id === id)
         if (post) {
