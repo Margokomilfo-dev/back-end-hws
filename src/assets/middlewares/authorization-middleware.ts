@@ -13,8 +13,8 @@ export const authorizationMiddleware = (
     res: Response,
     next: NextFunction
 ) => {
-    let data_ = Buffer.from(data)
-    let base64data = data_.toString('base64') //закодированная string под base64
+    //данные логина и пароля обязательны снаружи! Почему??? хзиначе не работает кодирование с переменными внутри
+    let base64data = Buffer.from(data).toString('base64') //закодированная string под base64
     const validAuthValue = `Basic ${base64data}` //вся кодировка 'Basic SDGSNstnsdgn' (admin:qwerty)
     let authHeader = req.headers.authorization
 
@@ -22,19 +22,3 @@ export const authorizationMiddleware = (
         next()
     } else res.sendStatus(CodeResponsesEnum.Not_Authorized)
 }
-//
-// export let authorizationMiddleware = (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-// ) => {
-//     let buff = Buffer.from(data) //string from auth - hcsakj23nj
-//     let base64data = buff.toString('base64') //закодированная string под base64
-//     const validAuthValue = `Basic ${base64data}` //вся кодировка 'Basic  SDGSNstnsdgn' (admin:qwerty)
-//
-//     let authHeader = req.headers.authorization
-//
-//     if (authHeader && authHeader === validAuthValue) {
-//         next()
-//     } else res.sendStatus(401)
-// }
