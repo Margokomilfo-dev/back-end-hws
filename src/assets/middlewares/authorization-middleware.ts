@@ -9,7 +9,7 @@ export const authorizationMiddleware = (
 ) => {
     let auth
     if (req.headers.authorization) {
-        auth = new Buffer(req.headers.authorization.substring(6), 'base64')
+        auth = new Buffer(req.headers.authorization.substring(7), 'base64')
             .toString()
             .split(':')
     }
