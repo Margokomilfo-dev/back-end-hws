@@ -20,7 +20,6 @@ export const idStringParamValidationMiddleware = (
     next: NextFunction
 ) => {
     const id = req.params.id?.toString().trim()
-    console.log(id)
     if (!id) {
         res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
         return

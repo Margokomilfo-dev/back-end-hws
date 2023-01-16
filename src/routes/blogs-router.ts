@@ -9,6 +9,7 @@ import {
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
 import { idStringParamValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
 import { blogsRepository } from '../repositores/blogs-repository'
+import { authorizationMiddleware } from '../assets/middlewares/authorization-middleware'
 
 export const blogsRouter = Router({})
 
@@ -19,6 +20,7 @@ blogsRouter.get('/', (req: Request, res: Response) => {
 
 blogsRouter.post(
     '/',
+    authorizationMiddleware,
     blogNameValidator,
     blogDescriptionValidator,
     blogWebsiteUrlValidator,
@@ -60,6 +62,7 @@ blogsRouter.get(
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
 blogsRouter.put(
     '/:id',
+    authorizationMiddleware,
     idStringParamValidationMiddleware,
     blogNameValidator,
     blogDescriptionValidator,
@@ -79,6 +82,7 @@ blogsRouter.put(
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
 blogsRouter.delete(
     '/:id',
+    authorizationMiddleware,
     idStringParamValidationMiddleware,
     (req: Request, res: Response) => {
         const id = req.params.id

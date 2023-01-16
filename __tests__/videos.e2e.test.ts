@@ -323,9 +323,10 @@ describe('all tests', function () {
         it('GET blogs = []', async () => {
             await request(app).get('/blogs/').expect([])
         })
-        it('- POST does not create the blog with incorrect data (no name, no description, no websiteUrl)', async function () {
+        it('- POST does not create the blog with incorrect data (authorized, no name, no description, no websiteUrl)', async function () {
             await request(app)
                 .post('/blogs/')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .send({})
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
@@ -344,9 +345,19 @@ describe('all tests', function () {
             const res = await request(app).get('/blogs/')
             expect(res.body).toEqual([])
         })
-        it('- POST does not create the blog with incorrect data (no name, no websiteUrl)', async function () {
+        it('- POST does not create the blog with incorrect data (no headers, no name, no description, no websiteUrl)', async function () {
             await request(app)
                 .post('/blogs/')
+                .send({})
+                .expect(CodeResponsesEnum.Not_Authorized)
+
+            const res = await request(app).get('/blogs/')
+            expect(res.body).toEqual([])
+        })
+        it('- POST does not create the blog with incorrect data (auth, no name, no websiteUrl)', async function () {
+            await request(app)
+                .post('/blogs/')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .send({ description: 'description' })
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
@@ -361,9 +372,10 @@ describe('all tests', function () {
             const res = await request(app).get('/blogs/')
             expect(res.body).toEqual([])
         })
-        it('- POST does not create the blog with incorrect data (incorrect name, incorrect websiteUrl)', async function () {
+        it('- POST does not create the blog with incorrect data (auth, incorrect name, incorrect websiteUrl)', async function () {
             await request(app)
                 .post('/blogs/')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .send({
                     name: 'name more then 15 symbols',
                     description: 'description',
@@ -385,9 +397,25 @@ describe('all tests', function () {
             const res = await request(app).get('/blogs/')
             expect(res.body).toEqual([])
         })
-        it('- POST does not create the blog with incorrect data (incorrect websiteUrl)', async function () {
+        it('- POST does not create the blog with incorrect data (not correct token, incorrect websiteUrl)', async function () {
             await request(app)
                 .post('/blogs/')
+                .set('Authorization', 'Bearer 123')
+                .send({
+                    name: 'valid title',
+                    description: 'description',
+                    websiteUrl:
+                        'http://margocommargocommargocommargocommargocommargocommargocommargocommargocommargocommargocommarm.pl.com',
+                })
+                .expect(CodeResponsesEnum.Not_Authorized)
+
+            const res = await request(app).get('/blogs/')
+            expect(res.body).toEqual([])
+        })
+        it('- POST does not create the blog with incorrect data (auth, not correct token, incorrect websiteUrl)', async function () {
+            await request(app)
+                .post('/blogs/')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .send({
                     name: 'valid title',
                     description: 'description',
@@ -410,6 +438,7 @@ describe('all tests', function () {
         it('+ POST create the blog with correct data', async function () {
             const res_ = await request(app)
                 .post('/blogs/')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .send({
                     name: 'valid title',
                     description: 'valid description',
@@ -433,7 +462,7 @@ describe('all tests', function () {
                 .expect(CodeResponsesEnum.Success_200, newBlog)
         })
 
-        it('- PUT does not update with incorrect data (not existed id)', async () => {
+        it('- PUT does not update with incorrect data (not auth, not existed id)', async () => {
             await request(app)
                 .put('/blogs/3570ht-i0u092')
                 .send({
@@ -441,12 +470,23 @@ describe('all tests', function () {
                     description: 'description',
                     websiteUrl: 'https://hello.world',
                 })
+                .expect(CodeResponsesEnum.Not_Authorized)
+        })
+        it('- PUT does not update with incorrect data (auth, not existed id)', async () => {
+            await request(app)
+                .put('/blogs/3570ht-i0u092')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
+                .send({
+                    name: 'name',
+                    description: 'description',
+                    websiteUrl: 'https://hello.world',
+                })
                 .expect(CodeResponsesEnum.Not_found_404)
         })
-
-        it('- PUT does not update with incorrect data (not valid body)', async () => {
+        it('- PUT does not update with incorrect data (auth, not valid body)', async () => {
             await request(app)
                 .put('/blogs/' + newBlog!.id)
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .send({ name: 'name' })
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
@@ -464,6 +504,7 @@ describe('all tests', function () {
         it('+ PUT update with correct data', async () => {
             await request(app)
                 .put('/blogs/' + newBlog!.id)
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .send({
                     name: 'name123',
                     description: 'description123',
@@ -478,9 +519,19 @@ describe('all tests', function () {
             expect(res.body).toEqual([updatedBlog])
             newBlog = updatedBlog
         })
-        it('- DELETE does not deleted with notExisted id', async () => {
+
+        it('- DELETE does not deleted with (no auth, notExisted id)', async () => {
             await request(app)
                 .delete('/blogs/hhh-we34')
+                .expect(CodeResponsesEnum.Not_Authorized)
+
+            const res = await request(app).get('/blogs/')
+            expect(res.body.length).toBe(1)
+        })
+        it('- DELETE does not deleted with (auth,notExisted id)', async () => {
+            await request(app)
+                .delete('/blogs/hhh-we34')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Not_found_404)
 
             const res = await request(app).get('/blogs/')
@@ -491,9 +542,10 @@ describe('all tests', function () {
         it('GET posts = []', async () => {
             await request(app).get('/posts/').expect([])
         })
-        it('- POST does not create the post with no data', async function () {
+        it('- POST does not create the post with no data, auth', async function () {
             await request(app)
                 .post('/posts/')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .send({})
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
@@ -519,9 +571,24 @@ describe('all tests', function () {
             const res = await request(app).get('/posts/')
             expect(res.body).toEqual([])
         })
-        it('- POST does not create the post with incorrect data (not correct title, no description,no blogId ', async function () {
+        it('- POST does not create the post with incorrect data (not auth, not correct title, no description,no blogId ', async function () {
             await request(app)
                 .post('/posts/')
+                .send({
+                    title: 'title more then 30 symbols and it is a big problem',
+                    shortDescription: '',
+                    content: 'content',
+                    blogId: '',
+                })
+                .expect(CodeResponsesEnum.Not_Authorized)
+
+            const res = await request(app).get('/posts/')
+            expect(res.body).toEqual([])
+        })
+        it('- POST does not create the post with incorrect data (auth, not correct title, no description,no blogId ', async function () {
+            await request(app)
+                .post('/posts/')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .send({
                     title: 'title more then 30 symbols and it is a big problem',
                     shortDescription: '',
@@ -551,6 +618,7 @@ describe('all tests', function () {
         it('- POST does not create the post with incorrect data no blog with this blogId ', async function () {
             await request(app)
                 .post('/posts/')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .send({
                     title: 'title123',
                     shortDescription: 'description123',
@@ -573,6 +641,7 @@ describe('all tests', function () {
         it('POST  create the post with correct data', async function () {
             const res_ = await request(app)
                 .post('/posts/')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .send({
                     title: 'title123',
                     shortDescription: 'description123',
@@ -601,9 +670,24 @@ describe('all tests', function () {
                 .expect(200, newPost)
         })
 
-        it('- PUT update post by ID with incorrect data (no all field)', async () => {
+        it('- PUT update post by ID with incorrect data (not auth, no all field)', async () => {
             await request(app)
                 .put('/posts/helloWorld')
+                .send({
+                    title: '',
+                    shortDescription: '',
+                    content: '',
+                    blogId: '',
+                })
+                .expect(CodeResponsesEnum.Not_Authorized)
+
+            const res = await request(app).get('/posts/')
+            expect(res.body[0]).toEqual(newPost)
+        })
+        it('- PUT update post by ID with incorrect data (auth, no all field)', async () => {
+            await request(app)
+                .put('/posts/helloWorld')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .send({
                     title: '',
                     shortDescription: '',
@@ -634,9 +718,10 @@ describe('all tests', function () {
             const res = await request(app).get('/posts/')
             expect(res.body[0]).toEqual(newPost)
         })
-        it('- PUT update post by ID with incorrect data (blog with this blogId not exist)', async () => {
+        it('- PUT update post by ID with incorrect data (auth, blog with this blogId not exist)', async () => {
             await request(app)
                 .put('/posts/132-hsj-11')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .send({
                     title: 'title',
                     shortDescription: 'string',
@@ -658,6 +743,7 @@ describe('all tests', function () {
         it('+ PUT update post by ID with correct data', async () => {
             await request(app)
                 .put('/posts/' + newPost!.id)
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .send({
                     title: 'title123',
                     shortDescription: 'string123',
@@ -676,17 +762,27 @@ describe('all tests', function () {
             newPost = res.body[0]
         })
 
-        it('- DELETE post by incorrect ID', async () => {
+        it('- DELETE post by incorrect ID, not auth', async () => {
             await request(app)
                 .delete('/posts/1kcnsdk')
+                .expect(CodeResponsesEnum.Not_Authorized)
+
+            const res = await request(app).get('/posts/')
+            expect(res.body[0]).toEqual(newPost)
+        })
+        it('- DELETE post by incorrect ID, auth', async () => {
+            await request(app)
+                .delete('/posts/1kcnsdk')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Not_found_404)
 
             const res = await request(app).get('/posts/')
             expect(res.body[0]).toEqual(newPost)
         })
-        it('- DELETE post by incorrect ID', async () => {
+        it('- DELETE post by incorrect ID, auth', async () => {
             await request(app)
                 .delete('/posts/876328')
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Not_found_404)
 
             const res = await request(app).get('/posts/')
@@ -694,25 +790,28 @@ describe('all tests', function () {
         })
     })
     describe('deleted all data', () => {
-        it('+ DELETE deleted with valid id', async () => {
+        it('+ DELETE deleted with valid id, auth', async () => {
             await request(app)
                 .delete('/blogs/' + newBlog!.id)
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Not_content_204)
 
             const res = await request(app).get('/blogs/')
             expect(res.body).toEqual([])
         })
-        it('+ DELETE product by correct ID', async () => {
+        it('+ DELETE product by correct ID, auth', async () => {
             await request(app)
                 .delete('/videos/' + newVideo!.id)
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Not_content_204)
 
             const res = await request(app).get('/videos/')
             expect(res.body.length).toBe(0)
         })
-        it('+ DELETE post by correct ID', async () => {
+        it('+ DELETE post by correct ID, auth', async () => {
             await request(app)
                 .delete('/posts/' + newPost!.id)
+                .set('Authorization', 'Bearer YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Not_content_204)
 
             const res = await request(app).get('/posts/')
