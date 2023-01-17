@@ -17,7 +17,7 @@
   "scripts": {
     "dev": "nodemon src/index.ts",
     "dev:debug": "nodemon --inspect src/index.ts",
-    "jest": "jest"
+    "jest": "jest --runInBand"
   },
   "devDependencies": {
     "@types/express": "^4.17.15",

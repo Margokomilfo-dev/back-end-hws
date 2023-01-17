@@ -2,6 +2,7 @@
 
 import { app } from '../src'
 import { CodeResponsesEnum } from '../src/types'
+// import request from 'supertest'
 
 //от этой ошибки! -> thrown: "Exceeded timeout of 5000 ms for a test. go to the jest.config.js
 describe('/blogs', function () {
