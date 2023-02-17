@@ -10,10 +10,10 @@ let blogs: Array<BlogType> = [
 ]
 
 export const blogsRepository = {
-    getBlogs() {
+    async getBlogs() {
         return blogs
     },
-    getBlogById(id: string): BlogType | null {
+    async getBlogById(id: string): Promise<BlogType | null> {
         const blog = blogs.find((blog) => blog.id === id)
         if (blog) {
             return blog
@@ -21,11 +21,11 @@ export const blogsRepository = {
             return null
         }
     },
-    createBlog(
+    async createBlog(
         name: string,
         description: string,
         websiteUrl: string
-    ): BlogType | null {
+    ): Promise<BlogType | null> {
         const blog = {
             id: new Date().getTime().toString(),
             description,
@@ -40,14 +40,14 @@ export const blogsRepository = {
         }
     },
 
-    updateBlog(
+    async updateBlog(
         id: string,
         body: {
             name: 'string'
             description: 'string'
             websiteUrl: 'string'
         }
-    ): boolean {
+    ): Promise<boolean> {
         const blog = blogs.find((b) => b.id === id)
         if (!blog) {
             return false
@@ -56,7 +56,7 @@ export const blogsRepository = {
         return true
     },
 
-    deleteBlog(id: string): boolean {
+    async deleteBlog(id: string): Promise<boolean> {
         const blog = blogs.find((b) => b.id === id)
         if (blog) {
             for (let i = 0; i < blogs.length; i++) {
@@ -68,7 +68,7 @@ export const blogsRepository = {
             return false
         } else return false
     },
-    deleteAll() {
+    async deleteAll() {
         blogs.splice(0, blogs.length)
         return blogs
     },

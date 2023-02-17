@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express'
 import { CodeResponsesEnum } from '../types'
-import { videosRepository } from '../repositores/videos-repository'
+// import { videosRepository } from '../repositores/videos-repository'
 
 import {
     videoAuthorValidator,
@@ -11,11 +11,12 @@ import {
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
 import { idIntParamValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
+import { videosRepository } from '../repositores/videos-db-repository'
 
 export const videosRouter = Router({})
 
-videosRouter.get('/', (req: Request, res: Response) => {
-    const videos = videosRepository.getVideos()
+videosRouter.get('/', async (req: Request, res: Response) => {
+    const videos = await videosRepository.getVideos()
     res.status(CodeResponsesEnum.Success_200).send(videos)
 })
 
@@ -24,12 +25,12 @@ videosRouter.post(
     videoTitleValidator,
     videoAuthorValidator,
     errorsResultMiddleware,
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const title = req.body.title
         const author = req.body.author
         const availableResolutions = req.body.availableResolutions
 
-        const newVideo = videosRepository.createVideo(
+        const newVideo = await videosRepository.createVideo(
             title,
             author,
             availableResolutions
@@ -46,10 +47,10 @@ videosRouter.post(
 videosRouter.get(
     '/:id',
     idIntParamValidationMiddleware,
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const id = +req.params.id //if NaN - return !id === false
 
-        const video = videosRepository.getVideoById(id)
+        const video = await videosRepository.getVideoById(id)
         if (video) {
             res.status(CodeResponsesEnum.Success_200).send(video)
         } else {
@@ -68,9 +69,9 @@ videosRouter.put(
     videoMinAgeRestrictionValidator,
     videoPublicationDateValidator,
     errorsResultMiddleware,
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const id = +req.params.id
-        const isUpdated = videosRepository.updateVideo(id, req.body)
+        const isUpdated = await videosRepository.updateVideo(id, req.body)
         if (!isUpdated) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
@@ -83,9 +84,9 @@ videosRouter.put(
 videosRouter.delete(
     '/:id',
     idIntParamValidationMiddleware,
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const id = +req.params.id
-        const isDeleted = videosRepository.deleteVideo(id)
+        const isDeleted = await videosRepository.deleteVideo(id)
         if (isDeleted) {
             res.sendStatus(CodeResponsesEnum.Not_content_204)
         } else {

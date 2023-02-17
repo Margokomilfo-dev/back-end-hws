@@ -8,13 +8,13 @@ import {
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
 import { idStringParamValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
-import { blogsRepository } from '../repositores/blogs-repository'
 import { authorizationMiddleware } from '../assets/middlewares/authorization-middleware'
+import { blogsRepository } from '../repositores/blogs-db-repository'
 
 export const blogsRouter = Router({})
 
-blogsRouter.get('/', (req: Request, res: Response) => {
-    const blogs = blogsRepository.getBlogs()
+blogsRouter.get('/', async (req: Request, res: Response) => {
+    const blogs = await blogsRepository.getBlogs()
     res.status(CodeResponsesEnum.Success_200).send(blogs)
 })
 
@@ -25,12 +25,12 @@ blogsRouter.post(
     blogDescriptionValidator,
     blogWebsiteUrlValidator,
     errorsResultMiddleware,
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const name = req.body.name
         const description = req.body.description
         const websiteUrl = req.body.websiteUrl
 
-        const newBlog = blogsRepository.createBlog(
+        const newBlog = await blogsRepository.createBlog(
             name,
             description,
             websiteUrl
@@ -47,10 +47,10 @@ blogsRouter.post(
 blogsRouter.get(
     '/:id',
     idStringParamValidationMiddleware,
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const id = req.params.id
 
-        const blog = blogsRepository.getBlogById(id)
+        const blog = await blogsRepository.getBlogById(id)
         if (blog) {
             res.status(CodeResponsesEnum.Success_200).send(blog)
         } else {
@@ -68,9 +68,9 @@ blogsRouter.put(
     blogDescriptionValidator,
     blogWebsiteUrlValidator,
     errorsResultMiddleware,
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const id = req.params.id
-        const isUpdated = blogsRepository.updateBlog(id, req.body)
+        const isUpdated = await blogsRepository.updateBlog(id, req.body)
         if (!isUpdated) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
@@ -84,9 +84,9 @@ blogsRouter.delete(
     '/:id',
     authorizationMiddleware,
     idStringParamValidationMiddleware,
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const id = req.params.id
-        const isDeleted = blogsRepository.deleteBlog(id)
+        const isDeleted = await blogsRepository.deleteBlog(id)
         if (isDeleted) {
             res.sendStatus(CodeResponsesEnum.Not_content_204)
         } else {

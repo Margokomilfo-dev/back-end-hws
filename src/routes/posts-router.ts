@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express'
 import { CodeResponsesEnum } from '../types'
-import { postsRepository } from '../repositores/posts-repository'
-import { blogsRepository } from '../repositores/blogs-repository'
+// import { postsRepository } from '../repositores/posts-repository'
+// import { blogsRepository } from '../repositores/blogs-repository'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
 import {
     postBlogIdValidator,
@@ -12,11 +12,13 @@ import {
 import { idStringParamValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
 import { _customIsBlogValidator } from '../assets/express-validator/custom-validators'
 import { authorizationMiddleware } from '../assets/middlewares/authorization-middleware'
+import { blogsRepository } from '../repositores/blogs-db-repository'
+import { postsRepository } from '../repositores/posts-db-repository'
 
 export const postsRouter = Router({})
 
-postsRouter.get('/', (req: Request, res: Response) => {
-    const posts = postsRepository.getPosts()
+postsRouter.get('/', async (req: Request, res: Response) => {
+    const posts = await postsRepository.getPosts()
     res.status(CodeResponsesEnum.Success_200).send(posts)
 })
 
@@ -29,11 +31,11 @@ postsRouter.post(
     postBlogIdValidator,
     _customIsBlogValidator,
     errorsResultMiddleware,
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const blogId = req.body.blogId
-        const blog = blogsRepository.getBlogById(blogId)
+        const blog = await blogsRepository.getBlogById(blogId)
 
-        const newPost = postsRepository.createPost(req.body, blog!.name)
+        const newPost = await postsRepository.createPost(req.body, blog!.name)
 
         if (newPost) {
             res.status(CodeResponsesEnum.Created_201).send(newPost) //если сделать sendStatus - не дойдем до send
@@ -43,9 +45,9 @@ postsRouter.post(
     }
 )
 
-postsRouter.get('/:id', (req: Request, res: Response) => {
+postsRouter.get('/:id', async (req: Request, res: Response) => {
     const id = req.params.id
-    const post = postsRepository.getPostById(id)
+    const post = await postsRepository.getPostById(id)
     if (post) {
         res.status(CodeResponsesEnum.Success_200).send(post)
     } else {
@@ -63,9 +65,9 @@ postsRouter.put(
     postBlogIdValidator,
     _customIsBlogValidator,
     errorsResultMiddleware,
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const id = req.params.id
-        const isUpdated = postsRepository.updatePost(id, req.body)
+        const isUpdated = await postsRepository.updatePost(id, req.body)
         if (!isUpdated) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
@@ -79,9 +81,9 @@ postsRouter.delete(
     '/:id',
     authorizationMiddleware,
     idStringParamValidationMiddleware,
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const id = req.params.id
-        const isDeleted = postsRepository.deletePost(id)
+        const isDeleted = await postsRepository.deletePost(id)
         if (isDeleted) {
             res.sendStatus(CodeResponsesEnum.Not_content_204)
         } else {

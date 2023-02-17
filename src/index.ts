@@ -1,32 +1,13 @@
-import bodyParser from 'body-parser'
-import express, { Response, Request } from 'express'
+import { app } from './settings'
+import { runDb } from './repositores/db'
 
-import { videosRouter } from './routes/videos-router'
-import { CodeResponsesEnum } from './types'
-import { videosRepository } from './repositores/videos-repository'
-import { blogsRepository } from './repositores/blogs-repository'
-import { postsRepository } from './repositores/posts-repository'
-import { blogsRouter } from './routes/blogs-router'
-import { postsRouter } from './routes/posts-router'
+const port = process.env.PORT || 3999
 
-export const app = express()
-const port = 3999
+const startApp = async () => {
+    await runDb()
+    app.listen(port, () => {
+        console.log(`Example app listening on port ${port}`)
+    })
+}
 
-app.use(bodyParser({}))
-app.use('/videos', videosRouter)
-app.use('/blogs', blogsRouter)
-app.use('/posts', postsRouter)
-
-app.get('/', (req: Request, res: Response) => {
-    res.send('Hello back-end HomeWorks in it-incubator!!!')
-})
-app.delete('/testing/all-data', (req: Request, res: Response) => {
-    videosRepository.deleteAll()
-    blogsRepository.deleteAll()
-    postsRepository.deleteAll()
-    res.sendStatus(CodeResponsesEnum.Not_content_204)
-})
-
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-})
+startApp()

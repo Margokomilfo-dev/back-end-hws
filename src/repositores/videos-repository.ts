@@ -15,10 +15,10 @@ let videos: Array<VideoType> = [
 ]
 
 export const videosRepository = {
-    getVideos() {
+    async getVideos() {
         return videos
     },
-    getVideoById(id: number): VideoType | null {
+    async getVideoById(id: number): Promise<VideoType | null> {
         const video = videos.find((video) => video.id === id)
         if (video) {
             return video
@@ -26,11 +26,11 @@ export const videosRepository = {
             return null
         }
     },
-    createVideo(
+    async createVideo(
         title: string,
         author: string,
         availableResolutions: Array<string> | null | undefined
-    ): VideoType | null {
+    ): Promise<VideoType | null> {
         const newVideo = {
             id: new Date().getTime(),
             title,
@@ -50,7 +50,7 @@ export const videosRepository = {
             return null
         }
     },
-    updateVideo(id: number, body: any): boolean {
+    async updateVideo(id: number, body: any): Promise<boolean> {
         const ourVideo = videos.find((video) => video.id === id)
         if (!ourVideo) {
             return false
@@ -60,7 +60,7 @@ export const videosRepository = {
         )
         return true
     },
-    deleteVideo(id: number): boolean {
+    async deleteVideo(id: number): Promise<boolean> {
         const video = videos.find((video) => video.id === id)
         if (video) {
             for (let i = 0; i < videos.length; i++) {
@@ -72,7 +72,7 @@ export const videosRepository = {
             return false
         } else return false
     },
-    deleteAll() {
+    async deleteAll() {
         videos.splice(0, videos.length)
         return videos
     },

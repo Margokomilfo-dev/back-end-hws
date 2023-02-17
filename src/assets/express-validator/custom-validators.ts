@@ -1,9 +1,10 @@
 import { body } from 'express-validator'
-import { blogsRepository } from '../../repositores/blogs-repository'
+import { blogsRepository } from '../../repositores/blogs-db-repository'
+// import { blogsRepository } from '../../repositores/blogs-repository'
 
-export const _customIsBlogValidator = body('blogId').custom((value) => {
+export const _customIsBlogValidator = body('blogId').custom(async (value) => {
     if (value && typeof value === 'string' && value.trim()) {
-        const blog = blogsRepository.getBlogById(value)
+        const blog = await blogsRepository.getBlogById(value)
         if (!blog) {
             throw new Error('no blog with this blogId')
         } else return true
