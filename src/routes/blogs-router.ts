@@ -101,4 +101,5 @@ export type BlogType = {
     description: string
     websiteUrl: string
     isMembership: boolean
+    createdAt: string
 }

@@ -27,8 +27,10 @@ export const blogsRepository = {
             name,
             websiteUrl,
             isMembership: false,
+            createdAt: new Date().toISOString(),
         }
         await blogsCollection.insertOne(blog)
+        console.log('IN BLOOOOG create', blog)
         return blog
     },
 

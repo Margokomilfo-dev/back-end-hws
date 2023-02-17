@@ -8,6 +8,7 @@ let posts: Array<PostType> = [
         title: 'postTitle',
         content: 'content',
         shortDescription: 'shortDescription',
+        createdAt: new Date().toISOString(),
     },
 ]
 
@@ -38,6 +39,7 @@ export const postsRepository = {
             content: body.content,
             blogId: body.blogId,
             shortDescription: body.shortDescription,
+            createdAt: new Date().toISOString(),
             blogName,
         }
         posts.push(newPost)

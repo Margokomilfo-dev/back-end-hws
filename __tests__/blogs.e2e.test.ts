@@ -137,9 +137,10 @@ describe('/blogs', () => {
             .expect(CodeResponsesEnum.Not_found_404)
     })
     it('+ GET:id- correct id', async () => {
-        await request(app)
+        const res = await request(app)
             .get('/blogs/' + newBlog!.id)
             .expect(CodeResponsesEnum.Success_200, newBlog)
+        console.log(res.body)
     })
 
     it('- PUT does not update with incorrect data (not auth, not existed id)', async () => {

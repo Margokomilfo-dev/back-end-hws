@@ -6,6 +6,8 @@ let blogs: Array<BlogType> = [
         description: 'description',
         websiteUrl: 'https//:margokomilfo.com',
         id: '1',
+        createdAt: '2023-02-17T20:20:23.630Z',
+        isMembership: false,
     },
 ]
 
@@ -31,6 +33,8 @@ export const blogsRepository = {
             description,
             name,
             websiteUrl,
+            isMembership: false,
+            createdAt: new Date().toISOString(),
         }
         blogs.push(blog)
         if (blogs.find((b) => b.id === b.id)) {

@@ -30,12 +30,6 @@ export const videoPublicationDateValidator = body('publicationDate')
     .matches(/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}Z/g)
     .withMessage('not correct')
 
-export const createdAtDateTimeValidator = body('publicationDate')
-    .matches(
-        /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/g
-    )
-    .withMessage('createdAt not correct')
-
 export const blogNameValidator = body('name')
     .trim()
     .notEmpty()
