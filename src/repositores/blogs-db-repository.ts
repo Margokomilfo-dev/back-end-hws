@@ -3,10 +3,13 @@ import { blogsCollection } from './db'
 
 export const blogsRepository = {
     async getBlogs(): Promise<BlogType[]> {
-        return blogsCollection.find({}).toArray()
+        return blogsCollection.find({}, { projection: { _id: 0 } }).toArray()
     },
     async getBlogById(id: string): Promise<BlogType | null> {
-        const blog = await blogsCollection.findOne({ id })
+        const blog = await blogsCollection.findOne(
+            { id },
+            { projection: { _id: 0 } }
+        )
         if (blog) {
             return blog
         } else {

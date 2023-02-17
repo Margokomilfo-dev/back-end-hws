@@ -3,10 +3,13 @@ import { postsCollection } from './db'
 
 export const postsRepository = {
     async getPosts(): Promise<PostType[]> {
-        return postsCollection.find({}).toArray()
+        return postsCollection.find({}, { projection: { _id: 0 } }).toArray()
     },
     async getPostById(id: string): Promise<PostType | null> {
-        const post = await postsCollection.findOne({ id })
+        const post = await postsCollection.findOne(
+            { id },
+            { projection: { _id: 0 } }
+        )
         if (post) {
             return post
         } else {

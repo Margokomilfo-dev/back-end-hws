@@ -4,6 +4,7 @@ import { CodeResponsesEnum } from '../types'
 // import { blogsRepository } from '../repositores/blogs-repository'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
 import {
+    createdAtDateTimeValidator,
     postBlogIdValidator,
     postContentValidator,
     postShortDescriptionValidator,
@@ -29,6 +30,7 @@ postsRouter.post(
     postShortDescriptionValidator,
     postContentValidator,
     postBlogIdValidator,
+    createdAtDateTimeValidator,
     _customIsBlogValidator,
     errorsResultMiddleware,
     async (req: Request, res: Response) => {

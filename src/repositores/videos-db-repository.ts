@@ -4,10 +4,13 @@ import { videosCollection } from './db'
 
 export const videosRepository = {
     async getVideos() {
-        return videosCollection.find({}).toArray()
+        return videosCollection.find({}, { projection: { _id: 0 } }).toArray()
     },
     async getVideoById(id: number): Promise<VideoType | null> {
-        const video = await videosCollection.findOne({ id })
+        const video = await videosCollection.findOne(
+            { id },
+            { projection: { _id: 0 } }
+        )
         if (video) {
             return video
         } else {
