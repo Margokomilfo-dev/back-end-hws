@@ -13,6 +13,5 @@ export const createBlog = async (): Promise<BlogType> => {
             websiteUrl: 'https://margocommm.pl.com',
         })
         .expect(CodeResponsesEnum.Created_201)
-    console.log('created: ', res_.body)
     return res_.body
 }

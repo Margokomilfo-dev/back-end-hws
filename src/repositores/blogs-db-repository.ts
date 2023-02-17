@@ -6,15 +6,7 @@ export const blogsRepository = {
         return blogsCollection.find({}, { projection: { _id: 0 } }).toArray()
     },
     async getBlogById(id: string): Promise<BlogType | null> {
-        const blog = await blogsCollection.findOne(
-            { id },
-            { projection: { _id: 0 } }
-        )
-        if (blog) {
-            return blog
-        } else {
-            return null
-        }
+        return blogsCollection.findOne({ id }, { projection: { _id: 0 } })
     },
     async createBlog(
         name: string,
@@ -30,8 +22,7 @@ export const blogsRepository = {
             createdAt: new Date().toISOString(),
         }
         await blogsCollection.insertOne(blog)
-        console.log('IN BLOOOOG create', blog)
-        return blog
+        return this.getBlogById(blog.id)
     },
 
     async updateBlog(

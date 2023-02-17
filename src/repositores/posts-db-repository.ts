@@ -6,15 +6,7 @@ export const postsRepository = {
         return postsCollection.find({}, { projection: { _id: 0 } }).toArray()
     },
     async getPostById(id: string): Promise<PostType | null> {
-        const post = await postsCollection.findOne(
-            { id },
-            { projection: { _id: 0 } }
-        )
-        if (post) {
-            return post
-        } else {
-            return null
-        }
+        return postsCollection.findOne({ id }, { projection: { _id: 0 } })
     },
     async createPost(
         body: {
@@ -35,7 +27,7 @@ export const postsRepository = {
             blogName,
         }
         await postsCollection.insertOne(newPost)
-        return newPost
+        return this.getPostById(newPost.id)
     },
     async updatePost(
         id: string,

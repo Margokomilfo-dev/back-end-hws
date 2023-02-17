@@ -7,15 +7,7 @@ export const videosRepository = {
         return videosCollection.find({}, { projection: { _id: 0 } }).toArray()
     },
     async getVideoById(id: number): Promise<VideoType | null> {
-        const video = await videosCollection.findOne(
-            { id },
-            { projection: { _id: 0 } }
-        )
-        if (video) {
-            return video
-        } else {
-            return null
-        }
+        return videosCollection.findOne({ id }, { projection: { _id: 0 } })
     },
     async createVideo(
         title: string,
@@ -35,7 +27,7 @@ export const videosRepository = {
                 : null,
         }
         await videosCollection.insertOne(newVideo)
-        return newVideo
+        return this.getVideoById(newVideo.id)
     },
     async updateVideo(id: number, body: any): Promise<boolean> {
         // const ourVideo = await this.getVideoById(id)
