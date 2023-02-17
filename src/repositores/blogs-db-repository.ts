@@ -2,7 +2,7 @@ import { BlogType } from '../routes/blogs-router'
 import { blogsCollection } from './db'
 
 export const blogsRepository = {
-    async getBlogs() {
+    async getBlogs(): Promise<BlogType[]> {
         return blogsCollection.find({}).toArray()
     },
     async getBlogById(id: string): Promise<BlogType | null> {
@@ -23,6 +23,7 @@ export const blogsRepository = {
             description,
             name,
             websiteUrl,
+            isMembership: false,
         }
         await blogsCollection.insertOne(blog)
         return blog
