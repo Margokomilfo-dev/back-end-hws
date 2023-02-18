@@ -1,5 +1,5 @@
 import { BlogType } from '../routes/blogs-router'
-import { blogsCollection } from './db'
+import { blogsCollection } from '../mongo/db'
 
 export const blogsRepository = {
     async getBlogs(): Promise<BlogType[]> {
@@ -8,19 +8,7 @@ export const blogsRepository = {
     async getBlogById(id: string): Promise<BlogType | null> {
         return blogsCollection.findOne({ id }, { projection: { _id: 0 } })
     },
-    async createBlog(
-        name: string,
-        description: string,
-        websiteUrl: string
-    ): Promise<BlogType | null> {
-        const blog = {
-            id: new Date().getTime().toString(),
-            description,
-            name,
-            websiteUrl,
-            isMembership: false,
-            createdAt: new Date().toISOString(),
-        }
+    async createBlog(blog: BlogType): Promise<BlogType | null> {
         await blogsCollection.insertOne(blog)
         return this.getBlogById(blog.id)
     },

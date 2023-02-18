@@ -1,5 +1,5 @@
 import { app } from './settings'
-import { runDb } from './repositores/db'
+import { runDb } from './mongo/db'
 
 const port = process.env.PORT || 3999
 

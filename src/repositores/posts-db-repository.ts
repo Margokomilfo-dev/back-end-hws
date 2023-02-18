@@ -1,5 +1,5 @@
 import { PostType } from '../routes/posts-router'
-import { postsCollection } from './db'
+import { postsCollection } from '../mongo/db'
 
 export const postsRepository = {
     async getPosts(): Promise<PostType[]> {
@@ -8,24 +8,7 @@ export const postsRepository = {
     async getPostById(id: string): Promise<PostType | null> {
         return postsCollection.findOne({ id }, { projection: { _id: 0 } })
     },
-    async createPost(
-        body: {
-            title: string
-            content: string
-            blogId: string
-            shortDescription: string
-        },
-        blogName: string
-    ): Promise<PostType | null> {
-        const newPost: PostType = {
-            id: new Date().getTime().toString(),
-            title: body.title,
-            content: body.content,
-            blogId: body.blogId,
-            shortDescription: body.shortDescription,
-            createdAt: new Date().toISOString(),
-            blogName,
-        }
+    async createPost(newPost: PostType): Promise<PostType | null> {
         await postsCollection.insertOne(newPost)
         return this.getPostById(newPost.id)
     },

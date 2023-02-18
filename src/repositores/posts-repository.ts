@@ -24,24 +24,7 @@ export const postsRepository = {
             return null
         }
     },
-    async createPost(
-        body: {
-            title: string
-            content: string
-            blogId: string
-            shortDescription: string
-        },
-        blogName: string
-    ): Promise<PostType | null> {
-        const newPost: PostType = {
-            id: new Date().getTime().toString(),
-            title: body.title,
-            content: body.content,
-            blogId: body.blogId,
-            shortDescription: body.shortDescription,
-            createdAt: new Date().toISOString(),
-            blogName,
-        }
+    async createPost(newPost: PostType): Promise<PostType | null> {
         posts.push(newPost)
         if (posts.find((p) => p.id === newPost.id)) {
             return newPost

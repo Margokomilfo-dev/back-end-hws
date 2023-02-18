@@ -9,12 +9,12 @@ import {
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
 import { idStringParamValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
 import { authorizationMiddleware } from '../assets/middlewares/authorization-middleware'
-import { blogsRepository } from '../repositores/blogs-db-repository'
+import { blogsService } from '../services/blogs-service'
 
 export const blogsRouter = Router({})
 
 blogsRouter.get('/', async (req: Request, res: Response) => {
-    const blogs = await blogsRepository.getBlogs()
+    const blogs = await blogsService.getBlogs()
     res.status(CodeResponsesEnum.Success_200).send(blogs)
 })
 
@@ -30,7 +30,7 @@ blogsRouter.post(
         const description = req.body.description
         const websiteUrl = req.body.websiteUrl
 
-        const newBlog = await blogsRepository.createBlog(
+        const newBlog = await blogsService.createBlog(
             name,
             description,
             websiteUrl
@@ -50,7 +50,7 @@ blogsRouter.get(
     async (req: Request, res: Response) => {
         const id = req.params.id
 
-        const blog = await blogsRepository.getBlogById(id)
+        const blog = await blogsService.getBlogById(id)
         if (blog) {
             res.status(CodeResponsesEnum.Success_200).send(blog)
         } else {
@@ -70,7 +70,7 @@ blogsRouter.put(
     errorsResultMiddleware,
     async (req: Request, res: Response) => {
         const id = req.params.id
-        const isUpdated = await blogsRepository.updateBlog(id, req.body)
+        const isUpdated = await blogsService.updateBlog(id, req.body)
         if (!isUpdated) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
@@ -86,7 +86,7 @@ blogsRouter.delete(
     idStringParamValidationMiddleware,
     async (req: Request, res: Response) => {
         const id = req.params.id
-        const isDeleted = await blogsRepository.deleteBlog(id)
+        const isDeleted = await blogsService.deleteBlog(id)
         if (isDeleted) {
             res.sendStatus(CodeResponsesEnum.Not_content_204)
         } else {

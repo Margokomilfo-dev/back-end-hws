@@ -23,19 +23,7 @@ export const blogsRepository = {
             return null
         }
     },
-    async createBlog(
-        name: string,
-        description: string,
-        websiteUrl: string
-    ): Promise<BlogType | null> {
-        const blog = {
-            id: new Date().getTime().toString(),
-            description,
-            name,
-            websiteUrl,
-            isMembership: false,
-            createdAt: new Date().toISOString(),
-        }
+    async createBlog(blog: BlogType): Promise<BlogType | null> {
         blogs.push(blog)
         if (blogs.find((b) => b.id === b.id)) {
             return blog

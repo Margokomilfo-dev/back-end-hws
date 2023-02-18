@@ -26,23 +26,7 @@ export const videosRepository = {
             return null
         }
     },
-    async createVideo(
-        title: string,
-        author: string,
-        availableResolutions: Array<string> | null | undefined
-    ): Promise<VideoType | null> {
-        const newVideo = {
-            id: new Date().getTime(),
-            title,
-            author,
-            canBeDownloaded: false, //By default - false
-            minAgeRestriction: null, //maximum: 18, minimum: 1, default: null, nullable: true - null - no restriction
-            createdAt: new Date().toISOString(),
-            publicationDate: addDays(new Date(), 1).toISOString(), //By default - +1 day from CreatedAt
-            availableResolutions: availableResolutions
-                ? availableResolutions
-                : null,
-        }
+    async createVideo(newVideo: VideoType): Promise<VideoType | null> {
         videos.push(newVideo)
         if (videos.find((video) => video.id === newVideo.id)) {
             return newVideo

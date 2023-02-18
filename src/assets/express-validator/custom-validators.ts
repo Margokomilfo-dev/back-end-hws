@@ -1,6 +1,5 @@
 import { body } from 'express-validator'
 import { blogsRepository } from '../../repositores/blogs-db-repository'
-// import { blogsRepository } from '../../repositores/blogs-repository'
 
 export const _customIsBlogValidator = body('blogId').custom(async (value) => {
     if (value && typeof value === 'string' && value.trim()) {

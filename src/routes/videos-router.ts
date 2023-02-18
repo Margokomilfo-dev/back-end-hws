@@ -1,7 +1,5 @@
 import { Request, Response, Router } from 'express'
 import { CodeResponsesEnum } from '../types'
-// import { videosRepository } from '../repositores/videos-repository'
-
 import {
     videoAuthorValidator,
     videoCanBeDownloadedValidator,
@@ -11,12 +9,12 @@ import {
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
 import { idIntParamValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
-import { videosRepository } from '../repositores/videos-db-repository'
+import { videosService } from '../services/videos-service'
 
 export const videosRouter = Router({})
 
 videosRouter.get('/', async (req: Request, res: Response) => {
-    const videos = await videosRepository.getVideos()
+    const videos = await videosService.getVideos()
     res.status(CodeResponsesEnum.Success_200).send(videos)
 })
 
@@ -30,7 +28,7 @@ videosRouter.post(
         const author = req.body.author
         const availableResolutions = req.body.availableResolutions
 
-        const newVideo = await videosRepository.createVideo(
+        const newVideo = await videosService.createVideo(
             title,
             author,
             availableResolutions
@@ -50,7 +48,7 @@ videosRouter.get(
     async (req: Request, res: Response) => {
         const id = +req.params.id //if NaN - return !id === false
 
-        const video = await videosRepository.getVideoById(id)
+        const video = await videosService.getVideoById(id)
         if (video) {
             res.status(CodeResponsesEnum.Success_200).send(video)
         } else {
@@ -71,7 +69,7 @@ videosRouter.put(
     errorsResultMiddleware,
     async (req: Request, res: Response) => {
         const id = +req.params.id
-        const isUpdated = await videosRepository.updateVideo(id, req.body)
+        const isUpdated = await videosService.updateVideo(id, req.body)
         if (!isUpdated) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
@@ -86,7 +84,7 @@ videosRouter.delete(
     idIntParamValidationMiddleware,
     async (req: Request, res: Response) => {
         const id = +req.params.id
-        const isDeleted = await videosRepository.deleteVideo(id)
+        const isDeleted = await videosService.deleteVideo(id)
         if (isDeleted) {
             res.sendStatus(CodeResponsesEnum.Not_content_204)
         } else {
@@ -95,11 +93,6 @@ videosRouter.delete(
     }
 )
 
-// type CreateVideoBodyType = {
-//     title: 'string'
-//     author: 'string'
-//     availableResolutions: Array<string>
-// }
 export type VideoType = {
     id: number
     title: string

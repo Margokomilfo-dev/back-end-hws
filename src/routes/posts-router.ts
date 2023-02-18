@@ -10,13 +10,13 @@ import {
 import { idStringParamValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
 import { _customIsBlogValidator } from '../assets/express-validator/custom-validators'
 import { authorizationMiddleware } from '../assets/middlewares/authorization-middleware'
-import { blogsRepository } from '../repositores/blogs-db-repository'
-import { postsRepository } from '../repositores/posts-db-repository'
+import { postsService } from '../services/posts-service'
+import { blogsService } from '../services/blogs-service'
 
 export const postsRouter = Router({})
 
 postsRouter.get('/', async (req: Request, res: Response) => {
-    const posts = await postsRepository.getPosts()
+    const posts = await postsService.getPosts()
     res.status(CodeResponsesEnum.Success_200).send(posts)
 })
 
@@ -31,9 +31,9 @@ postsRouter.post(
     errorsResultMiddleware,
     async (req: Request, res: Response) => {
         const blogId = req.body.blogId
-        const blog = await blogsRepository.getBlogById(blogId)
+        const blog = await blogsService.getBlogById(blogId)
 
-        const newPost = await postsRepository.createPost(req.body, blog!.name)
+        const newPost = await postsService.createPost(req.body, blog!.name)
 
         if (newPost) {
             res.status(CodeResponsesEnum.Created_201).send(newPost) //если сделать sendStatus - не дойдем до send
@@ -45,7 +45,7 @@ postsRouter.post(
 
 postsRouter.get('/:id', async (req: Request, res: Response) => {
     const id = req.params.id
-    const post = await postsRepository.getPostById(id)
+    const post = await postsService.getPostById(id)
     if (post) {
         res.status(CodeResponsesEnum.Success_200).send(post)
     } else {
@@ -65,7 +65,7 @@ postsRouter.put(
     errorsResultMiddleware,
     async (req: Request, res: Response) => {
         const id = req.params.id
-        const isUpdated = await postsRepository.updatePost(id, req.body)
+        const isUpdated = await postsService.updatePost(id, req.body)
         if (!isUpdated) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
@@ -81,7 +81,7 @@ postsRouter.delete(
     idStringParamValidationMiddleware,
     async (req: Request, res: Response) => {
         const id = req.params.id
-        const isDeleted = await postsRepository.deletePost(id)
+        const isDeleted = await postsService.deletePost(id)
         if (isDeleted) {
             res.sendStatus(CodeResponsesEnum.Not_content_204)
         } else {
