@@ -16,8 +16,7 @@ export const postsRepository = {
             .toArray()
     },
     async getPostsCount(): Promise<number> {
-        const res = await postsCollection.find({}).toArray()
-        return res.length
+        return postsCollection.countDocuments({})
     },
     async getPostById(id: string): Promise<PostType | null> {
         return postsCollection.findOne({ id }, { projection: { _id: 0 } })
@@ -37,8 +36,7 @@ export const postsRepository = {
             .toArray()
     },
     async getPostsCountByBlogId(blogId: string): Promise<number> {
-        const res = await postsCollection.find({ blogId }).toArray()
-        return res.length
+        return postsCollection.countDocuments({ blogId })
     },
     async createPost(newPost: PostType): Promise<PostType | null> {
         await postsCollection.insertOne(newPost)

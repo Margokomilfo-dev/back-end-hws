@@ -25,8 +25,7 @@ export const blogsRepository = {
         if (searchNameTerm) {
             filter.name = { $regex: searchNameTerm, $options: '$i' }
         }
-        const res_ = await blogsCollection.find(filter).toArray()
-        return res_.length
+        return blogsCollection.countDocuments(filter)
     },
     async getBlogById(id: string): Promise<BlogType | null> {
         return blogsCollection.findOne({ id }, { projection: { _id: 0 } })
