@@ -16,8 +16,30 @@ import { blogsService } from '../services/blogs-service'
 export const postsRouter = Router({})
 
 postsRouter.get('/', async (req: Request, res: Response) => {
-    const posts = await postsService.getPosts()
-    res.status(CodeResponsesEnum.Success_200).send(posts)
+    let pageNumber = req.query.pageNumber ? +req.query.pageNumber : 1
+    let pageSize = req.query.pageSize ? +req.query.pageSize : 10
+    let sortBy = req.query.sortBy ? req.query.sortBy.toString() : 'createAt'
+    let sortDirection =
+        req.query.sortDirection && req.query.sortDirection.toString() === 'asc'
+            ? 'asc'
+            : 'desc'
+
+    const posts = await postsService.getPosts(
+        pageNumber,
+        pageSize,
+        sortBy,
+        sortDirection
+    )
+    const postsCount = await postsService.getPostsCount()
+
+    const result = {
+        pagesCount: Math.ceil(postsCount / pageSize),
+        page: pageNumber,
+        pageSize,
+        totalCount: postsCount,
+        items: posts,
+    }
+    res.status(CodeResponsesEnum.Success_200).send(result)
 })
 
 postsRouter.post(

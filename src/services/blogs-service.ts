@@ -2,12 +2,28 @@ import { BlogType } from '../routes/blogs-router'
 import { blogsRepository } from '../repositores/blogs-db-repository'
 
 export const blogsService = {
-    async getBlogs(): Promise<BlogType[]> {
-        return blogsRepository.getBlogs()
+    async getBlogs(
+        pageNumber: number,
+        pageSize: number,
+        sortBy: string,
+        sortDirection: string,
+        searchNameTerm: string | null
+    ): Promise<BlogType[]> {
+        return blogsRepository.getBlogs(
+            pageNumber,
+            pageSize,
+            sortBy,
+            sortDirection,
+            searchNameTerm
+        )
+    },
+    async getBlogsCount(): Promise<number> {
+        return blogsRepository.getBlogsCount()
     },
     async getBlogById(id: string): Promise<BlogType | null> {
         return blogsRepository.getBlogById(id)
     },
+
     async createBlog(
         name: string,
         description: string,

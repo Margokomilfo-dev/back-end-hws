@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { CodeResponsesEnum } from '../../types'
+import { blogsService } from '../../services/blogs-service'
 
 export const idIntParamValidationMiddleware = (
     req: Request,
@@ -24,4 +25,24 @@ export const idStringParamValidationMiddleware = (
         res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
         return
     } else next()
+}
+
+export const blogIdStringParamValidationMiddleware = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    let blogId = req.params.blogId?.toString().trim()
+    if (blogId) {
+        const res_ = await blogsService.getBlogById(blogId)
+        if (res_) {
+            next()
+        } else {
+            res.sendStatus(CodeResponsesEnum.Not_found_404)
+            return
+        }
+    } else {
+        res.sendStatus(CodeResponsesEnum.Not_found_404)
+        return
+    }
 }

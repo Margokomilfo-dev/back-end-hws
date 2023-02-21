@@ -2,12 +2,32 @@ import { BlogType } from '../routes/blogs-router'
 import { blogsCollection } from '../mongo/db'
 
 export const blogsRepository = {
-    async getBlogs(): Promise<BlogType[]> {
-        return blogsCollection.find({}, { projection: { _id: 0 } }).toArray()
+    async getBlogs(
+        pageNumber: number,
+        pageSize: number,
+        sortBy: string,
+        sortDirection: string,
+        searchNameTerm: string | null
+    ): Promise<BlogType[]> {
+        let filter: any = {}
+        if (searchNameTerm) {
+            filter.name = { $regex: searchNameTerm }
+        }
+        return blogsCollection
+            .find(filter, { projection: { _id: 0 } })
+            .skip((pageNumber - 1) * pageSize)
+            .limit(pageSize)
+            .sort({ [sortBy]: sortDirection === 'asc' ? -1 : 1 })
+            .toArray()
+    },
+    async getBlogsCount(): Promise<number> {
+        const res_ = await blogsCollection.find({}).toArray()
+        return res_.length
     },
     async getBlogById(id: string): Promise<BlogType | null> {
         return blogsCollection.findOne({ id }, { projection: { _id: 0 } })
     },
+
     async createBlog(blog: BlogType): Promise<BlogType | null> {
         await blogsCollection.insertOne(blog)
         return this.getBlogById(blog.id)

@@ -5,17 +5,50 @@ import {
     blogDescriptionValidator,
     blogNameValidator,
     blogWebsiteUrlValidator,
+    postContentValidator,
+    postShortDescriptionValidator,
+    postTitleValidator,
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
-import { idStringParamValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
+import {
+    blogIdStringParamValidationMiddleware,
+    idStringParamValidationMiddleware,
+} from '../assets/express-validator/id-int-param-validation-middleware'
 import { authorizationMiddleware } from '../assets/middlewares/authorization-middleware'
 import { blogsService } from '../services/blogs-service'
+import { postsService } from '../services/posts-service'
 
 export const blogsRouter = Router({})
 
 blogsRouter.get('/', async (req: Request, res: Response) => {
-    const blogs = await blogsService.getBlogs()
-    res.status(CodeResponsesEnum.Success_200).send(blogs)
+    let pageNumber = req.query.pageNumber ? +req.query.pageNumber : 1
+    let pageSize = req.query.pageSize ? +req.query.pageSize : 10
+    let sortBy = req.query.sortBy ? req.query.sortBy.toString() : 'createAt'
+    let sortDirection =
+        req.query.sortDirection && req.query.sortDirection.toString() === 'asc'
+            ? 'asc'
+            : 'desc'
+
+    let searchNameTerm = req.query.searchNameTerm
+        ? req.query.searchNameTerm.toString()
+        : null
+
+    const blogs = await blogsService.getBlogs(
+        pageNumber,
+        pageSize,
+        sortBy,
+        sortDirection,
+        searchNameTerm
+    )
+    const blogsCount = await blogsService.getBlogsCount()
+    const result = {
+        pagesCount: Math.ceil(blogsCount / pageSize),
+        page: pageNumber,
+        pageSize,
+        totalCount: blogsCount,
+        items: blogs,
+    }
+    res.status(CodeResponsesEnum.Success_200).send(result)
 })
 
 blogsRouter.post(
@@ -43,6 +76,35 @@ blogsRouter.post(
         }
     }
 )
+
+blogsRouter.post(
+    '/:blogId/posts',
+    authorizationMiddleware,
+    blogIdStringParamValidationMiddleware,
+    postTitleValidator,
+    postShortDescriptionValidator,
+    postContentValidator,
+    errorsResultMiddleware,
+    async (req: Request, res: Response) => {
+        const blog = await blogsService.getBlogById(req.params.blogId)
+        const newPost = await postsService.createPost(
+            {
+                title: req.body.title,
+                content: req.body.content,
+                shortDescription: req.body.shortDescription,
+                blogId: blog!.id,
+            },
+            blog!.name
+        )
+
+        if (newPost) {
+            res.status(CodeResponsesEnum.Created_201).send(newPost) //если сделать sendStatus - не дойдем до send
+        } else {
+            res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
+        }
+    }
+)
+
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
 blogsRouter.get(
     '/:id',
@@ -56,6 +118,41 @@ blogsRouter.get(
         } else {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
         }
+    }
+)
+
+blogsRouter.get(
+    '/:blogId/posts',
+    blogIdStringParamValidationMiddleware,
+    async (req: Request, res: Response) => {
+        let pageNumber = req.query.pageNumber ? +req.query.pageNumber : 1
+        let pageSize = req.query.pageSize ? +req.query.pageSize : 10
+        let sortBy = req.query.sortBy ? req.query.sortBy.toString() : 'createAt'
+        let sortDirection =
+            req.query.sortDirection &&
+            req.query.sortDirection.toString() === 'asc'
+                ? 'asc'
+                : 'desc'
+
+        const id = req.params.blogId
+
+        const posts = await postsService.getPostsByBlogId(
+            id,
+            pageNumber,
+            pageSize,
+            sortBy,
+            sortDirection
+        )
+        const postsCount = await postsService.getPostsCountByBlogId(id)
+        const result = {
+            pagesCount: Math.ceil(postsCount / pageSize),
+            page: pageNumber,
+            pageSize,
+            totalCount: postsCount,
+            items: posts,
+        }
+
+        res.status(CodeResponsesEnum.Success_200).send(result)
     }
 )
 
