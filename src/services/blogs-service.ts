@@ -17,8 +17,8 @@ export const blogsService = {
             searchNameTerm
         )
     },
-    async getBlogsCount(): Promise<number> {
-        return blogsRepository.getBlogsCount()
+    async getBlogsCount(searchNameTerm: string | null): Promise<number> {
+        return blogsRepository.getBlogsCount(searchNameTerm)
     },
     async getBlogById(id: string): Promise<BlogType | null> {
         return blogsRepository.getBlogById(id)

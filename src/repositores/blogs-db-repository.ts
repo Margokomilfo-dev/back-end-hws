@@ -20,8 +20,12 @@ export const blogsRepository = {
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
             .toArray()
     },
-    async getBlogsCount(): Promise<number> {
-        const res_ = await blogsCollection.find({}).toArray()
+    async getBlogsCount(searchNameTerm: string | null): Promise<number> {
+        let filter: any = {}
+        if (searchNameTerm) {
+            filter.name = { $regex: searchNameTerm, $options: '$i' }
+        }
+        const res_ = await blogsCollection.find(filter).toArray()
         return res_.length
     },
     async getBlogById(id: string): Promise<BlogType | null> {

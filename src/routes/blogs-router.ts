@@ -40,7 +40,7 @@ blogsRouter.get('/', async (req: Request, res: Response) => {
         sortDirection,
         searchNameTerm
     )
-    const blogsCount = await blogsService.getBlogsCount()
+    const blogsCount = await blogsService.getBlogsCount(searchNameTerm)
     const result = {
         pagesCount: Math.ceil(blogsCount / pageSize),
         page: pageNumber,
