@@ -11,7 +11,7 @@ export const blogsRepository = {
     ): Promise<BlogType[]> {
         let filter: any = {}
         if (searchNameTerm) {
-            filter.name = { $regex: searchNameTerm }
+            filter.name = { $regex: searchNameTerm, $options: '$i' }
         }
         return blogsCollection
             .find(filter, { projection: { _id: 0 } })

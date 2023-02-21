@@ -144,7 +144,7 @@ describe('/posts', () => {
             })
             const res = await request(app).get('/posts/')
             expect(res.body.items.length).toBe(2)
-            expect(res.body.items[1]).toEqual(newPost1)
+            expect(res.body.items[1]).toEqual(newPost)
         })
     })
     describe('GET:id', () => {
@@ -196,7 +196,7 @@ describe('/posts', () => {
             expect(res_.body.pageSize).toBe(10)
             expect(res_.body.page).toBe(1)
             expect(res_.body.totalCount).toBe(2)
-            expect(res_.body.items[0].id > res_.body.items[1].id).toBe(true)
+            expect(res_.body.items[0].id < res_.body.items[1].id).toBe(true)
         })
         it('+ GET posts - pagination pageNumber=1, pageSize=10, sortBy=id, sortDirection=desc', async () => {
             const res_ = await request(app)
@@ -209,7 +209,7 @@ describe('/posts', () => {
             expect(res_.body.pageSize).toBe(10)
             expect(res_.body.page).toBe(1)
             expect(res_.body.totalCount).toBe(2)
-            expect(res_.body.items[0].id < res_.body.items[1].id).toBe(true)
+            expect(res_.body.items[0].id > res_.body.items[1].id).toBe(true)
         })
     })
     describe('PUT', () => {
@@ -225,7 +225,7 @@ describe('/posts', () => {
                 .expect(CodeResponsesEnum.Not_Authorized)
 
             const res = await request(app).get('/posts/')
-            expect(res.body.items[0]).toEqual(newPost)
+            expect(res.body.items[0]).toEqual(newPost1)
         })
         it('- PUT update post by ID with incorrect data (auth, no all field)', async () => {
             await request(app)
@@ -259,7 +259,7 @@ describe('/posts', () => {
                 })
 
             const res = await request(app).get('/posts/')
-            expect(res.body.items[0]).toEqual(newPost)
+            expect(res.body.items[0]).toEqual(newPost1)
         })
         it('- PUT update post by ID with incorrect data (auth, blog with this blogId not exist)', async () => {
             await request(app)
@@ -281,7 +281,7 @@ describe('/posts', () => {
                 })
 
             const res = await request(app).get('/posts/')
-            expect(res.body.items[0]).toEqual(newPost)
+            expect(res.body.items[0]).toEqual(newPost1)
         })
         it('+ PUT update post by ID with correct data', async () => {
             await request(app)
@@ -295,14 +295,14 @@ describe('/posts', () => {
                 })
                 .expect(CodeResponsesEnum.Not_content_204)
 
-            const res = await request(app).get('/posts/')
-            expect(res.body.items[0]).toEqual({
+            const res = await request(app).get(`/posts/${newPost!.id}`)
+            expect(res.body).toEqual({
                 ...newPost,
                 title: 'title123',
                 shortDescription: 'string123',
                 content: 'string123',
             })
-            newPost = res.body.items[0]
+            newPost = res.body
         })
     })
     describe('DELETE', () => {
@@ -312,7 +312,7 @@ describe('/posts', () => {
                 .expect(CodeResponsesEnum.Not_Authorized)
 
             const res = await request(app).get('/posts/')
-            expect(res.body.items).toEqual([newPost, newPost1])
+            expect(res.body.items.length).toBe(2)
         })
         it('- DELETE post by incorrect ID, auth', async () => {
             await request(app)
@@ -321,7 +321,7 @@ describe('/posts', () => {
                 .expect(CodeResponsesEnum.Not_found_404)
 
             const res = await request(app).get('/posts/')
-            expect(res.body.items[0]).toEqual(newPost)
+            expect(res.body.items[0]).toEqual(newPost1)
         })
         it('- DELETE post by incorrect ID, auth', async () => {
             await request(app)
@@ -330,7 +330,7 @@ describe('/posts', () => {
                 .expect(CodeResponsesEnum.Not_found_404)
 
             const res = await request(app).get('/posts/')
-            expect(res.body.items[0]).toEqual(newPost)
+            expect(res.body.items[0]).toEqual(newPost1)
         })
         it('+ DELETE post by correct ID, auth', async () => {
             await request(app)

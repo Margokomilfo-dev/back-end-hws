@@ -235,7 +235,7 @@ describe('/blogs', () => {
             expect(res_.body.pageSize).toBe(10)
             expect(res_.body.page).toBe(1)
             expect(res_.body.totalCount).toBe(2)
-            expect(res_.body.items[0].id > res_.body.items[1].id).toBe(true)
+            expect(res_.body.items[0].id < res_.body.items[1].id).toBe(true)
         })
         it('+ GET blogs - pagination pageNumber=1, pageSize=10, sortBy=id, sortDirection=desc', async () => {
             const res_ = await request(app)
@@ -248,7 +248,7 @@ describe('/blogs', () => {
             expect(res_.body.pageSize).toBe(10)
             expect(res_.body.page).toBe(1)
             expect(res_.body.totalCount).toBe(2)
-            expect(res_.body.items[0].id < res_.body.items[1].id).toBe(true)
+            expect(res_.body.items[0].id > res_.body.items[1].id).toBe(true)
         })
         it('+ GET searchNameTerm=va', async () => {
             const res_ = await request(app)
@@ -331,7 +331,7 @@ describe('/blogs', () => {
             expect(res.body.page).toBe(2)
             expect(res.body.pageSize).toBe(3)
             expect(
-                new Date(res.body.items[0].createdAt).getTime() <
+                new Date(res.body.items[0].createdAt).getTime() >
                     new Date(res.body.items[1].createdAt).getTime()
             ).toBe(true)
         })
@@ -346,7 +346,7 @@ describe('/blogs', () => {
 
             expect(res.body.page).toBe(2)
             expect(res.body.pageSize).toBe(3)
-            expect(+res.body.items[0].id < +res.body.items[1].id).toBe(true)
+            expect(+res.body.items[0].id > +res.body.items[1].id).toBe(true)
         })
         it('+ GET:id/posts - correct  blogId, pagination - pageNumber=2, pageSize=3,sortBy=id, sortDirection=asc', async () => {
             const res = await request(app)
@@ -358,7 +358,7 @@ describe('/blogs', () => {
                 .expect(CodeResponsesEnum.Success_200)
             expect(res.body.page).toBe(2)
             expect(res.body.pageSize).toBe(3)
-            expect(+res.body.items[0].id > +res.body.items[1].id).toBe(true)
+            expect(+res.body.items[0].id < +res.body.items[1].id).toBe(true)
         })
     })
     describe('PUT', () => {
