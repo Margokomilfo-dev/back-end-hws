@@ -12,17 +12,13 @@ import { _customIsBlogValidator } from '../assets/express-validator/custom-valid
 import { authorizationMiddleware } from '../assets/middlewares/authorization-middleware'
 import { postsService } from '../services/posts-service'
 import { blogsService } from '../services/blogs-service'
+import { paginationQueries } from '../assets/pagination'
 
 export const postsRouter = Router({})
 
 postsRouter.get('/', async (req: Request, res: Response) => {
-    let pageNumber = req.query.pageNumber ? +req.query.pageNumber : 1
-    let pageSize = req.query.pageSize ? +req.query.pageSize : 10
-    let sortBy = req.query.sortBy ? req.query.sortBy.toString() : 'createdAt'
-    let sortDirection =
-        req.query.sortDirection && req.query.sortDirection.toString() === 'asc'
-            ? 'asc'
-            : 'desc'
+    const { pageNumber, pageSize, sortBy, sortDirection } =
+        paginationQueries(req)
 
     const posts = await postsService.getPosts(
         pageNumber,
