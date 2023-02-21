@@ -30,7 +30,7 @@ export const postsRepository = {
         sortDirection: string
     ): Promise<Array<PostType>> {
         return postsCollection
-            .find({ blogId })
+            .find({ blogId }, { projection: { _id: 0 } })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .sort({ [sortBy]: sortDirection === 'asc' ? -1 : 1 })
