@@ -12,7 +12,7 @@ export const postsRepository = {
             .find({}, { projection: { _id: 0 } })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
-            .sort({ [sortBy]: sortDirection === 'asc' ? -1 : 1 })
+            .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
             .toArray()
     },
     async getPostsCount(): Promise<number> {
@@ -33,7 +33,7 @@ export const postsRepository = {
             .find({ blogId }, { projection: { _id: 0 } })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
-            .sort({ [sortBy]: sortDirection === 'asc' ? -1 : 1 })
+            .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
             .toArray()
     },
     async getPostsCountByBlogId(blogId: string): Promise<number> {

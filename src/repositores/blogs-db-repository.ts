@@ -17,7 +17,7 @@ export const blogsRepository = {
             .find(filter, { projection: { _id: 0 } })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
-            .sort({ [sortBy]: sortDirection === 'asc' ? -1 : 1 })
+            .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
             .toArray()
     },
     async getBlogsCount(): Promise<number> {
