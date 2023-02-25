@@ -31,7 +31,6 @@ export const usersService = {
     async getUserByLoginOrEmail(
         loginOrEmail: string
     ): Promise<UserType | null> {
-        console.log('loginOrEmail', loginOrEmail)
         return usersRepository.getUserByLoginOrEmail(loginOrEmail)
     },
 

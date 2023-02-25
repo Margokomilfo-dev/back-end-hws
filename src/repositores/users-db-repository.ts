@@ -23,7 +23,7 @@ export const usersRepository = {
             ]
         }
         return usersCollection
-            .find(filter, { projection: { _id: 0 } })
+            .find(filter, { projection: { _id: 0, passwordHash: 0 } })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
@@ -49,10 +49,12 @@ export const usersRepository = {
         return usersCollection.countDocuments(filter)
     },
     async getUserById(id: string): Promise<UserType | null> {
-        return usersCollection.findOne({ id }, { projection: { _id: 0 } })
+        return usersCollection.findOne(
+            { id },
+            { projection: { _id: 0, passwordHash: 0 } }
+        )
     },
     async getUserByLoginOrEmail(loginOrEmail: string) {
-        console.log('-', loginOrEmail)
         return usersCollection.findOne({
             $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
         })

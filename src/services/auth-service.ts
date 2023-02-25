@@ -7,7 +7,6 @@ export const authService = {
         password: string
     ): Promise<boolean> {
         const user = await usersService.getUserByLoginOrEmail(loginOrEmail)
-        console.log('user:', user)
         if (!user) return false
         return cryptoService._compareHash(password, user)
     },

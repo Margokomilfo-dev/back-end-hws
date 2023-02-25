@@ -8,7 +8,6 @@ import { UserType } from '../repositores/users-db-repository'
 dotenv.config()
 
 const mongoURI = process.env.mongoURI || 'mongodb://0.0.0.0:27017'
-console.log(mongoURI)
 
 const client = new MongoClient(mongoURI)
 const db = client.db('hw')

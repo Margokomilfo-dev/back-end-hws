@@ -24,7 +24,6 @@ authRouter.post(
             loginOrEmail,
             password
         )
-        console.log('check:', checkUser)
         if (!checkUser) {
             res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
         } else res.sendStatus(CodeResponsesEnum.Not_content_204)
