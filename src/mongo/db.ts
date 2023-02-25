@@ -3,7 +3,8 @@ import { VideoType } from '../routes/videos-router'
 import { BlogType } from '../routes/blogs-router'
 import { PostType } from '../routes/posts-router'
 
-import * as dotenv from 'dotenv'
+import dotenv from 'dotenv'
+import { UserType } from '../repositores/users-db-repository'
 dotenv.config()
 
 const mongoURI = process.env.mongoURI || 'mongodb://0.0.0.0:27017'
@@ -14,6 +15,7 @@ const db = client.db('hw')
 export const videosCollection = db.collection<VideoType>('videos')
 export const blogsCollection = db.collection<BlogType>('blogs')
 export const postsCollection = db.collection<PostType>('posts')
+export const usersCollection = db.collection<UserType>('users')
 
 export async function runDb() {
     try {

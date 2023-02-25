@@ -3,6 +3,7 @@ import { app } from '../src/settings'
 import { CodeResponsesEnum } from '../src/types'
 import { BlogType } from '../src/routes/blogs-router'
 import { PostType } from '../src/routes/posts-router'
+import { UserType } from '../src/repositores/users-db-repository'
 
 export const createBlog = async (dto: {
     title: string
@@ -36,3 +37,20 @@ export const createPost = async (
         .expect(CodeResponsesEnum.Created_201)
     return res_.body
 }
+export const createUser = async (dto: {
+    login: string
+    email: string
+    password: string
+}): Promise<UserType> => {
+    const result = await request(app)
+        .post('/users/')
+        .set('authorization', 'Basic YWRtaW46cXdlcnR5')
+        .send({
+            login: dto.login,
+            email: dto.email,
+            password: dto.password,
+        })
+        .expect(CodeResponsesEnum.Created_201)
+    return result.body
+}
+// {login: 'Dimych', email: 'dimych@gmail.com', password: '123456'}

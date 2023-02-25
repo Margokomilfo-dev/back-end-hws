@@ -60,7 +60,7 @@ describe('/posts', () => {
                     content: 'content',
                     blogId: '',
                 })
-                .expect(CodeResponsesEnum.Not_Authorized)
+                .expect(CodeResponsesEnum.Not_Authorized_401)
 
             const res = await request(app).get('/posts/')
             expect(res.body.items).toEqual([])
@@ -78,7 +78,7 @@ describe('/posts', () => {
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
                         {
-                            message: 'title should contain  2 - 30 symbols',
+                            message: 'title should contain 2 - 30 symbols',
                             field: 'title',
                         },
                         {
@@ -222,7 +222,7 @@ describe('/posts', () => {
                     content: '',
                     blogId: '',
                 })
-                .expect(CodeResponsesEnum.Not_Authorized)
+                .expect(CodeResponsesEnum.Not_Authorized_401)
 
             const res = await request(app).get('/posts/')
             expect(res.body.items[0]).toEqual(newPost1)
@@ -309,7 +309,7 @@ describe('/posts', () => {
         it('- DELETE post by incorrect ID, not auth', async () => {
             await request(app)
                 .delete('/posts/1kcnsdk')
-                .expect(CodeResponsesEnum.Not_Authorized)
+                .expect(CodeResponsesEnum.Not_Authorized_401)
 
             const res = await request(app).get('/posts/')
             expect(res.body.items.length).toBe(2)

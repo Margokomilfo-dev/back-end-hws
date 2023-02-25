@@ -53,7 +53,7 @@ describe('/blogs', () => {
             await request(app)
                 .post('/blogs/')
                 .send({})
-                .expect(CodeResponsesEnum.Not_Authorized)
+                .expect(CodeResponsesEnum.Not_Authorized_401)
 
             const res = await request(app).get('/blogs/')
             expect(res.body.items.length).toBe(0)
@@ -88,7 +88,7 @@ describe('/blogs', () => {
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
                         {
-                            message: 'name should contain  2 - 15 symbols',
+                            message: 'name should contain 2 - 15 symbols',
                             field: 'name',
                         },
                         {
@@ -111,7 +111,7 @@ describe('/blogs', () => {
                     websiteUrl:
                         'http://margocommargocommargocommargocommargocommargocommargocommargocommargocommargocommargocommarm.pl.com',
                 })
-                .expect(CodeResponsesEnum.Not_Authorized)
+                .expect(CodeResponsesEnum.Not_Authorized_401)
 
             const res = await request(app).get('/blogs/')
             expect(res.body.items.length).toBe(0)
@@ -130,7 +130,7 @@ describe('/blogs', () => {
                     errorsMessages: [
                         {
                             message:
-                                'websiteUrl should contain  2 - 100 symbols',
+                                'websiteUrl should contain 2 - 100 symbols',
                             field: 'websiteUrl',
                         },
                     ],
@@ -370,7 +370,7 @@ describe('/blogs', () => {
                     description: 'description',
                     websiteUrl: 'https://hello.world',
                 })
-                .expect(CodeResponsesEnum.Not_Authorized)
+                .expect(CodeResponsesEnum.Not_Authorized_401)
         })
         it('- PUT does not update with incorrect data (auth, not existed id)', async () => {
             await request(app)
@@ -427,7 +427,7 @@ describe('/blogs', () => {
         it('- DELETE does not deleted with (no auth, notExisted id)', async () => {
             await request(app)
                 .delete('/blogs/hhh-we34')
-                .expect(CodeResponsesEnum.Not_Authorized)
+                .expect(CodeResponsesEnum.Not_Authorized_401)
 
             const res = await request(app).get('/blogs/')
             expect(res.body.items.length).toBe(2)

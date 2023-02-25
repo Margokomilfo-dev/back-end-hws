@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { CodeResponsesEnum } from '../../types'
 import { blogsService } from '../../services/blogs-service'
+import { usersService } from '../../services/users-service'
 
 export const idIntParamValidationMiddleware = (
     req: Request,
@@ -15,6 +16,7 @@ export const idIntParamValidationMiddleware = (
         return
     }
 }
+
 export const idStringParamValidationMiddleware = (
     req: Request,
     res: Response,
@@ -35,6 +37,26 @@ export const blogIdStringParamValidationMiddleware = async (
     let blogId = req.params.blogId?.toString().trim()
     if (blogId) {
         const res_ = await blogsService.getBlogById(blogId)
+        if (res_) {
+            next()
+        } else {
+            res.sendStatus(CodeResponsesEnum.Not_found_404)
+            return
+        }
+    } else {
+        res.sendStatus(CodeResponsesEnum.Not_found_404)
+        return
+    }
+}
+
+export const userExistedParamValidationMiddleware = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    let userId = req.params.id?.toString().trim()
+    if (userId) {
+        const res_ = await usersService.getUserById(userId)
         if (res_) {
             next()
         } else {

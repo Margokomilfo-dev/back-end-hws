@@ -20,5 +20,5 @@ export const authorizationMiddleware = (
 
     if (authHeader && authHeader === validAuthValue) {
         next()
-    } else res.sendStatus(CodeResponsesEnum.Not_Authorized)
+    } else res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
 }

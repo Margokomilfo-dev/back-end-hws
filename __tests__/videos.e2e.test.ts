@@ -92,7 +92,7 @@ describe('/videos', () => {
             .expect(CodeResponsesEnum.Incorrect_values_400, {
                 errorsMessages: [
                     {
-                        message: 'title should contain  1 - 40 symbols',
+                        message: 'title should contain 1 - 40 symbols',
                         field: 'title',
                     },
                     { message: 'author is required', field: 'author' },
@@ -113,7 +113,7 @@ describe('/videos', () => {
             .expect(CodeResponsesEnum.Incorrect_values_400, {
                 errorsMessages: [
                     {
-                        message: 'title should contain  1 - 40 symbols',
+                        message: 'title should contain 1 - 40 symbols',
                         field: 'title',
                     },
                     { message: 'more than 20 symbols', field: 'author' },
@@ -136,7 +136,7 @@ describe('/videos', () => {
             .expect(CodeResponsesEnum.Incorrect_values_400, {
                 errorsMessages: [
                     {
-                        message: 'title should contain  1 - 40 symbols',
+                        message: 'title should contain 1 - 40 symbols',
                         field: 'title',
                     },
                     {
