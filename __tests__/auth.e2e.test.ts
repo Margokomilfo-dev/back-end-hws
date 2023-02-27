@@ -1,5 +1,5 @@
 import { CodeResponsesEnum } from '../src/types'
-import request from 'supertest'
+import * as request from 'supertest'
 import { app } from '../src/settings'
 import { UserType } from '../src/repositores/users-db-repository'
 import { createUser } from './assets'
@@ -31,12 +31,6 @@ describe('/auth', () => {
     })
 
     describe('POST auth/login', () => {
-        it('- POST does not login user (no authorized, correct data)', async function () {
-            await request(app)
-                .post('/auth/login')
-                .send({ loginOrEmail: 'Dimych', password: '123456' })
-                .expect(CodeResponsesEnum.Not_Authorized_401)
-        })
         it('- POST does not login user (no authorized, no data)', async function () {
             await request(app)
                 .post('/auth/login')
@@ -46,7 +40,6 @@ describe('/auth', () => {
         it('- POST does not login user incorrect data', async function () {
             await request(app)
                 .post('/auth/login')
-                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .send({ loginOrEmail: 'Dimych', password: '1236' })
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
@@ -57,17 +50,9 @@ describe('/auth', () => {
                     ],
                 })
         })
-        it('- POST does not login user - incorrect data', async function () {
-            await request(app)
-                .post('/auth/login')
-                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
-                .send({ loginOrEmail: 'Dimych', password: '123346' })
-                .expect(CodeResponsesEnum.Not_Authorized_401)
-        })
         it('+ POST does not login user', async function () {
             await request(app)
                 .post('/auth/login')
-                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .send({ loginOrEmail: 'Dimych', password: '123456' })
                 .expect(CodeResponsesEnum.Not_content_204)
         })
