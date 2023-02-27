@@ -1,5 +1,6 @@
 import { CodeResponsesEnum } from '../src/types'
-import * as request from 'supertest'
+// @ts-ignore
+import request from 'supertest'
 import { app } from '../src/settings'
 import { UserType } from '../src/repositores/users-db-repository'
 import { createUser } from './assets'
@@ -35,7 +36,15 @@ describe('/auth', () => {
             await request(app)
                 .post('/auth/login')
                 .send({})
-                .expect(CodeResponsesEnum.Not_Authorized_401)
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        {
+                            message: 'loginOrEmail is required',
+                            field: 'loginOrEmail',
+                        },
+                        { message: 'password is required', field: 'password' },
+                    ],
+                })
         })
         it('- POST does not login user incorrect data', async function () {
             await request(app)
