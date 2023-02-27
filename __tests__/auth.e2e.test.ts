@@ -1,5 +1,4 @@
 import { CodeResponsesEnum } from '../src/types'
-// @ts-ignore
 import request from 'supertest'
 import { app } from '../src/settings'
 import { UserType } from '../src/repositores/users-db-repository'
