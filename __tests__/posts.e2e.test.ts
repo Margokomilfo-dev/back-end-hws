@@ -1,17 +1,31 @@
+// @ts-ignore
 import request from 'supertest'
 
 import { CodeResponsesEnum } from '../src/types'
 import { PostType } from '../src/routes/posts-router'
 import { app } from '../src/settings'
 import { BlogType } from '../src/routes/blogs-router'
-import { createBlog, createPost } from './assets'
+import {
+    createBlog,
+    createPost,
+    createUser,
+    getTokenPostAuthLogin,
+} from './assets'
+import { UserType } from '../src/repositores/users-db-repository'
+import { CommentType } from '../src/services/comments-service'
 
 //от этой ошибки! -> thrown: "Exceeded timeout of 5000 ms for a test. go to the jest.config.js
 
 describe('/posts', () => {
     let newPost: PostType | null = null
+    let comment: CommentType | null = null
+
     let newPost1: PostType | null = null
     let newBlog: BlogType | null = null
+
+    let user: UserType | null = null
+    let token: string | null = null
+
     beforeAll(async () => {
         await request(app).delete('/testing/all-data').expect(204)
     })
@@ -145,6 +159,96 @@ describe('/posts', () => {
             const res = await request(app).get('/posts/')
             expect(res.body.items.length).toBe(2)
             expect(res.body.items[1]).toEqual(newPost)
+        })
+    })
+    describe('POST/:postId/comments', () => {
+        it('POST create user', async () => {
+            user = await createUser({
+                login: 'Dimych',
+                email: 'dimych@gmail.com',
+                password: '123456',
+            })
+            await request(app)
+                .get('/users/')
+                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
+        })
+        it('POST auth/login - get token', async () => {
+            token = await getTokenPostAuthLogin('Dimych', '123456')
+        })
+        it('- POST does not create comment for existed postId - not authorized', async function () {
+            await request(app)
+                .post(`/posts/${newPost!.id}/comments`)
+                .send({})
+                .expect(CodeResponsesEnum.Not_Authorized_401)
+        })
+        it('- POST does not create comment for existed postId but no content data', async function () {
+            await request(app)
+                .post(`/posts/${newPost!.id}/comments`)
+                .set('Authorization', `bearer ${token}`)
+                .send({})
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        {
+                            message: 'content is required',
+                            field: 'content',
+                        },
+                    ],
+                })
+        })
+        it('- POST does not create comment for not existed postId with correct correct content data', async function () {
+            await request(app)
+                .post(`/posts/12345/comments`)
+                .set('Authorization', `bearer ${token}`)
+                .send({
+                    content: 'content should contain 20 - 300 symbols',
+                })
+                .expect(CodeResponsesEnum.Not_found_404)
+        })
+        it('- POST does not create comment for existed postId but not correct content data', async function () {
+            await request(app)
+                .post(`/posts/${newPost!.id}/comments`)
+                .set('Authorization', `bearer ${token}`)
+                .send({
+                    content: 'content',
+                })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        {
+                            message: 'content should contain 20 - 300 symbols',
+                            field: 'content',
+                        },
+                    ],
+                })
+        })
+        it('+ POST create comment for existed postId', async function () {
+            const res_ = await request(app)
+                .post(`/posts/${newPost!.id}/comments`)
+                .set('Authorization', `bearer ${token}`)
+                .send({
+                    content: 'content should contain 20 - 300 symbols',
+                })
+                .expect(CodeResponsesEnum.Created_201)
+            expect(res_.body.content).toBe(
+                'content should contain 20 - 300 symbols'
+            )
+            expect(res_.body.commentatorInfo).toEqual({
+                userId: user!.id,
+                userLogin: user!.login,
+            })
+            comment = res_.body
+        })
+    })
+    describe('GET/:postId/comments', () => {
+        it('GET comments by postId', async () => {
+            const res_ = await request(app)
+                .get('/posts/' + newPost!.id + '/comments')
+                .expect(CodeResponsesEnum.Success_200)
+            expect(res_.body.items.length).toBe(1)
+            expect(res_.body.pagesCount).toBe(1)
+            expect(res_.body.pageSize).toBe(10)
+            expect(res_.body.page).toBe(1)
+            expect(res_.body.totalCount).toBe(1)
+            expect(res_.body.items[0].id).toBe(comment!.id)
         })
     })
     describe('GET:id', () => {

@@ -1,5 +1,6 @@
 import { CodeResponsesEnum } from '../src/types'
 import { BlogType } from '../src/routes/blogs-router'
+// @ts-ignore
 import request from 'supertest'
 import { app } from '../src/settings'
 import { createBlog, createPost } from './assets'
@@ -15,6 +16,7 @@ describe('/blogs', () => {
     let newPost3: PostType | null = null
     let newPost4: PostType | null = null
     let newPost5: PostType | null = null
+
     beforeAll(async () => {
         await request(app).delete('/testing/all-data').expect(204)
     })
@@ -203,6 +205,7 @@ describe('/blogs', () => {
             expect(res_.body).toEqual(post.body)
         })
     })
+
     describe('GET', () => {
         it('+ GET blogs - pagination pageNumber=1, pageSize=10, sortBy=createdAt(default), sortDirection=desc(default)', async () => {
             const res_ = await request(app)

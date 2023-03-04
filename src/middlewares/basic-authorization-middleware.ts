@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express'
-import { CodeResponsesEnum } from '../../types'
+import { CodeResponsesEnum } from '../types'
 
 //1
 
-export const authorizationMiddleware = (
+export const basicAuthorizationMiddleware = (
     req: Request,
     res: Response,
     next: NextFunction

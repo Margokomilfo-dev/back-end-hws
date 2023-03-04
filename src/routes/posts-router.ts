@@ -2,17 +2,23 @@ import { Request, Response, Router } from 'express'
 import { CodeResponsesEnum } from '../types'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
 import {
+    commentContentValidator,
     postBlogIdValidator,
     postContentValidator,
     postShortDescriptionValidator,
     postTitleValidator,
 } from '../assets/express-validator/field-validators'
-import { idStringParamValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
+import {
+    idStringParamValidationMiddleware,
+    postIdStringParamValidationMiddleware,
+} from '../assets/express-validator/id-int-param-validation-middleware'
 import { _customIsBlogValidator } from '../assets/express-validator/custom-validators'
-import { authorizationMiddleware } from '../assets/middlewares/authorization-middleware'
+import { basicAuthorizationMiddleware } from '../middlewares/basic-authorization-middleware'
 import { postsService } from '../services/posts-service'
 import { blogsService } from '../services/blogs-service'
 import { paginationQueries } from '../assets/pagination'
+import { commentsService } from '../services/comments-service'
+import { bearerAuthorizationMiddleware } from '../middlewares/bearer-authorization-middleware'
 
 export const postsRouter = Router({})
 
@@ -38,9 +44,43 @@ postsRouter.get('/', async (req: Request, res: Response) => {
     res.status(CodeResponsesEnum.Success_200).send(result)
 })
 
+postsRouter.get(
+    '/:postId/comments',
+    postIdStringParamValidationMiddleware,
+    async (req: Request, res: Response) => {
+        const { pageNumber, pageSize, sortBy, sortDirection } =
+            paginationQueries(req)
+        const postId = req.params.postId.toString().trim()
+        const post = await postsService.getPostById(postId)
+        if (!post) {
+            res.sendStatus(CodeResponsesEnum.Not_found_404)
+            return
+        }
+        const comments = await commentsService.getCommentsByPostId(
+            postId,
+            pageNumber,
+            pageSize,
+            sortBy,
+            sortDirection
+        )
+        const commentsCount = await commentsService.getCommentsCountByPostId(
+            postId
+        )
+
+        const result = {
+            pagesCount: Math.ceil(commentsCount / pageSize),
+            page: pageNumber,
+            pageSize,
+            totalCount: commentsCount,
+            items: comments,
+        }
+        res.status(CodeResponsesEnum.Success_200).send(result)
+    }
+)
+
 postsRouter.post(
     '/',
-    authorizationMiddleware,
+    basicAuthorizationMiddleware,
     postTitleValidator,
     postShortDescriptionValidator,
     postContentValidator,
@@ -61,6 +101,36 @@ postsRouter.post(
     }
 )
 
+postsRouter.post(
+    '/:postId/comments',
+    bearerAuthorizationMiddleware,
+    postIdStringParamValidationMiddleware,
+    commentContentValidator,
+    errorsResultMiddleware,
+    async (req: Request, res: Response) => {
+        const postId = req.params.postId.toString().trim()
+        const content = req.body.content.toString().trim()
+        const post = await postsService.getPostById(postId)
+        if (!post) {
+            res.sendStatus(CodeResponsesEnum.Not_found_404)
+            return
+        }
+
+        const newComment = await commentsService.createComment(
+            content,
+            req.userId!,
+            req.userLogin!,
+            postId
+        )
+
+        if (newComment) {
+            res.status(CodeResponsesEnum.Created_201).send(newComment) //если сделать sendStatus - не дойдем до send
+        } else {
+            res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
+        }
+    }
+)
+
 postsRouter.get('/:id', async (req: Request, res: Response) => {
     const id = req.params.id
     const post = await postsService.getPostById(id)
@@ -73,7 +143,7 @@ postsRouter.get('/:id', async (req: Request, res: Response) => {
 
 postsRouter.put(
     '/:id',
-    authorizationMiddleware,
+    basicAuthorizationMiddleware,
     idStringParamValidationMiddleware,
     postTitleValidator,
     postShortDescriptionValidator,
@@ -95,7 +165,7 @@ postsRouter.put(
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
 postsRouter.delete(
     '/:id',
-    authorizationMiddleware,
+    basicAuthorizationMiddleware,
     idStringParamValidationMiddleware,
     async (req: Request, res: Response) => {
         const id = req.params.id

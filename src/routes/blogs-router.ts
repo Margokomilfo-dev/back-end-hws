@@ -14,7 +14,7 @@ import {
     blogIdStringParamValidationMiddleware,
     idStringParamValidationMiddleware,
 } from '../assets/express-validator/id-int-param-validation-middleware'
-import { authorizationMiddleware } from '../assets/middlewares/authorization-middleware'
+import { basicAuthorizationMiddleware } from '../middlewares/basic-authorization-middleware'
 import { blogsService } from '../services/blogs-service'
 import { postsService } from '../services/posts-service'
 import { paginationQueries } from '../assets/pagination'
@@ -49,7 +49,7 @@ blogsRouter.get('/', async (req: Request, res: Response) => {
 
 blogsRouter.post(
     '/',
-    authorizationMiddleware,
+    basicAuthorizationMiddleware,
     blogNameValidator,
     blogDescriptionValidator,
     blogWebsiteUrlValidator,
@@ -75,7 +75,7 @@ blogsRouter.post(
 
 blogsRouter.post(
     '/:blogId/posts',
-    authorizationMiddleware,
+    basicAuthorizationMiddleware,
     blogIdStringParamValidationMiddleware,
     postTitleValidator,
     postShortDescriptionValidator,
@@ -149,7 +149,7 @@ blogsRouter.get(
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
 blogsRouter.put(
     '/:id',
-    authorizationMiddleware,
+    basicAuthorizationMiddleware,
     idStringParamValidationMiddleware,
     blogNameValidator,
     blogDescriptionValidator,
@@ -169,7 +169,7 @@ blogsRouter.put(
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
 blogsRouter.delete(
     '/:id',
-    authorizationMiddleware,
+    basicAuthorizationMiddleware,
     idStringParamValidationMiddleware,
     async (req: Request, res: Response) => {
         const id = req.params.id

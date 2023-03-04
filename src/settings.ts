@@ -10,6 +10,8 @@ import { postsRepository } from './repositores/posts-db-repository'
 import { usersRepository } from './repositores/users-db-repository'
 import { usersRouter } from './routes/users-router'
 import { authRouter } from './routes/auth-router'
+import { commentsRouter } from './routes/comments-router'
+import { commentsRepository } from './repositores/comments-db-repository'
 
 export const app = express()
 
@@ -19,6 +21,7 @@ app.use('/blogs', blogsRouter)
 app.use('/posts', postsRouter)
 app.use('/users', usersRouter)
 app.use('/auth', authRouter)
+app.use('/comments', commentsRouter)
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Hello back-end HomeWorks in it-incubator!!!')
@@ -28,5 +31,6 @@ app.delete('/testing/all-data', async (req: Request, res: Response) => {
     await blogsRepository.deleteAll()
     await postsRepository.deleteAll()
     await usersRepository.deleteAll()
+    await commentsRepository.deleteAll()
     res.sendStatus(CodeResponsesEnum.Not_content_204)
 })

@@ -10,13 +10,13 @@ import { userExistedParamValidationMiddleware } from '../assets/express-validato
 import { usersService } from '../services/users-service'
 import { paginationQueries } from '../assets/pagination'
 import { usersRepository } from '../repositores/users-db-repository'
-import { authorizationMiddleware } from '../assets/middlewares/authorization-middleware'
+import { basicAuthorizationMiddleware } from '../middlewares/basic-authorization-middleware'
 
 export const usersRouter = Router({})
 
 usersRouter.get(
     '/',
-    authorizationMiddleware,
+    basicAuthorizationMiddleware,
     async (req: Request, res: Response) => {
         // searchLoginTerm: string, searchEmailTerm: string
         const { pageNumber, pageSize, sortBy, sortDirection } =
@@ -55,7 +55,7 @@ usersRouter.get(
 
 usersRouter.post(
     '/',
-    authorizationMiddleware,
+    basicAuthorizationMiddleware,
     userLoginValidator,
     userPasswordValidator,
     userEmailValidator,
@@ -77,7 +77,7 @@ usersRouter.post(
 
 usersRouter.delete(
     '/:id',
-    authorizationMiddleware,
+    basicAuthorizationMiddleware,
     userExistedParamValidationMiddleware,
     async (req: Request, res: Response) => {
         const id = req.params.id

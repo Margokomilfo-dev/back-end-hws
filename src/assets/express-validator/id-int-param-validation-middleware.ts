@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import { CodeResponsesEnum } from '../../types'
 import { blogsService } from '../../services/blogs-service'
 import { usersService } from '../../services/users-service'
+import { commentsService } from '../../services/comments-service'
 
 export const idIntParamValidationMiddleware = (
     req: Request,
@@ -67,4 +68,31 @@ export const userExistedParamValidationMiddleware = async (
         res.sendStatus(CodeResponsesEnum.Not_found_404)
         return
     }
+}
+
+export const postIdStringParamValidationMiddleware = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const postId = req.params.postId?.toString().trim()
+    if (!postId) {
+        res.sendStatus(CodeResponsesEnum.Not_found_404)
+        return
+    } else next()
+}
+
+export const isMineCommentValidationMiddleware = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const id = req.params.id?.toString().trim()
+    const comment = await commentsService.getCommentById(id)
+
+    if (id && comment && req.userId !== comment.commentatorInfo.userId) {
+        res.sendStatus(CodeResponsesEnum.Forbidden_403)
+        return
+    }
+    next()
 }

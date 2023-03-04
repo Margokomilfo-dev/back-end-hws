@@ -1,9 +1,32 @@
+// @ts-ignore
 import request from 'supertest'
 import { app } from '../src/settings'
 import { CodeResponsesEnum } from '../src/types'
 import { BlogType } from '../src/routes/blogs-router'
 import { PostType } from '../src/routes/posts-router'
 import { UserType } from '../src/repositores/users-db-repository'
+import { CommentType } from '../src/services/comments-service'
+
+export const createUser = async (dto: {
+    login: string
+    email: string
+    password: string
+}): Promise<UserType> => {
+    const result = await request(app)
+        .post('/users/')
+        .set('authorization', 'Basic YWRtaW46cXdlcnR5')
+        .send({
+            login: dto.login,
+            email: dto.email,
+            password: dto.password,
+        })
+        .expect(CodeResponsesEnum.Created_201)
+
+    expect(result.body.email).toBe(dto.email)
+    expect(result.body.login).toBe(dto.login)
+    return result.body
+}
+// {login: 'Dimych', email: 'dimych@gmail.com', password: '123456'}
 
 export const createBlog = async (dto: {
     title: string
@@ -37,20 +60,34 @@ export const createPost = async (
         .expect(CodeResponsesEnum.Created_201)
     return res_.body
 }
-export const createUser = async (dto: {
-    login: string
-    email: string
-    password: string
-}): Promise<UserType> => {
-    const result = await request(app)
-        .post('/users/')
-        .set('authorization', 'Basic YWRtaW46cXdlcnR5')
-        .send({
-            login: dto.login,
-            email: dto.email,
-            password: dto.password,
-        })
+
+export const createComment = async (
+    postId: string,
+    content: string,
+    user: UserType,
+    token: string
+): Promise<CommentType> => {
+    const res_ = await request(app)
+        .post(`/posts/${postId}/comments`)
+        .set('Authorization', `bearer ${token}`)
+        .send({ content })
         .expect(CodeResponsesEnum.Created_201)
-    return result.body
+    expect(res_.body.content).toBe(content)
+    expect(res_.body.commentatorInfo).toEqual({
+        userId: user!.id,
+        userLogin: user!.login,
+    })
+    return res_.body
 }
-// {login: 'Dimych', email: 'dimych@gmail.com', password: '123456'}
+
+export const getTokenPostAuthLogin = async (
+    loginOrEmail: string,
+    password: string
+): Promise<string> => {
+    const res = await request(app)
+        .post('/auth/login')
+        .send({ loginOrEmail, password })
+        .expect(CodeResponsesEnum.Success_200)
+
+    return res.body.accessToken
+}
