@@ -1,4 +1,4 @@
-// @ts-ignore
+import '1'
 
 declare global {
     namespace Express {
