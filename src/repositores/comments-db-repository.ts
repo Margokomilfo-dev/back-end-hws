@@ -21,7 +21,7 @@ export const commentsRepository = {
         sortDirection: string
     ): Promise<CommentType[]> {
         return commentsCollection
-            .find({ postId }, { projection: { _id: 0 } })
+            .find({ postId }, { projection: { _id: 0, postId: 0 } })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
