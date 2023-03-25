@@ -1,5 +1,7 @@
 import { usersRepository, UserType } from '../repositores/users-db-repository'
 import { cryptoService } from './crypto-service'
+import { v4 as uuidv4 } from 'uuid'
+import dateFns from 'date-fns/addMinutes'
 
 export const usersService = {
     async getUsers(
@@ -19,13 +21,24 @@ export const usersService = {
             searchEmailTerm
         )
     },
-
-    // async getUsersCount(): Promise<number> {
-    //     return usersRepository.getUsersCount()
-    // },
-    //
     async getUserById(id: string): Promise<UserType | null> {
         return usersRepository.getUserById(id)
+    },
+    async _getUserById(id: string): Promise<UserType | null> {
+        return usersRepository._getUserById(id)
+    },
+    async getAndUpdateUserByConfirmationCode(
+        code: string
+    ): Promise<UserType | null> {
+        return usersRepository.getAndUpdateUserByConfirmationCode(code)
+    },
+
+    async getUserByConfirmationCode(code: string): Promise<UserType | null> {
+        return usersRepository.getUserByConfirmationCode(code)
+    },
+
+    async updateUserConfirmationCode(id: string): Promise<UserType | null> {
+        return usersRepository.updateUserConfirmationCode(id)
     },
 
     async getUserByLoginOrEmail(
@@ -47,6 +60,11 @@ export const usersService = {
             createdAt: new Date().toISOString(),
             email,
             passwordHash,
+            confirmationData: {
+                data: dateFns(new Date(), 1),
+                isConfirmed: false,
+                code: uuidv4(),
+            },
         }
         return usersRepository.createUser(newUser)
     },

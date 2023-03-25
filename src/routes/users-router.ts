@@ -1,9 +1,9 @@
 import { Request, Response, Router } from 'express'
 import { CodeResponsesEnum } from '../types'
 import {
-    userEmailValidator,
-    userLoginValidator,
-    userPasswordValidator,
+    emailValidator,
+    loginValidator,
+    passwordValidator,
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
 import { userExistedParamValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
@@ -56,9 +56,9 @@ usersRouter.get(
 usersRouter.post(
     '/',
     basicAuthorizationMiddleware,
-    userLoginValidator,
-    userPasswordValidator,
-    userEmailValidator,
+    loginValidator,
+    passwordValidator,
+    emailValidator,
     errorsResultMiddleware,
     async (req: Request, res: Response) => {
         const login = req.body.login

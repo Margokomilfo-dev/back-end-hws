@@ -4,9 +4,11 @@ import request from 'supertest'
 import { app } from '../src/settings'
 import { UserType } from '../src/repositores/users-db-repository'
 import { createUser } from './assets'
+import { usersService } from '../src/services/users-service'
 
 describe('/auth', () => {
-    let user: UserType
+    let user1: UserType
+    let user2: UserType | null
     let token: string
     beforeAll(async () => {
         await request(app).delete('/testing/all-data').expect(204)
@@ -14,7 +16,7 @@ describe('/auth', () => {
 
     describe('POST user', () => {
         it('+ POST create the user with correct data', async function () {
-            user = await createUser({
+            user1 = await createUser({
                 login: 'Dimych',
                 email: 'dimych@gmail.com',
                 password: '123456',
@@ -28,7 +30,120 @@ describe('/auth', () => {
                 .set('authorization', 'Basic YWRtaW46cXdlcnR5')
 
             expect(res.body.items.length).toBe(1)
-            expect(res.body.items[0].id).toBe(user!.id)
+            expect(res.body.items[0].id).toBe(user1!.id)
+        })
+    })
+    describe('POST auth/registration', () => {
+        it('- POST not data of user', async function () {
+            await request(app)
+                .post('/auth/registration')
+                .send({})
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        {
+                            message: 'login is required',
+                            field: 'login',
+                        },
+                        { message: 'password is required', field: 'password' },
+                        { message: 'email is required', field: 'email' },
+                    ],
+                })
+        })
+        it('- POST not correct data of user', async function () {
+            await request(app)
+                .post('/auth/registration')
+                .send({
+                    login: 'admin',
+                    password: 'admin',
+                    email: 'email',
+                })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        {
+                            message: 'password should contain 6 - 20 symbols',
+                            field: 'password',
+                        },
+                        { message: 'not correct', field: 'email' },
+                    ],
+                })
+        })
+        it('+ POST registration', async function () {
+            await request(app)
+                .post('/auth/registration')
+                .send({
+                    login: 'admin',
+                    password: 'admin123',
+                    email: 'margokomilfo.dek@gmail.com',
+                })
+                .expect(CodeResponsesEnum.Not_content_204)
+
+            user2 = await usersService.getUserByLoginOrEmail(
+                'margokomilfo.dek@gmail.com'
+            )
+        })
+    })
+    describe('POST auth/registration-confirmation', () => {
+        it('- POST not code', async function () {
+            await request(app)
+                .post('/auth/registration-confirmation')
+                .send({})
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        { message: 'code is required', field: 'code' },
+                    ],
+                })
+        })
+        it('- POST incorrect code', async function () {
+            await request(app)
+                .post('/auth/registration-confirmation')
+                .send({ code: 'ncksanc-sxnck-casnk' })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        {
+                            message: 'user is not confirmed',
+                            field: 'code',
+                        },
+                    ],
+                })
+        })
+        it('+ POST correct code', async function () {
+            await request(app)
+                .post('/auth/registration-confirmation')
+                .send({ code: user2!.confirmationData.code })
+                .expect(CodeResponsesEnum.Incorrect_values_400)
+                .send({})
+        })
+    })
+    describe('POST auth/registration-email-resending', () => {
+        it('- POST not email', async function () {
+            await request(app)
+                .post('/auth/registration-email-resending')
+                .send({})
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        { message: 'email is required', field: 'email' },
+                    ],
+                })
+        })
+        it('- POST not user with this email', async function () {
+            await request(app)
+                .post('/auth/registration-email-resending')
+                .send({ email: 'hello@email.ru' })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        {
+                            message: 'not user with this email',
+                            field: 'email',
+                        },
+                    ],
+                })
+        })
+
+        it('+ POST correct email', async function () {
+            await request(app)
+                .post('/auth/registration-email-resending')
+                .send({ email: user2!.email })
+                .expect(CodeResponsesEnum.Not_content_204)
         })
     })
 
@@ -67,7 +182,6 @@ describe('/auth', () => {
                 .expect(CodeResponsesEnum.Success_200)
 
             token = res.body.accessToken
-            console.log(token)
             expect(token).toBeDefined()
         })
     })
@@ -88,23 +202,23 @@ describe('/auth', () => {
                 .get('/auth/me')
                 .set('Authorization', `bearer ${token}`)
                 .expect(CodeResponsesEnum.Success_200, {
-                    email: user.email,
-                    login: user.login,
-                    userId: user.id,
+                    email: user1.email,
+                    login: user1.login,
+                    userId: user1.id,
                 })
         })
     })
     describe('DELETE user', () => {
         it('+ DELETE blog deleted with valid id, auth', async () => {
             await request(app)
-                .delete('/users/' + user!.id)
+                .delete('/users/' + user1!.id)
                 .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Not_content_204)
 
             const res = await request(app)
                 .get('/users/')
                 .set('authorization', 'Basic YWRtaW46cXdlcnR5')
-            expect(res.body.items.length).toBe(0)
+            expect(res.body.items.length).toBe(1)
         })
     })
 })
