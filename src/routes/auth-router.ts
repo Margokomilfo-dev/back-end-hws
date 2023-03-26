@@ -77,7 +77,7 @@ authRouter.post(
                      </p>`
             )
         } catch (e) {
-            await usersService.deleteUser(createdUser.id)
+            // await usersService.deleteUser(createdUser.id)
             res.status(CodeResponsesEnum.Incorrect_values_400).send({
                 errorsMessages: [
                     {

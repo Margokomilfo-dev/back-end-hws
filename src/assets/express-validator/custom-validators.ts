@@ -29,7 +29,7 @@ export const _customIsUserValidator = body('email').custom(async (value) => {
         if (!user) {
             throw new Error('not user with this email')
         } else if (user && user.confirmationData.isConfirmed) {
-            throw new Error('user is confirmed')
+            throw new Error('email is already confirmed')
         } else return true
     }
     return true

@@ -79,14 +79,12 @@ describe('/comments', () => {
                 user!,
                 token!
             )
-            console.log('comment:', comment)
             comment1 = await createComment(
                 newPost!.id,
                 'comment from Natali Natali Natali Natali Natali',
                 user1!,
                 token1!
             )
-            console.log('comment1:', comment1)
         })
         it('- GET/:id', async () => {
             await request(app)

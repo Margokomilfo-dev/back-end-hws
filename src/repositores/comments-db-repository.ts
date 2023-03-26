@@ -33,12 +33,10 @@ export const commentsRepository = {
     },
 
     async updateComment(id: string, content: string): Promise<boolean> {
-        console.log('id, content', id, content)
         const res = await commentsCollection.updateOne(
             { id },
             { $set: { content } }
         )
-        console.log('res.matchedCount:', res.matchedCount)
         return res.matchedCount === 1
     },
 
