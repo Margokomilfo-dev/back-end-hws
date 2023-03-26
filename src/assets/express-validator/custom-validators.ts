@@ -16,7 +16,7 @@ export const _customUserValidator = body('code').custom(async (value) => {
     if (value && typeof value === 'string' && value.trim()) {
         const user = await usersService.getUserByLoginOrEmail(value)
         if (!user) {
-            throw new Error('user is not confirmed')
+            throw new Error('user in not found')
         } else return true
     }
     return true
