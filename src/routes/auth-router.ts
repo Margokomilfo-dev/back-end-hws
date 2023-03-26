@@ -1,11 +1,11 @@
 import { Request, Response, Router } from 'express'
 import { CodeResponsesEnum } from '../types'
 import {
-    userLoginOrEmailValidator,
-    passwordValidator,
-    loginValidator,
-    emailValidator,
     codeValidator,
+    emailValidator,
+    loginValidator,
+    passwordValidator,
+    userLoginOrEmailValidator,
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
 import { authService } from '../services/auth-service'
@@ -17,6 +17,7 @@ import {
     _customIsUserValidator,
     _customUserValidator,
 } from '../assets/express-validator/custom-validators'
+import { isLoginOrEmailExistsValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
 
 export const authRouter = Router({})
 
@@ -44,6 +45,7 @@ authRouter.post(
     loginValidator,
     passwordValidator,
     emailValidator,
+    isLoginOrEmailExistsValidationMiddleware,
     errorsResultMiddleware,
     async (req: Request, res: Response) => {
         const login = req.body.login

@@ -52,6 +52,11 @@ export const usersService = {
         email: string,
         password: string
     ): Promise<UserType | null> {
+        const getUser1 = await usersRepository.getUserByLoginOrEmail(login)
+        const getUser2 = await usersRepository.getUserByLoginOrEmail(email)
+        if (getUser1 || getUser2) {
+            return null
+        }
         const salt = await cryptoService._generateSalt()
         const passwordHash = await cryptoService._generateHash(password, salt)
         const newUser: UserType = {

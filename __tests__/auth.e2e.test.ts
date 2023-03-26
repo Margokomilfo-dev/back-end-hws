@@ -81,6 +81,35 @@ describe('/auth', () => {
                 'margokomilfo.dek@gmail.com'
             )
         })
+        it('- POST not created with the same data of user', async function () {
+            await request(app)
+                .post('/auth/registration')
+                .send({
+                    login: 'admin',
+                    password: 'admin123',
+                    email: 'margokomilfo.dek@gmail.com',
+                })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        { message: 'login is already exist', field: 'login' },
+                        { message: 'email is already exist', field: 'email' },
+                    ],
+                })
+        })
+        it('- POST not created with the same login of user', async function () {
+            await request(app)
+                .post('/auth/registration')
+                .send({
+                    login: 'admin',
+                    password: 'admin123',
+                    email: 'margokomilfo@gmail.com',
+                })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        { message: 'login is already exist', field: 'login' },
+                    ],
+                })
+        })
     })
     describe('POST auth/registration-confirmation', () => {
         it('- POST not code', async function () {

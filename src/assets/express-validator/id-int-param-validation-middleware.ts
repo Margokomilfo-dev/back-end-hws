@@ -96,3 +96,50 @@ export const isMineCommentValidationMiddleware = async (
     }
     next()
 }
+
+export const isLoginOrEmailExistsValidationMiddleware = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const isUser1 = await usersService.getUserByLoginOrEmail(req.body.login)
+    const isUser2 = await usersService.getUserByLoginOrEmail(req.body.email)
+    if (isUser1 && !isUser2) {
+        res.status(CodeResponsesEnum.Incorrect_values_400).send({
+            errorsMessages: [
+                {
+                    message: 'login is already exist',
+                    field: 'login',
+                },
+            ],
+        })
+        return
+    }
+    if (!isUser1 && isUser2) {
+        res.status(CodeResponsesEnum.Incorrect_values_400).send({
+            errorsMessages: [
+                {
+                    message: 'email is already exist',
+                    field: 'email',
+                },
+            ],
+        })
+        return
+    }
+    if (isUser1 && isUser2) {
+        res.status(CodeResponsesEnum.Incorrect_values_400).send({
+            errorsMessages: [
+                {
+                    message: 'login is already exist',
+                    field: 'login',
+                },
+                {
+                    message: 'email is already exist',
+                    field: 'email',
+                },
+            ],
+        })
+        return
+    }
+    next()
+}
