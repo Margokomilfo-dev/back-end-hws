@@ -113,27 +113,24 @@ authRouter.post(
     async (req: Request, res: Response) => {
         const email = req.body.email
         const user = await usersService.getUserByLoginOrEmail(email)
-        const full_user = await usersService._getUserById(user!.id)
+        const updatedUser = await usersService.updateUserConfirmationCode(
+            user!.id
+        )
+        if (!updatedUser) {
+            res.sendStatus(405)
+            return
+        }
         try {
             await emailService.sendEmail(
                 email,
                 'Email resending confirmation',
                 `<h1>Email resending confirmation</h1>
                      <p>To finish email resending please follow the link below:
-                         <a href='https://hellosite.com/resending-email?code=${
-                             full_user!.confirmationData.code
-                         }'>complete changing your email</a>
+                         <a href='https://hellosite.com/resending-email?code=${updatedUser.confirmationData.code}'>complete changing your email</a>
                      </p>`
             )
         } catch (e) {
             res.sendStatus(406)
-            return
-        }
-        const updatedUser = await usersService.updateUserConfirmationCode(
-            user!.id
-        )
-        if (!updatedUser) {
-            res.sendStatus(405)
             return
         }
         res.sendStatus(CodeResponsesEnum.Not_content_204)

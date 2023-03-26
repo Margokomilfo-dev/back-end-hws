@@ -128,10 +128,7 @@ describe('/auth', () => {
                 .send({ code: 'ncksanc-sxnck-casnk' })
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
-                        {
-                            message: 'user is not confirmed',
-                            field: 'code',
-                        },
+                        { message: 'user in not found', field: 'code' },
                     ],
                 })
         })

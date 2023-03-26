@@ -25,6 +25,7 @@ export const _customUserValidator = body('code').custom(async (value) => {
 export const _customIsUserValidator = body('email').custom(async (value) => {
     if (value && typeof value === 'string' && value.trim()) {
         const user = await usersService.getUserByLoginOrEmail(value)
+        console.log('user in validator:', user)
         if (!user) {
             throw new Error('not user with this email')
         } else if (user && user.confirmationData.isConfirmed) {
