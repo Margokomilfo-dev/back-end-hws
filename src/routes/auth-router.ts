@@ -76,9 +76,15 @@ authRouter.post(
             )
         } catch (e) {
             await usersService.deleteUser(createdUser.id)
-            res.status(CodeResponsesEnum.Incorrect_values_400).send(
-                'сообщение не отправилось на почту, попробуй произвести регистрацию на другой почтовый адрес'
-            )
+            res.status(CodeResponsesEnum.Incorrect_values_400).send({
+                errorsMessages: [
+                    {
+                        message:
+                            'сообщение не отправилось на почту, попробуй произвести регистрацию на другой почтовый адрес',
+                        field: 'email',
+                    },
+                ],
+            })
             return
         }
 
