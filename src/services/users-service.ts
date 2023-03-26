@@ -66,7 +66,7 @@ export const usersService = {
             email,
             passwordHash,
             confirmationData: {
-                data: dateFns(new Date(), 1),
+                data: dateFns(new Date(), 10),
                 isConfirmed: false,
                 code: uuidv4(),
             },

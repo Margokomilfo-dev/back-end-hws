@@ -84,7 +84,7 @@ export const usersRepository = {
         })
     },
     async updateUserConfirmationCode(id: string): Promise<UserType | null> {
-        const res = await usersCollection.findOneAndUpdate(
+        await usersCollection.findOneAndUpdate(
             { id },
             {
                 $set: {
@@ -93,7 +93,7 @@ export const usersRepository = {
                 },
             }
         )
-        return res.value
+        return usersCollection.findOne({ id })
     },
     async getUserByLoginOrEmail(loginOrEmail: string) {
         return usersCollection.findOne({
