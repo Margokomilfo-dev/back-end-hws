@@ -27,6 +27,8 @@ export const _customIsUserValidator = body('email').custom(async (value) => {
         const user = await usersService.getUserByLoginOrEmail(value)
         if (!user) {
             throw new Error('not user with this email')
+        } else if (user && user.confirmationData.isConfirmed) {
+            throw new Error('user is confirmed')
         } else return true
     }
     return true
