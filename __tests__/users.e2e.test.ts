@@ -16,9 +16,7 @@ describe('/users', () => {
 
     describe('GET', () => {
         it('- GET users not authorized', async () => {
-            await request(app)
-                .get('/users/')
-                .expect(CodeResponsesEnum.Not_Authorized_401)
+            await request(app).get('/users/').expect(CodeResponsesEnum.Not_Authorized_401)
         })
         it('+ GET users = [] authorized', async () => {
             const res_ = await request(app)
@@ -31,10 +29,7 @@ describe('/users', () => {
 
     describe('POST', () => {
         it('- POST does not create the user (no authorized)', async function () {
-            await request(app)
-                .post('/users/')
-                .send({})
-                .expect(CodeResponsesEnum.Not_Authorized_401)
+            await request(app).post('/users/').send({}).expect(CodeResponsesEnum.Not_Authorized_401)
             const res = await request(app)
                 .get('/users/')
                 .set('authorization', 'Basic YWRtaW46cXdlcnR5')
@@ -155,9 +150,7 @@ describe('/users', () => {
         })
         it('+ GET users - pagination pageNumber=1, pageSize=10, sortBy=id, sortDirection=asc', async () => {
             const res_ = await request(app)
-                .get(
-                    '/users?pageNumber=1&pageSize=10&sortBy=id&sortDirection=asc'
-                )
+                .get('/users?pageNumber=1&pageSize=10&sortBy=id&sortDirection=asc')
                 .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Success_200)
             expect(res_.body.items.length).toBe(3)
@@ -169,9 +162,7 @@ describe('/users', () => {
         })
         it('+ GET users - pagination pageNumber=1, pageSize=10, sortBy=id, sortDirection=desc', async () => {
             const res_ = await request(app)
-                .get(
-                    '/users?pageNumber=1&pageSize=10&sortBy=id&sortDirection=desc'
-                )
+                .get('/users?pageNumber=1&pageSize=10&sortBy=id&sortDirection=desc')
                 .set('authorization', 'Basic YWRtaW46cXdlcnR5')
                 .expect(CodeResponsesEnum.Success_200)
             expect(res_.body.items.length).toBe(3)

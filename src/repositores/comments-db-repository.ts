@@ -7,10 +7,7 @@ export const commentsRepository = {
         return this.getCommentById(comment.id)
     },
     async getCommentById(id: string): Promise<CommentType | null> {
-        return commentsCollection.findOne(
-            { id },
-            { projection: { _id: 0, postId: 0 } }
-        )
+        return commentsCollection.findOne({ id }, { projection: { _id: 0, postId: 0 } })
     },
 
     async getCommentsByPostId(
@@ -33,10 +30,7 @@ export const commentsRepository = {
     },
 
     async updateComment(id: string, content: string): Promise<boolean> {
-        const res = await commentsCollection.updateOne(
-            { id },
-            { $set: { content } }
-        )
+        const res = await commentsCollection.updateOne({ id }, { $set: { content } })
         return res.matchedCount === 1
     },
 

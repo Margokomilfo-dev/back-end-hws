@@ -23,15 +23,9 @@ import { bearerAuthorizationMiddleware } from '../middlewares/bearer-authorizati
 export const postsRouter = Router({})
 
 postsRouter.get('/', async (req: Request, res: Response) => {
-    const { pageNumber, pageSize, sortBy, sortDirection } =
-        paginationQueries(req)
+    const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
 
-    const posts = await postsService.getPosts(
-        pageNumber,
-        pageSize,
-        sortBy,
-        sortDirection
-    )
+    const posts = await postsService.getPosts(pageNumber, pageSize, sortBy, sortDirection)
     const postsCount = await postsService.getPostsCount()
 
     const result = {
@@ -48,8 +42,7 @@ postsRouter.get(
     '/:postId/comments',
     postIdStringParamValidationMiddleware,
     async (req: Request, res: Response) => {
-        const { pageNumber, pageSize, sortBy, sortDirection } =
-            paginationQueries(req)
+        const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
         const postId = req.params.postId.toString().trim()
         const post = await postsService.getPostById(postId)
         if (!post) {
@@ -63,9 +56,7 @@ postsRouter.get(
             sortBy,
             sortDirection
         )
-        const commentsCount = await commentsService.getCommentsCountByPostId(
-            postId
-        )
+        const commentsCount = await commentsService.getCommentsCountByPostId(postId)
 
         const result = {
             pagesCount: Math.ceil(commentsCount / pageSize),

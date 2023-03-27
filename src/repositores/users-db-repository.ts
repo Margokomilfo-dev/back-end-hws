@@ -62,9 +62,7 @@ export const usersRepository = {
         return usersCollection.findOne({ id })
     },
 
-    async getAndUpdateUserByConfirmationCode(
-        code: string
-    ): Promise<UserType | null> {
+    async getAndUpdateUserByConfirmationCode(code: string): Promise<UserType | null> {
         const res = await usersCollection.findOneAndUpdate(
             {
                 $and: [

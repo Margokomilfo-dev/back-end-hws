@@ -5,9 +5,7 @@ export const paginationQueries = (req: Request) => {
     let pageSize = req.query.pageSize ? +req.query.pageSize : 10
     let sortBy = req.query.sortBy ? req.query.sortBy.toString() : 'createdAt'
     let sortDirection =
-        req.query.sortDirection && req.query.sortDirection.toString() === 'asc'
-            ? 'asc'
-            : 'desc'
+        req.query.sortDirection && req.query.sortDirection.toString() === 'asc' ? 'asc' : 'desc'
 
     return { pageNumber, pageSize, sortBy, sortDirection }
 }

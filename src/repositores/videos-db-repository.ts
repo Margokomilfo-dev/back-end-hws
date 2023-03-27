@@ -13,10 +13,7 @@ export const videosRepository = {
         return this.getVideoById(newVideo.id)
     },
     async updateVideo(id: number, body: any): Promise<boolean> {
-        const res = await videosCollection.updateOne(
-            { id },
-            { $set: { ...body } }
-        )
+        const res = await videosCollection.updateOne({ id }, { $set: { ...body } })
         return res.matchedCount === 1
     },
 

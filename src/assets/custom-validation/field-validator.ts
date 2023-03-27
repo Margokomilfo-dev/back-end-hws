@@ -88,10 +88,7 @@ export const publicationDateFieldValidator = (
     publicationDate: any | undefined,
     errorsArray: Array<{ field: string; message: string }>
 ) => {
-    if (
-        publicationDate &&
-        publicationDate.toString() == parseInt(publicationDate).toString()
-    ) {
+    if (publicationDate && publicationDate.toString() == parseInt(publicationDate).toString()) {
         errorsArray.push({
             field: 'publicationDate',
             message: 'not correct',

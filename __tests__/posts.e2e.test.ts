@@ -5,12 +5,7 @@ import { CodeResponsesEnum } from '../src/types'
 import { PostType } from '../src/routes/posts-router'
 import { app } from '../src/settings'
 import { BlogType } from '../src/routes/blogs-router'
-import {
-    createBlog,
-    createPost,
-    createUser,
-    getTokenPostAuthLogin,
-} from './assets'
+import { createBlog, createPost, createUser, getTokenPostAuthLogin } from './assets'
 import { UserType } from '../src/repositores/users-db-repository'
 import { CommentType } from '../src/services/comments-service'
 
@@ -168,9 +163,7 @@ describe('/posts', () => {
                 email: 'dimych@gmail.com',
                 password: '123456',
             })
-            await request(app)
-                .get('/users/')
-                .set('authorization', 'Basic YWRtaW46cXdlcnR5')
+            await request(app).get('/users/').set('authorization', 'Basic YWRtaW46cXdlcnR5')
         })
         it('POST auth/login - get token', async () => {
             token = await getTokenPostAuthLogin('Dimych', '123456')
@@ -228,9 +221,7 @@ describe('/posts', () => {
                     content: 'content should contain 20 - 300 symbols',
                 })
                 .expect(CodeResponsesEnum.Created_201)
-            expect(res_.body.content).toBe(
-                'content should contain 20 - 300 symbols'
-            )
+            expect(res_.body.content).toBe('content should contain 20 - 300 symbols')
             expect(res_.body.commentatorInfo).toEqual({
                 userId: user!.id,
                 userLogin: user!.login,
@@ -253,14 +244,10 @@ describe('/posts', () => {
     })
     describe('GET:id', () => {
         it('- GET:id post by ID with incorrect id', async () => {
-            await request(app)
-                .get('/posts/182018')
-                .expect(CodeResponsesEnum.Not_found_404)
+            await request(app).get('/posts/182018').expect(CodeResponsesEnum.Not_found_404)
         })
         it('- GET:id post by ID with incorrect id', async () => {
-            await request(app)
-                .get('/posts/helloWorld')
-                .expect(CodeResponsesEnum.Not_found_404)
+            await request(app).get('/posts/helloWorld').expect(CodeResponsesEnum.Not_found_404)
         })
         it('+ GET:id post by ID with correct id', async () => {
             await request(app)
@@ -270,9 +257,7 @@ describe('/posts', () => {
     })
     describe('GET', () => {
         it('+ GET posts - pagination pageNumber=1, pageSize=10, sortBy=createdAt(default), sortDirection=desc(default)', async () => {
-            const res_ = await request(app)
-                .get('/posts/')
-                .expect(CodeResponsesEnum.Success_200)
+            const res_ = await request(app).get('/posts/').expect(CodeResponsesEnum.Success_200)
             expect(res_.body.items.length).toBe(2)
             expect(res_.body.pagesCount).toBe(1)
             expect(res_.body.pageSize).toBe(10)
@@ -291,9 +276,7 @@ describe('/posts', () => {
         })
         it('+ GET posts - pagination pageNumber=1, pageSize=10, sortBy=id, sortDirection=asc', async () => {
             const res_ = await request(app)
-                .get(
-                    '/posts?pageNumber=1&pageSize=10&sortBy=id&sortDirection=asc'
-                )
+                .get('/posts?pageNumber=1&pageSize=10&sortBy=id&sortDirection=asc')
                 .expect(CodeResponsesEnum.Success_200)
             expect(res_.body.items.length).toBe(2)
             expect(res_.body.pagesCount).toBe(1)
@@ -304,9 +287,7 @@ describe('/posts', () => {
         })
         it('+ GET posts - pagination pageNumber=1, pageSize=10, sortBy=id, sortDirection=desc', async () => {
             const res_ = await request(app)
-                .get(
-                    '/posts?pageNumber=1&pageSize=10&sortBy=id&sortDirection=desc'
-                )
+                .get('/posts?pageNumber=1&pageSize=10&sortBy=id&sortDirection=desc')
                 .expect(CodeResponsesEnum.Success_200)
             expect(res_.body.items.length).toBe(2)
             expect(res_.body.pagesCount).toBe(1)
@@ -411,9 +392,7 @@ describe('/posts', () => {
     })
     describe('DELETE', () => {
         it('- DELETE post by incorrect ID, not auth', async () => {
-            await request(app)
-                .delete('/posts/1kcnsdk')
-                .expect(CodeResponsesEnum.Not_Authorized_401)
+            await request(app).delete('/posts/1kcnsdk').expect(CodeResponsesEnum.Not_Authorized_401)
 
             const res = await request(app).get('/posts/')
             expect(res.body.items.length).toBe(2)

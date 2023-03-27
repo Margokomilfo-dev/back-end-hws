@@ -77,9 +77,7 @@ describe('/auth', () => {
                 })
                 .expect(CodeResponsesEnum.Not_content_204)
 
-            user2 = await usersService.getUserByLoginOrEmail(
-                'margokomilfo.dek@gmail.com'
-            )
+            user2 = await usersService.getUserByLoginOrEmail('margokomilfo.dek@gmail.com')
         })
         it('- POST not created with the same data of user', async function () {
             await request(app)
@@ -105,39 +103,8 @@ describe('/auth', () => {
                     email: 'margokomilfo@gmail.com',
                 })
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
-                    errorsMessages: [
-                        { message: 'login is already exist', field: 'login' },
-                    ],
+                    errorsMessages: [{ message: 'login is already exist', field: 'login' }],
                 })
-        })
-    })
-    describe('POST auth/registration-confirmation', () => {
-        it('- POST not code', async function () {
-            await request(app)
-                .post('/auth/registration-confirmation')
-                .send({})
-                .expect(CodeResponsesEnum.Incorrect_values_400, {
-                    errorsMessages: [
-                        { message: 'code is required', field: 'code' },
-                    ],
-                })
-        })
-        it('- POST incorrect code', async function () {
-            await request(app)
-                .post('/auth/registration-confirmation')
-                .send({ code: 'ncksanc-sxnck-casnk' })
-                .expect(CodeResponsesEnum.Incorrect_values_400, {
-                    errorsMessages: [
-                        { message: 'user in not found', field: 'code' },
-                    ],
-                })
-        })
-        it('+ POST correct code', async function () {
-            await request(app)
-                .post('/auth/registration-confirmation')
-                .send({ code: user2!.confirmationData.code })
-                .expect(CodeResponsesEnum.Incorrect_values_400)
-                .send({})
         })
     })
     describe('POST auth/registration-email-resending', () => {
@@ -146,9 +113,7 @@ describe('/auth', () => {
                 .post('/auth/registration-email-resending')
                 .send({})
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
-                    errorsMessages: [
-                        { message: 'email is required', field: 'email' },
-                    ],
+                    errorsMessages: [{ message: 'email is required', field: 'email' }],
                 })
         })
         it('- POST not user with this email', async function () {
@@ -169,6 +134,32 @@ describe('/auth', () => {
             await request(app)
                 .post('/auth/registration-email-resending')
                 .send({ email: user2!.email })
+                .expect(CodeResponsesEnum.Not_content_204)
+
+            user2 = await usersService.getUserByLoginOrEmail('margokomilfo.dek@gmail.com')
+        })
+    })
+    describe('POST auth/registration-confirmation', () => {
+        it('- POST not code', async function () {
+            await request(app)
+                .post('/auth/registration-confirmation')
+                .send({})
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [{ message: 'code is required', field: 'code' }],
+                })
+        })
+        it('- POST incorrect code', async function () {
+            await request(app)
+                .post('/auth/registration-confirmation')
+                .send({ code: 'ncksanc-sxnck-casnk' })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [{ message: 'user in not found', field: 'code' }],
+                })
+        })
+        it('+ POST correct code', async function () {
+            await request(app)
+                .post('/auth/registration-confirmation')
+                .send({ code: user2!.confirmationData.code })
                 .expect(CodeResponsesEnum.Not_content_204)
         })
     })
@@ -213,9 +204,7 @@ describe('/auth', () => {
     })
     describe('GET auth/me', () => {
         it('- GET no user (no token)', async function () {
-            await request(app)
-                .get('/auth/me')
-                .expect(CodeResponsesEnum.Not_Authorized_401)
+            await request(app).get('/auth/me').expect(CodeResponsesEnum.Not_Authorized_401)
         })
         it('- GET no user (bad token, no data)', async function () {
             await request(app)

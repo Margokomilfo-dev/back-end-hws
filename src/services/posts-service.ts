@@ -8,12 +8,7 @@ export const postsService = {
         sortBy: string,
         sortDirection: string
     ): Promise<PostType[]> {
-        return postsRepository.getPosts(
-            pageNumber,
-            pageSize,
-            sortBy,
-            sortDirection
-        )
+        return postsRepository.getPosts(pageNumber, pageSize, sortBy, sortDirection)
     },
 
     async getPostsCount(): Promise<number> {
@@ -30,13 +25,7 @@ export const postsService = {
         sortBy: string,
         sortDirection: string
     ): Promise<PostType[]> {
-        return postsRepository.getPostsByBlogId(
-            blogId,
-            pageNumber,
-            pageSize,
-            sortBy,
-            sortDirection
-        )
+        return postsRepository.getPostsByBlogId(blogId, pageNumber, pageSize, sortBy, sortDirection)
     },
 
     async getPostsCountByBlogId(blogId: string): Promise<number> {

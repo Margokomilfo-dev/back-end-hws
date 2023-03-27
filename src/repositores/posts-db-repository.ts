@@ -51,10 +51,7 @@ export const postsRepository = {
             shortDescription: string
         }
     ): Promise<boolean> {
-        const ourPost = await postsCollection.updateOne(
-            { id },
-            { $set: { ...body } }
-        )
+        const ourPost = await postsCollection.updateOne({ id }, { $set: { ...body } })
         return ourPost.matchedCount === 1
     },
 

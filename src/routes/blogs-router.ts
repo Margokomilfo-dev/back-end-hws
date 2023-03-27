@@ -22,12 +22,9 @@ import { paginationQueries } from '../assets/pagination'
 export const blogsRouter = Router({})
 
 blogsRouter.get('/', async (req: Request, res: Response) => {
-    const { pageNumber, pageSize, sortBy, sortDirection } =
-        paginationQueries(req)
+    const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
 
-    let searchNameTerm = req.query.searchNameTerm
-        ? req.query.searchNameTerm.toString()
-        : null
+    let searchNameTerm = req.query.searchNameTerm ? req.query.searchNameTerm.toString() : null
 
     const blogs = await blogsService.getBlogs(
         pageNumber,
@@ -59,11 +56,7 @@ blogsRouter.post(
         const description = req.body.description
         const websiteUrl = req.body.websiteUrl
 
-        const newBlog = await blogsService.createBlog(
-            name,
-            description,
-            websiteUrl
-        )
+        const newBlog = await blogsService.createBlog(name, description, websiteUrl)
 
         if (newBlog) {
             res.status(CodeResponsesEnum.Created_201).send(newBlog) //если сделать sendStatus - не дойдем до send
@@ -102,27 +95,22 @@ blogsRouter.post(
 )
 
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
-blogsRouter.get(
-    '/:id',
-    idStringParamValidationMiddleware,
-    async (req: Request, res: Response) => {
-        const id = req.params.id
+blogsRouter.get('/:id', idStringParamValidationMiddleware, async (req: Request, res: Response) => {
+    const id = req.params.id
 
-        const blog = await blogsService.getBlogById(id)
-        if (blog) {
-            res.status(CodeResponsesEnum.Success_200).send(blog)
-        } else {
-            res.sendStatus(CodeResponsesEnum.Not_found_404)
-        }
+    const blog = await blogsService.getBlogById(id)
+    if (blog) {
+        res.status(CodeResponsesEnum.Success_200).send(blog)
+    } else {
+        res.sendStatus(CodeResponsesEnum.Not_found_404)
     }
-)
+})
 
 blogsRouter.get(
     '/:blogId/posts',
     blogIdStringParamValidationMiddleware,
     async (req: Request, res: Response) => {
-        const { pageNumber, pageSize, sortBy, sortDirection } =
-            paginationQueries(req)
+        const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
 
         const id = req.params.blogId
 

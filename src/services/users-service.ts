@@ -27,9 +27,7 @@ export const usersService = {
     async _getUserById(id: string): Promise<UserType | null> {
         return usersRepository._getUserById(id)
     },
-    async getAndUpdateUserByConfirmationCode(
-        code: string
-    ): Promise<UserType | null> {
+    async getAndUpdateUserByConfirmationCode(code: string): Promise<UserType | null> {
         return usersRepository.getAndUpdateUserByConfirmationCode(code)
     },
 
@@ -41,17 +39,11 @@ export const usersService = {
         return usersRepository.updateUserConfirmationCode(id)
     },
 
-    async getUserByLoginOrEmail(
-        loginOrEmail: string
-    ): Promise<UserType | null> {
+    async getUserByLoginOrEmail(loginOrEmail: string): Promise<UserType | null> {
         return usersRepository.getUserByLoginOrEmail(loginOrEmail)
     },
 
-    async createUser(
-        login: string,
-        email: string,
-        password: string
-    ): Promise<UserType | null> {
+    async createUser(login: string, email: string, password: string): Promise<UserType | null> {
         const getUser1 = await usersRepository.getUserByLoginOrEmail(login)
         const getUser2 = await usersRepository.getUserByLoginOrEmail(email)
         if (getUser1 || getUser2) {

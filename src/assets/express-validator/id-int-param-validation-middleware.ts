@@ -4,11 +4,7 @@ import { blogsService } from '../../services/blogs-service'
 import { usersService } from '../../services/users-service'
 import { commentsService } from '../../services/comments-service'
 
-export const idIntParamValidationMiddleware = (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const idIntParamValidationMiddleware = (req: Request, res: Response, next: NextFunction) => {
     //if NaN - return !id === false
     if (req.params.id && parseInt(req.params.id)) {
         next()

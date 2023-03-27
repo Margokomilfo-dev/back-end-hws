@@ -22,9 +22,7 @@ export const videosService = {
             minAgeRestriction: null, //maximum: 18, minimum: 1, default: null, nullable: true - null - no restriction
             createdAt: new Date().toISOString(),
             publicationDate: addDays(new Date(), 1).toISOString(), //By default - +1 day from CreatedAt
-            availableResolutions: availableResolutions
-                ? availableResolutions
-                : null,
+            availableResolutions: availableResolutions ? availableResolutions : null,
         }
         return videosRepository.createVideo(newVideo)
     },

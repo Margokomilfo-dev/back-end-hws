@@ -5,13 +5,7 @@ import { CodeResponsesEnum } from '../src/types'
 import { PostType } from '../src/routes/posts-router'
 import { app } from '../src/settings'
 import { BlogType } from '../src/routes/blogs-router'
-import {
-    createBlog,
-    createComment,
-    createPost,
-    createUser,
-    getTokenPostAuthLogin,
-} from './assets'
+import { createBlog, createComment, createPost, createUser, getTokenPostAuthLogin } from './assets'
 import { UserType } from '../src/repositores/users-db-repository'
 import { CommentType } from '../src/services/comments-service'
 
@@ -87,9 +81,7 @@ describe('/comments', () => {
             )
         })
         it('- GET/:id', async () => {
-            await request(app)
-                .get('/comments/2324')
-                .expect(CodeResponsesEnum.Not_found_404)
+            await request(app).get('/comments/2324').expect(CodeResponsesEnum.Not_found_404)
         })
         it('+ GET/:id', async () => {
             const res = await request(app).get('/comments/' + comment!.id)
@@ -98,18 +90,14 @@ describe('/comments', () => {
     })
     describe('PUT/:id', () => {
         it('- PUT/:id no auth', async () => {
-            await request(app)
-                .put('/comments/2324')
-                .expect(CodeResponsesEnum.Not_Authorized_401)
+            await request(app).put('/comments/2324').expect(CodeResponsesEnum.Not_Authorized_401)
         })
         it('- PUT/:id auth, not correct id', async () => {
             await request(app)
                 .put('/comments/2324')
                 .set('Authorization', `bearer ${token}`)
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
-                    errorsMessages: [
-                        { message: 'content is required', field: 'content' },
-                    ],
+                    errorsMessages: [{ message: 'content is required', field: 'content' }],
                 })
         })
         it('- PUT/:id auth, not correct id', async () => {
@@ -134,9 +122,7 @@ describe('/comments', () => {
                 .expect(CodeResponsesEnum.Not_content_204)
 
             const res_ = await request(app).get('/comments/' + comment!.id)
-            expect(res_.body.content).toBe(
-                'contentik contentik contentik contentik'
-            )
+            expect(res_.body.content).toBe('contentik contentik contentik contentik')
         })
     })
     describe('DELETE', () => {

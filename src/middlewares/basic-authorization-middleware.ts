@@ -3,11 +3,7 @@ import { CodeResponsesEnum } from '../types'
 
 //1
 
-export const basicAuthorizationMiddleware = (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const basicAuthorizationMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const credentials = {
         login: 'admin',
         password: 'qwerty',

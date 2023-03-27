@@ -50,9 +50,7 @@ export const blogWebsiteUrlValidator = body('websiteUrl')
     .withMessage('websiteUrl is required')
     .isLength({ min: 2, max: 100 })
     .withMessage('websiteUrl should contain 2 - 100 symbols')
-    .matches(
-        /^https:\/\/([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/
-    )
+    .matches(/^https:\/\/([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/)
     .withMessage('not correct')
 
 export const postTitleValidator = body('title')

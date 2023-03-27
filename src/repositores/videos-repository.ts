@@ -39,9 +39,7 @@ export const videosRepository = {
         if (!ourVideo) {
             return false
         }
-        videos = videos.map((video) =>
-            video.id === id ? { ...video, ...body } : video
-        )
+        videos = videos.map((video) => (video.id === id ? { ...video, ...body } : video))
         return true
     },
     async deleteVideo(id: number): Promise<boolean> {

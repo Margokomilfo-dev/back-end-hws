@@ -12,7 +12,6 @@ import { authService } from '../services/auth-service'
 import { bearerAuthorizationMiddleware } from '../middlewares/bearer-authorization-middleware'
 import { jwtService } from '../services/jwt-service'
 import { usersService } from '../services/users-service'
-import { emailService } from '../services/email-service'
 import {
     _customIsUserValidator,
     _customUserValidator,
@@ -52,11 +51,7 @@ authRouter.post(
         const password = req.body.password
         const email = req.body.email
 
-        const createdUser = await usersService.createUser(
-            login,
-            email,
-            password
-        )
+        const createdUser = await usersService.createUser(login, email, password)
 
         if (!createdUser) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
@@ -67,17 +62,8 @@ authRouter.post(
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
         }
-        try {
-            await emailService.sendEmail(
-                email,
-                'Registration confirmation',
-                `<h1>Thank for your registration</h1>
-                     <p>To finish registration please follow the link below:
-                         <a href='https://hellosite.com/confirm-email?code=${user.confirmationData.code}'>complete registration</a>
-                     </p>`
-            )
-        } catch (e) {
-            // await usersService.deleteUser(createdUser.id)
+        const sendEmail = await authService.registrationSendEmail(email, user.confirmationData.code)
+        if (!sendEmail) {
             res.status(CodeResponsesEnum.Incorrect_values_400).send({
                 errorsMessages: [
                     {
@@ -113,23 +99,13 @@ authRouter.post(
     async (req: Request, res: Response) => {
         const email = req.body.email
         const user = await usersService.getUserByLoginOrEmail(email)
-        const updatedUser = await usersService.updateUserConfirmationCode(
-            user!.id
-        )
-        if (!updatedUser) {
+        const updUser = await usersService.updateUserConfirmationCode(user!.id)
+        if (!updUser) {
             res.sendStatus(405)
             return
         }
-        try {
-            await emailService.sendEmail(
-                email,
-                'Email resending confirmation',
-                `<h1>Email resending confirmation</h1>
-                     <p>To finish email resending please follow the link below:
-                         <a href='https://hellosite.com/resending-email?code=${updatedUser.confirmationData.code}'>complete changing your email</a>
-                     </p>`
-            )
-        } catch (e) {
+        const sendEmail = await authService.resendingEmail(email, updUser.confirmationData.code)
+        if (!sendEmail) {
             res.sendStatus(406)
             return
         }
@@ -137,18 +113,16 @@ authRouter.post(
     }
 )
 
-authRouter.get(
-    '/me',
-    bearerAuthorizationMiddleware,
-    async (req: Request, res: Response) => {
-        const user = await usersService.getUserById(req.userId!)
-        if (!user) {
-            res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
-        } else
-            res.status(CodeResponsesEnum.Success_200).send({
-                email: user.email,
-                login: user.login,
-                userId: user.id,
-            })
+authRouter.get('/me', bearerAuthorizationMiddleware, async (req: Request, res: Response) => {
+    const user = await usersService.getUserById(req.userId!)
+    if (!user) {
+        res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
+        return
     }
-)
+    const { id, email, login } = user
+    res.status(CodeResponsesEnum.Success_200).send({
+        email,
+        login,
+        userId: id,
+    })
+})

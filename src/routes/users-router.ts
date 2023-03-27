@@ -14,44 +14,32 @@ import { basicAuthorizationMiddleware } from '../middlewares/basic-authorization
 
 export const usersRouter = Router({})
 
-usersRouter.get(
-    '/',
-    basicAuthorizationMiddleware,
-    async (req: Request, res: Response) => {
-        // searchLoginTerm: string, searchEmailTerm: string
-        const { pageNumber, pageSize, sortBy, sortDirection } =
-            paginationQueries(req)
+usersRouter.get('/', basicAuthorizationMiddleware, async (req: Request, res: Response) => {
+    // searchLoginTerm: string, searchEmailTerm: string
+    const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
 
-        let searchLoginTerm = req.query.searchLoginTerm
-            ? req.query.searchLoginTerm.toString()
-            : null
+    let searchLoginTerm = req.query.searchLoginTerm ? req.query.searchLoginTerm.toString() : null
 
-        let searchEmailTerm = req.query.searchEmailTerm
-            ? req.query.searchEmailTerm.toString()
-            : null
+    let searchEmailTerm = req.query.searchEmailTerm ? req.query.searchEmailTerm.toString() : null
 
-        const users = await usersService.getUsers(
-            pageNumber,
-            pageSize,
-            sortBy,
-            sortDirection,
-            searchLoginTerm,
-            searchEmailTerm
-        )
-        const usersCount = await usersRepository.getUsersCount(
-            searchLoginTerm,
-            searchEmailTerm
-        )
-        const result = {
-            pagesCount: Math.ceil(usersCount / pageSize),
-            page: pageNumber,
-            pageSize,
-            totalCount: usersCount,
-            items: users,
-        }
-        res.status(CodeResponsesEnum.Success_200).send(result)
+    const users = await usersService.getUsers(
+        pageNumber,
+        pageSize,
+        sortBy,
+        sortDirection,
+        searchLoginTerm,
+        searchEmailTerm
+    )
+    const usersCount = await usersRepository.getUsersCount(searchLoginTerm, searchEmailTerm)
+    const result = {
+        pagesCount: Math.ceil(usersCount / pageSize),
+        page: pageNumber,
+        pageSize,
+        totalCount: usersCount,
+        items: users,
     }
-)
+    res.status(CodeResponsesEnum.Success_200).send(result)
+})
 
 usersRouter.post(
     '/',

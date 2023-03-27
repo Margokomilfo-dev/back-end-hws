@@ -28,11 +28,7 @@ videosRouter.post(
         const author = req.body.author
         const availableResolutions = req.body.availableResolutions
 
-        const newVideo = await videosService.createVideo(
-            title,
-            author,
-            availableResolutions
-        )
+        const newVideo = await videosService.createVideo(title, author, availableResolutions)
 
         if (newVideo) {
             res.status(CodeResponsesEnum.Created_201).send(newVideo) //если сделать sendStatus - не дойдем до send
@@ -42,20 +38,16 @@ videosRouter.post(
     }
 )
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
-videosRouter.get(
-    '/:id',
-    idIntParamValidationMiddleware,
-    async (req: Request, res: Response) => {
-        const id = +req.params.id //if NaN - return !id === false
+videosRouter.get('/:id', idIntParamValidationMiddleware, async (req: Request, res: Response) => {
+    const id = +req.params.id //if NaN - return !id === false
 
-        const video = await videosService.getVideoById(id)
-        if (video) {
-            res.status(CodeResponsesEnum.Success_200).send(video)
-        } else {
-            res.sendStatus(CodeResponsesEnum.Not_found_404)
-        }
+    const video = await videosService.getVideoById(id)
+    if (video) {
+        res.status(CodeResponsesEnum.Success_200).send(video)
+    } else {
+        res.sendStatus(CodeResponsesEnum.Not_found_404)
     }
-)
+})
 
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
 videosRouter.put(
@@ -79,19 +71,15 @@ videosRouter.put(
 )
 
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
-videosRouter.delete(
-    '/:id',
-    idIntParamValidationMiddleware,
-    async (req: Request, res: Response) => {
-        const id = +req.params.id
-        const isDeleted = await videosService.deleteVideo(id)
-        if (isDeleted) {
-            res.sendStatus(CodeResponsesEnum.Not_content_204)
-        } else {
-            res.sendStatus(CodeResponsesEnum.Not_found_404)
-        }
+videosRouter.delete('/:id', idIntParamValidationMiddleware, async (req: Request, res: Response) => {
+    const id = +req.params.id
+    const isDeleted = await videosService.deleteVideo(id)
+    if (isDeleted) {
+        res.sendStatus(CodeResponsesEnum.Not_content_204)
+    } else {
+        res.sendStatus(CodeResponsesEnum.Not_found_404)
     }
-)
+})
 
 export type VideoType = {
     id: number

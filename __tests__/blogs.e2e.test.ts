@@ -23,9 +23,7 @@ describe('/blogs', () => {
 
     describe('GET', () => {
         it('+ GET blogs = []', async () => {
-            const res_ = await request(app)
-                .get('/blogs/')
-                .expect(CodeResponsesEnum.Success_200)
+            const res_ = await request(app).get('/blogs/').expect(CodeResponsesEnum.Success_200)
             expect(res_.body.items.length).toBe(0)
         })
     })
@@ -52,10 +50,7 @@ describe('/blogs', () => {
             expect(res.body.items.length).toBe(0)
         })
         it('- POST does not create the blog with incorrect data (no headers, no name, no description, no websiteUrl)', async function () {
-            await request(app)
-                .post('/blogs/')
-                .send({})
-                .expect(CodeResponsesEnum.Not_Authorized_401)
+            await request(app).post('/blogs/').send({}).expect(CodeResponsesEnum.Not_Authorized_401)
 
             const res = await request(app).get('/blogs/')
             expect(res.body.items.length).toBe(0)
@@ -131,8 +126,7 @@ describe('/blogs', () => {
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
                     errorsMessages: [
                         {
-                            message:
-                                'websiteUrl should contain 2 - 100 symbols',
+                            message: 'websiteUrl should contain 2 - 100 symbols',
                             field: 'websiteUrl',
                         },
                     ],
@@ -208,9 +202,7 @@ describe('/blogs', () => {
 
     describe('GET', () => {
         it('+ GET blogs - pagination pageNumber=1, pageSize=10, sortBy=createdAt(default), sortDirection=desc(default)', async () => {
-            const res_ = await request(app)
-                .get('/blogs/')
-                .expect(CodeResponsesEnum.Success_200)
+            const res_ = await request(app).get('/blogs/').expect(CodeResponsesEnum.Success_200)
             expect(res_.body.items.length).toBe(2)
             expect(res_.body.pagesCount).toBe(1)
             expect(res_.body.pageSize).toBe(10)
@@ -229,9 +221,7 @@ describe('/blogs', () => {
         })
         it('+ GET blogs - pagination pageNumber=1, pageSize=10, sortBy=id, sortDirection=asc', async () => {
             const res_ = await request(app)
-                .get(
-                    '/blogs?pageNumber=1&pageSize=10&sortBy=id&sortDirection=asc'
-                )
+                .get('/blogs?pageNumber=1&pageSize=10&sortBy=id&sortDirection=asc')
                 .expect(CodeResponsesEnum.Success_200)
             expect(res_.body.items.length).toBe(2)
             expect(res_.body.pagesCount).toBe(1)
@@ -242,9 +232,7 @@ describe('/blogs', () => {
         })
         it('+ GET blogs - pagination pageNumber=1, pageSize=10, sortBy=id, sortDirection=desc', async () => {
             const res_ = await request(app)
-                .get(
-                    '/blogs?pageNumber=1&pageSize=10&sortBy=id&sortDirection=desc'
-                )
+                .get('/blogs?pageNumber=1&pageSize=10&sortBy=id&sortDirection=desc')
                 .expect(CodeResponsesEnum.Success_200)
             expect(res_.body.items.length).toBe(2)
             expect(res_.body.pagesCount).toBe(1)
@@ -276,9 +264,7 @@ describe('/blogs', () => {
     })
     describe('GET:id', () => {
         it('- GET:id - not existed id', async () => {
-            await request(app)
-                .get('/blogs/245')
-                .expect(CodeResponsesEnum.Not_found_404)
+            await request(app).get('/blogs/245').expect(CodeResponsesEnum.Not_found_404)
         })
         it('+ GET:id - correct id', async () => {
             await request(app)
@@ -288,9 +274,7 @@ describe('/blogs', () => {
     })
     describe('GET:id/posts', () => {
         it('- GET:id/posts - not existed  blogId', async () => {
-            await request(app)
-                .get('/blogs/245/posts')
-                .expect(CodeResponsesEnum.Not_found_404)
+            await request(app).get('/blogs/245/posts').expect(CodeResponsesEnum.Not_found_404)
         })
         it('+ GET:id/posts - correct blogId, pagination', async () => {
             newPost1 = await createPost(newBlog!.id, {
@@ -340,11 +324,7 @@ describe('/blogs', () => {
         })
         it('+ GET:id/posts - correct  blogId, pagination - pageNumber=2, pageSize=3,sortBy=id, sortDirection=desc(default)', async () => {
             const res = await request(app)
-                .get(
-                    `/blogs/${
-                        newBlog!.id
-                    }/posts?pageNumber=2&pageSize=3&sortId=id`
-                )
+                .get(`/blogs/${newBlog!.id}/posts?pageNumber=2&pageSize=3&sortId=id`)
                 .expect(CodeResponsesEnum.Success_200)
 
             expect(res.body.page).toBe(2)
@@ -419,9 +399,7 @@ describe('/blogs', () => {
             const updatedBlog = res_.body
 
             const res = await request(app).get('/blogs/')
-            const ourBlog = res.body.items.find(
-                (i: BlogType) => i.id === newBlog!.id
-            )
+            const ourBlog = res.body.items.find((i: BlogType) => i.id === newBlog!.id)
             expect(ourBlog).toEqual(updatedBlog)
             newBlog = updatedBlog
         })

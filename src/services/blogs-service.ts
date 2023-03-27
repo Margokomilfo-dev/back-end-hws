@@ -9,13 +9,7 @@ export const blogsService = {
         sortDirection: string,
         searchNameTerm: string | null
     ): Promise<BlogType[]> {
-        return blogsRepository.getBlogs(
-            pageNumber,
-            pageSize,
-            sortBy,
-            sortDirection,
-            searchNameTerm
-        )
+        return blogsRepository.getBlogs(pageNumber, pageSize, sortBy, sortDirection, searchNameTerm)
     },
     async getBlogsCount(searchNameTerm: string | null): Promise<number> {
         return blogsRepository.getBlogsCount(searchNameTerm)

@@ -44,10 +44,7 @@ export const blogsRepository = {
             websiteUrl: 'string'
         }
     ): Promise<boolean> {
-        const res = await blogsCollection.updateOne(
-            { id },
-            { $set: { ...body } }
-        )
+        const res = await blogsCollection.updateOne({ id }, { $set: { ...body } })
         return res.matchedCount === 1
     },
 
