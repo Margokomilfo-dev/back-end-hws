@@ -17,6 +17,9 @@ export const _customUserValidator = body('code').custom(async (value) => {
         const user = await usersService.getUserByConfirmationCode(value)
         if (!user) {
             throw new Error('user in not found')
+        }
+        if (user && user.confirmationData.isConfirmed) {
+            throw new Error('email is already confirmed')
         } else return true
     }
     return true
