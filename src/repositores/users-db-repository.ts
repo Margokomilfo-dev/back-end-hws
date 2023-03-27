@@ -1,5 +1,6 @@
 import { usersCollection } from '../mongo/db'
 import { v4 as uuidv4 } from 'uuid'
+import dateFns from 'date-fns/addMinutes'
 
 export const usersRepository = {
     async getUsers(
@@ -89,7 +90,7 @@ export const usersRepository = {
             {
                 $set: {
                     'confirmationData.code': uuidv4(),
-                    'confirmationData.data': new Date(),
+                    'confirmationData.data': dateFns(new Date(), 10),
                 },
             }
         )
