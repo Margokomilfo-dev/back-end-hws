@@ -17,6 +17,7 @@ import {
     _customUserValidator,
 } from '../assets/express-validator/custom-validators'
 import { isLoginOrEmailExistsValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
+import { checkCookiesAndUserMiddleware } from '../middlewares/getCookiesMiddleware'
 
 export const authRouter = Router({})
 
@@ -33,12 +34,41 @@ authRouter.post(
             res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
         } else {
             const token = await jwtService.createJWTToken(user)
+            const refreshToken = await jwtService.createRefreshJWTToken(user)
+            await usersService.updateRefreshToken(user.id, refreshToken)
+            res.cookie('refreshToken', refreshToken, {
+                //maxAge: 20000,
+                httpOnly: true,
+                secure: true,
+            })
             res.status(CodeResponsesEnum.Success_200).send({
                 accessToken: token,
             })
         }
     }
 )
+
+authRouter.post(
+    '/refresh-token',
+    checkCookiesAndUserMiddleware,
+    async (req: Request, res: Response) => {
+        const refreshToken = req.cookies.refreshToken
+        const userId = await jwtService.getUserIdByToken(refreshToken)
+        const user = await usersService._getUserById(userId!)
+        const token = await jwtService.createJWTToken(user!)
+        const newRefreshToken = await jwtService.createRefreshJWTToken(user!)
+        await usersService.updateRefreshToken(user!.id, newRefreshToken)
+        res.cookie('refreshToken', newRefreshToken, {
+            //maxAge: 20000,
+            httpOnly: true,
+            secure: true,
+        })
+        res.status(CodeResponsesEnum.Success_200).send({
+            accessToken: token,
+        })
+    }
+)
+
 authRouter.post(
     '/registration',
     loginValidator,
@@ -112,6 +142,13 @@ authRouter.post(
         res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
 )
+authRouter.post('/logout', checkCookiesAndUserMiddleware, async (req: Request, res: Response) => {
+    const refreshToken = req.cookies.refreshToken
+    const userId = await jwtService.getUserIdByToken(refreshToken)
+    const user = await usersService._getUserById(userId!)
+    await usersService.updateRefreshToken(user!.id, null)
+    res.sendStatus(CodeResponsesEnum.Not_content_204)
+})
 
 authRouter.get('/me', bearerAuthorizationMiddleware, async (req: Request, res: Response) => {
     const user = await usersService.getUserById(req.userId!)

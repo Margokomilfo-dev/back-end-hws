@@ -7,7 +7,7 @@ import { createUser } from './assets'
 import { usersService } from '../src/services/users-service'
 
 describe('/auth', () => {
-    let user1: UserType
+    let user1: UserType | null
     let user2: UserType | null
     let token: string
     beforeAll(async () => {
@@ -21,10 +21,6 @@ describe('/auth', () => {
                 email: 'dimych@gmail.com',
                 password: '123456',
             })
-
-            // expect(user!.email).toBe('dimych@gmail.com')
-            // expect(user!.login).toBe('Dimych')
-
             const res = await request(app)
                 .get('/users/')
                 .set('authorization', 'Basic YWRtaW46cXdlcnR5')
@@ -192,7 +188,7 @@ describe('/auth', () => {
                     ],
                 })
         })
-        it('+ POST does not login user', async function () {
+        it('+ POST login user', async function () {
             const res = await request(app)
                 .post('/auth/login')
                 .send({ loginOrEmail: 'Dimych', password: '123456' })
@@ -200,6 +196,58 @@ describe('/auth', () => {
 
             token = res.body.accessToken
             expect(token).toBeDefined()
+
+            user1 = await usersService._getUserById(user1!.id)
+            expect(user1!.refreshToken).toBeDefined()
+        })
+    })
+    describe('POST auth/refresh-token', () => {
+        it('- POST no correct cookies', async function () {
+            await request(app)
+                .post('/auth/refresh-token')
+                .set('Cookie', [`refreshToken = hello`])
+                .send({})
+                .expect(CodeResponsesEnum.Not_Authorized_401)
+        })
+        it('- POST no cookies', async function () {
+            await request(app)
+                .post('/auth/refresh-token')
+                .send({})
+                .expect(CodeResponsesEnum.Not_Authorized_401)
+        })
+        it('+ POST returned newAccessToken and newRefreshToken authorized', async function () {
+            const response = await request(app)
+                .post('/auth/refresh-token')
+                .set('Cookie', [`refreshToken = ${user1!.refreshToken!}`])
+                .send({})
+                .expect(CodeResponsesEnum.Success_200)
+
+            expect(response.body.accessToken).toBeDefined()
+        })
+    })
+    describe('POST auth/logout', () => {
+        it('- POST no correct cookies', async function () {
+            await request(app)
+                .post('/auth/logout')
+                .set('Cookie', [`refreshToken = hello`])
+                .send({})
+                .expect(CodeResponsesEnum.Not_Authorized_401)
+        })
+        it('- POST no cookies', async function () {
+            await request(app)
+                .post('/auth/logout')
+                .send({})
+                .expect(CodeResponsesEnum.Not_Authorized_401)
+        })
+        it('+ POST logout', async function () {
+            await request(app)
+                .post('/auth/logout')
+                .set('Cookie', [`refreshToken = ${user1!.refreshToken!}`])
+                .send({})
+                .expect(CodeResponsesEnum.Not_content_204)
+
+            user1 = await usersService._getUserById(user1!.id)
+            expect(user1!.refreshToken).toBe(null)
         })
     })
     describe('GET auth/me', () => {
@@ -217,9 +265,9 @@ describe('/auth', () => {
                 .get('/auth/me')
                 .set('Authorization', `bearer ${token}`)
                 .expect(CodeResponsesEnum.Success_200, {
-                    email: user1.email,
-                    login: user1.login,
-                    userId: user1.id,
+                    email: user1!.email,
+                    login: user1!.login,
+                    userId: user1!.id,
                 })
         })
     })

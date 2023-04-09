@@ -39,6 +39,10 @@ export const usersService = {
         return usersRepository.updateUserConfirmationCode(id)
     },
 
+    async updateRefreshToken(id: string, refreshToken: string | null): Promise<UserType | null> {
+        return usersRepository.updateRefreshToken(id, refreshToken)
+    },
+
     async getUserByLoginOrEmail(loginOrEmail: string): Promise<UserType | null> {
         return usersRepository.getUserByLoginOrEmail(loginOrEmail)
     },
@@ -62,6 +66,7 @@ export const usersService = {
                 isConfirmed: false,
                 code: uuidv4(),
             },
+            refreshToken: null,
         }
         return usersRepository.createUser(newUser)
     },

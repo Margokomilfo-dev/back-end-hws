@@ -12,10 +12,12 @@ import { usersRouter } from './routes/users-router'
 import { authRouter } from './routes/auth-router'
 import { commentsRouter } from './routes/comments-router'
 import { commentsRepository } from './repositores/comments-db-repository'
+import cookieParser from 'cookie-parser'
 
 export const app = express()
 
 app.use(bodyParser.json())
+app.use(cookieParser())
 app.use('/videos', videosRouter)
 app.use('/blogs', blogsRouter)
 app.use('/posts', postsRouter)

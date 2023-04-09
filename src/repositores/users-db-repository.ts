@@ -26,7 +26,7 @@ export const usersRepository = {
         }
         return usersCollection
             .find(filter, {
-                projection: { _id: 0, passwordHash: 0, confirmationData: 0 },
+                projection: { _id: 0, passwordHash: 0, confirmationData: 0, refreshToken: 0 },
             })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
@@ -55,7 +55,7 @@ export const usersRepository = {
     async getUserById(id: string): Promise<UserType | null> {
         return usersCollection.findOne(
             { id },
-            { projection: { _id: 0, passwordHash: 0, confirmationData: 0 } }
+            { projection: { _id: 0, passwordHash: 0, confirmationData: 0, refreshToken: 0 } }
         )
     },
     async _getUserById(id: string): Promise<UserType | null> {
@@ -94,6 +94,10 @@ export const usersRepository = {
         )
         return usersCollection.findOne({ id })
     },
+    async updateRefreshToken(id: string, refreshToken: string | null): Promise<UserType | null> {
+        await usersCollection.findOneAndUpdate({ id }, { $set: { refreshToken } })
+        return usersCollection.findOne({ id })
+    },
     async getUserByLoginOrEmail(loginOrEmail: string) {
         return usersCollection.findOne({
             $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
@@ -119,6 +123,7 @@ export type UserType = {
     createdAt: string
     passwordHash: string
     confirmationData: ConfirmationDataType
+    refreshToken: string | null
 }
 
 export type ConfirmationDataType = {
