@@ -19,7 +19,12 @@ export const checkCookiesAndUserMiddleware = async (
         return
     }
     const user = await usersService._getUserById(userId)
+
     if (!user) {
+        res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
+        return
+    }
+    if (user.refreshToken !== refreshToken) {
         res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
         return
     }

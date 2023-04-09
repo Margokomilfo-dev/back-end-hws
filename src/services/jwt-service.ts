@@ -7,12 +7,12 @@ const secret = process.env.SECRET ? process.env.SECRET : 'hello'
 export const jwtService = {
     async createJWTToken(user: UserType): Promise<string> {
         return jwt.sign({ userId: user.id }, secret, {
-            expiresIn: '10sec',
+            expiresIn: '10000',
         })
     },
     async createRefreshJWTToken(user: UserType): Promise<string> {
         return jwt.sign({ userId: user.id }, secret, {
-            expiresIn: '20sec',
+            expiresIn: '20000',
         })
     },
     async getUserIdByToken(token: string): Promise<string | null> {
