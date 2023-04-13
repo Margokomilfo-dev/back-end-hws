@@ -13,10 +13,10 @@ export const bearerAuthorizationMiddleware = async (
         return
     }
     const token = req.headers.authorization.split(' ')[1]
-    const userId = await jwtService.getUserIdByToken(token)
+    const data = await jwtService.verifyAndGetUserIdByToken(token)
 
-    if (userId) {
-        const user = await usersService.getUserById(userId)
+    if (data && data.userId) {
+        const user = await usersService.getUserById(data.userId)
         if (!user) {
             res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
             return

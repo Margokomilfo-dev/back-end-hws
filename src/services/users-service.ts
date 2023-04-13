@@ -39,10 +39,16 @@ export const usersService = {
         return usersRepository.updateUserConfirmationCode(id)
     },
 
-    async updateRefreshToken(id: string, refreshToken: string | null): Promise<UserType | null> {
-        return usersRepository.updateRefreshToken(id, refreshToken)
-    },
-
+    // async updateRefreshToken(
+    //     id: string,
+    //     refreshTokenPart: string | null,
+    //     deviceId: string
+    // ): Promise<UserType | null> {
+    //     return usersRepository.updateRefreshToken(id, refreshTokenPart, deviceId)
+    // },
+    // async updateTokensBase(id: string, data: TokensBaseType): Promise<UserType | null> {
+    //     return usersRepository.updateTokensBase(id, data)
+    // },
     async getUserByLoginOrEmail(loginOrEmail: string): Promise<UserType | null> {
         return usersRepository.getUserByLoginOrEmail(loginOrEmail)
     },
@@ -66,7 +72,6 @@ export const usersService = {
                 isConfirmed: false,
                 code: uuidv4(),
             },
-            refreshToken: null,
         }
         return usersRepository.createUser(newUser)
     },

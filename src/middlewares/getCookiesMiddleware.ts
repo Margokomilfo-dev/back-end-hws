@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 import { CodeResponsesEnum } from '../types'
 import { jwtService } from '../services/jwt-service'
-import { usersService } from '../services/users-service'
+import { firstPartsOfJWTToken } from '../assets/jwt-parse'
+import { securityRepository } from '../repositores/security-db-repository'
 
 export const checkCookiesAndUserMiddleware = async (
     req: Request,
@@ -13,20 +14,22 @@ export const checkCookiesAndUserMiddleware = async (
         res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
         return
     }
-    const userId = await jwtService.getUserIdByToken(refreshToken)
-    if (!userId) {
-        res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
-        return
-    }
-    const user = await usersService._getUserById(userId)
+    const firstPartOfToken = firstPartsOfJWTToken(refreshToken)
+    const data = await jwtService.verifyAndGetUserIdByToken(refreshToken)
 
-    if (!user) {
+    if (!data) {
         res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
         return
     }
-    if (user.refreshToken !== refreshToken) {
+    const session = await securityRepository._getSessionByUserIdAndDeviceId(
+        data.userId,
+        data.deviceId
+    )
+
+    if (!session || (session && session.refreshTokenData !== firstPartOfToken)) {
         res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
         return
     }
+
     next()
 }

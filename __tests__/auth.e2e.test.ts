@@ -5,11 +5,20 @@ import { app } from '../src/settings'
 import { UserType } from '../src/repositores/users-db-repository'
 import { createUser } from './assets'
 import { usersService } from '../src/services/users-service'
+import { SecurityType } from '../src/repositores/security-db-repository'
+import { securityService } from '../src/services/security-service'
 
 describe('/auth', () => {
     let user1: UserType | null
-    let user2: UserType | null
+    let cookie: string[] | null
+    let sessions: SecurityType[]
     let token: string
+
+    let cookie2: string[] | null
+    let user2: UserType | null
+    let token2: string
+    let sessions2: SecurityType[]
+
     beforeAll(async () => {
         await request(app).delete('/testing/all-data').expect(204)
     })
@@ -161,6 +170,23 @@ describe('/auth', () => {
     })
 
     describe('POST auth/login', () => {
+        it('+ POST login user', async function () {
+            const res = await request(app)
+                .post('/auth/login')
+                .send({ loginOrEmail: 'Dimych', password: '123456' })
+                .set('User-Agent', 'Chrome')
+                .expect(CodeResponsesEnum.Success_200)
+
+            cookie = res.get('Set-Cookie')
+
+            token = res.body.accessToken
+            expect(token).toBeDefined()
+
+            user1 = await usersService._getUserById(user1!.id)
+            sessions = await securityService.getSessionsByUserId(user1!.id)
+
+            expect(sessions.length).toBe(1)
+        })
         it('- POST does not login user (no authorized, no data)', async function () {
             await request(app)
                 .post('/auth/login')
@@ -188,24 +214,25 @@ describe('/auth', () => {
                     ],
                 })
         })
-        it('+ POST login user', async function () {
-            const res = await request(app)
+        it('- POST does not login user incorrect data', async function () {
+            await request(app)
                 .post('/auth/login')
-                .send({ loginOrEmail: 'Dimych', password: '123456' })
-                .expect(CodeResponsesEnum.Success_200)
-
-            token = res.body.accessToken
-            expect(token).toBeDefined()
-
-            user1 = await usersService._getUserById(user1!.id)
-            expect(user1!.refreshToken).toBeDefined()
+                .send({ loginOrEmail: 'Dimych', password: '1236' })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        {
+                            message: 'password should contain 6 - 20 symbols',
+                            field: 'password',
+                        },
+                    ],
+                })
         })
     })
     describe('POST auth/refresh-token', () => {
         it('- POST no correct cookies', async function () {
             await request(app)
                 .post('/auth/refresh-token')
-                .set('Cookie', [`refreshToken = hello`])
+                .set('Cookie', [`refreshToken = 1csfw`])
                 .send({})
                 .expect(CodeResponsesEnum.Not_Authorized_401)
         })
@@ -218,12 +245,36 @@ describe('/auth', () => {
         it('+ POST returned newAccessToken and newRefreshToken authorized', async function () {
             const response = await request(app)
                 .post('/auth/refresh-token')
-                .set('Cookie', [`refreshToken = ${user1!.refreshToken!}`])
+                .set('Cookie', cookie!)
                 .send({})
                 .expect(CodeResponsesEnum.Success_200)
 
+            cookie = response.get('Set-Cookie')
             expect(response.body.accessToken).toBeDefined()
         })
+    })
+    it('+ POST login user', async function () {
+        const res = await request(app)
+            .post('/auth/login')
+            .send({ loginOrEmail: 'Dimych', password: '123456' })
+            .set('User-Agent', 'iOS')
+            .expect(CodeResponsesEnum.Success_200)
+
+        cookie2 = res.get('Set-Cookie')
+
+        token2 = res.body.accessToken
+        expect(token).toBeDefined()
+
+        user1 = await usersService._getUserById(user1!.id)
+        sessions = await securityService.getSessionsByUserId(user1!.id)
+
+        expect(sessions.length).toBe(2)
+    })
+    it('- POST login 439 error', async function () {
+        await request(app)
+            .post('/auth/login')
+            .send({ loginOrEmail: 'Dimych', password: '1236' })
+            .expect(CodeResponsesEnum.Too_many_requests_429)
     })
     describe('POST auth/logout', () => {
         it('- POST no correct cookies', async function () {
@@ -242,12 +293,14 @@ describe('/auth', () => {
         it('+ POST logout', async function () {
             await request(app)
                 .post('/auth/logout')
-                .set('Cookie', [`refreshToken = ${user1!.refreshToken!}`])
+                .set('Cookie', cookie!)
                 .send({})
                 .expect(CodeResponsesEnum.Not_content_204)
 
             user1 = await usersService._getUserById(user1!.id)
-            expect(user1!.refreshToken).toBe(null)
+            sessions = await securityService.getSessionsByUserId(user1!.id)
+
+            expect(sessions.length).toBe(1)
         })
     })
     describe('GET auth/me', () => {
@@ -271,6 +324,7 @@ describe('/auth', () => {
                 })
         })
     })
+
     describe('DELETE user', () => {
         it('+ DELETE blog deleted with valid id, auth', async () => {
             await request(app)

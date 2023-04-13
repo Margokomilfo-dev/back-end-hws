@@ -91,3 +91,19 @@ export const getTokenPostAuthLogin = async (
 
     return res.body.accessToken
 }
+
+export const userLogin = async (
+    dto: { loginOrEmail: string; password: string },
+    agent: string
+): Promise<{ _cookie: string[]; _accessToken: string }> => {
+    const res = await request(app)
+        .post('/auth/login')
+        .send(dto)
+        .set('User-Agent', agent)
+        .expect(CodeResponsesEnum.Success_200)
+
+    const _cookie = res.get('Set-Cookie')
+    const _accessToken = res.body.accessToken
+    expect(_accessToken).toBeDefined()
+    return { _cookie, _accessToken }
+}

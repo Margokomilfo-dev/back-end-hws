@@ -6,4 +6,5 @@ export enum CodeResponsesEnum {
     'Not_Authorized_401' = 401,
     'Forbidden_403' = 403,
     'Not_found_404' = 404,
+    'Too_many_requests_429' = 429,
 }

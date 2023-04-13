@@ -13,20 +13,20 @@ export const usersRepository = {
     ): Promise<UserType[]> {
         const filter: any = {}
         if (searchLoginTerm && !searchEmailTerm) {
-            filter.login = { $regex: searchLoginTerm, $options: '$i' }
+            filter.login = { $regex: searchLoginTerm, $options: 'i' }
         }
         if (searchEmailTerm && !searchLoginTerm) {
-            filter.email = { $regex: searchEmailTerm, $options: '$i' }
+            filter.email = { $regex: searchEmailTerm, $options: 'i' }
         }
         if (searchEmailTerm && searchLoginTerm) {
             filter.$or = [
-                { login: { $regex: searchLoginTerm, $options: '$i' } },
-                { email: { $regex: searchEmailTerm, $options: '$i' } },
+                { login: { $regex: searchLoginTerm, $options: 'i' } },
+                { email: { $regex: searchEmailTerm, $options: 'i' } },
             ]
         }
         return usersCollection
             .find(filter, {
-                projection: { _id: 0, passwordHash: 0, confirmationData: 0, refreshToken: 0 },
+                projection: { _id: 0, passwordHash: 0, confirmationData: 0 },
             })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
@@ -39,15 +39,15 @@ export const usersRepository = {
     ): Promise<number> {
         const filter: any = {}
         if (searchLoginTerm && !searchEmailTerm) {
-            filter.login = { $regex: searchLoginTerm, $options: '$i' }
+            filter.login = { $regex: searchLoginTerm, $options: 'i' }
         }
         if (searchEmailTerm && !searchLoginTerm) {
-            filter.email = { $regex: searchEmailTerm, $options: '$i' }
+            filter.email = { $regex: searchEmailTerm, $options: 'i' }
         }
         if (searchEmailTerm && searchLoginTerm) {
             filter.$or = [
-                { login: { $regex: searchLoginTerm, $options: '$i' } },
-                { email: { $regex: searchEmailTerm, $options: '$i' } },
+                { login: { $regex: searchLoginTerm, $options: 'i' } },
+                { email: { $regex: searchEmailTerm, $options: 'i' } },
             ]
         }
         return usersCollection.countDocuments(filter)
@@ -55,7 +55,7 @@ export const usersRepository = {
     async getUserById(id: string): Promise<UserType | null> {
         return usersCollection.findOne(
             { id },
-            { projection: { _id: 0, passwordHash: 0, confirmationData: 0, refreshToken: 0 } }
+            { projection: { _id: 0, passwordHash: 0, confirmationData: 0 } }
         )
     },
     async _getUserById(id: string): Promise<UserType | null> {
@@ -94,10 +94,39 @@ export const usersRepository = {
         )
         return usersCollection.findOne({ id })
     },
-    async updateRefreshToken(id: string, refreshToken: string | null): Promise<UserType | null> {
-        await usersCollection.findOneAndUpdate({ id }, { $set: { refreshToken } })
-        return usersCollection.findOne({ id })
-    },
+
+    // async updateRefreshToken(
+    //     id: string,
+    //     refreshTokenPart: string | null,
+    //     deviceId: string
+    // ): Promise<UserType | null> {
+    //     const user = await usersCollection.findOne({ id })
+    //     if (!user) {
+    //         return null
+    //     }
+    //     if (refreshTokenPart) {
+    //         const devices = user.tokensBase.map((d) =>
+    //             d.deviceId === deviceId ? { ...d, refreshTokenData: refreshTokenPart } : d
+    //         )
+    //         await usersCollection.findOneAndUpdate(
+    //             { id, 'tokensBase.dId': deviceId },
+    //             { $set: { tokensBase: devices } }
+    //         )
+    //     } else {
+    //         const devices = user?.tokensBase.filter((d) => d.deviceId !== deviceId)
+    //         await usersCollection.findOneAndUpdate(
+    //             { id, 'tokensBase.deviceId': deviceId },
+    //             { $set: { tokensBase: devices } }
+    //         )
+    //     }
+    //     return usersCollection.findOne({ id })
+    // },
+
+    // async updateTokensBase(id: string, data: TokensBaseType): Promise<UserType | null> {
+    //     await usersCollection.findOneAndUpdate({ id }, { $push: { tokensBase: data } })
+    //     return usersCollection.findOne({ id })
+    // },
+
     async getUserByLoginOrEmail(loginOrEmail: string) {
         return usersCollection.findOne({
             $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
@@ -123,7 +152,6 @@ export type UserType = {
     createdAt: string
     passwordHash: string
     confirmationData: ConfirmationDataType
-    refreshToken: string | null
 }
 
 export type ConfirmationDataType = {
