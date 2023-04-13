@@ -14,7 +14,7 @@ export const securityService = {
             userId,
             title: dName,
             refreshTokenData,
-            lastActiveDate: iAt,
+            lastActiveDate: new Date(iAt).toISOString(),
             ip,
         }
         await securityRepository.create(data)
