@@ -20,7 +20,9 @@ export const securityRepository = {
     },
 
     async getSessionsByUserId(userId: string): Promise<SecurityType[]> {
-        return securityCollection.find({ userId }).toArray()
+        return securityCollection
+            .find({ userId }, { projection: { userId: 0, refreshTokenData: 0 } })
+            .toArray()
     },
 
     async update(deviceId: string, data: SecurityType): Promise<SecurityType | null> {

@@ -36,6 +36,10 @@ securityRouter.delete(
         const refreshToken = req.cookies.refreshToken
         const data = await jwtService.verifyAndGetUserIdByToken(refreshToken)
         const sessionWithThisDeviceId = await securityService.getSessionByDeviceId(deviceId)
+        if (!sessionWithThisDeviceId) {
+            res.sendStatus(CodeResponsesEnum.Not_found_404)
+            return
+        }
         if (sessionWithThisDeviceId && sessionWithThisDeviceId.userId !== data!.userId) {
             res.sendStatus(CodeResponsesEnum.Forbidden_403)
             return
