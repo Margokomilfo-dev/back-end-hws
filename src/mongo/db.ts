@@ -10,8 +10,8 @@ import { SecurityType } from '../repositores/security-db-repository'
 import { AttemptType } from '../repositores/rate-db-repository'
 dotenv.config()
 
-const mongoURI = process.env.mongoURI || 'mongodb://0.0.0.0:27017'
-//const mongoURI = process.env.MONGO_URI_FOR_STUDENTS || 'mongodb://0.0.0.0:27017'
+// const mongoURI = process.env.mongoURI || 'mongodb://0.0.0.0:27017'
+const mongoURI = process.env.MONGO_URI_FOR_STUDENTS || 'mongodb://0.0.0.0:27017'
 
 const client = new MongoClient(mongoURI)
 const db = client.db('hw')
