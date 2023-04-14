@@ -95,7 +95,7 @@ authRouter.post(
             ip: ipAddress,
             refreshTokenData: newRefreshTokenPart,
             title: dName,
-            lastActiveDate: newPayload!.iat,
+            lastActiveDate: new Date(newPayload!.iat).toISOString(),
         })
 
         res.cookie('refreshToken', newRefreshToken, {
