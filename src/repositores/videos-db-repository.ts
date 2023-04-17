@@ -1,27 +1,27 @@
 import { VideoType } from '../routes/videos-router'
-import { videosCollection } from '../mongo/db'
+import { BlogModel } from '../mongo/blog/blog.model'
 
 export const videosRepository = {
     async getVideos() {
-        return videosCollection.find({}, { projection: { _id: 0 } }).toArray()
+        return BlogModel.find({}, { projection: { _id: 0 } })
     },
     async getVideoById(id: number): Promise<VideoType | null> {
-        return videosCollection.findOne({ id }, { projection: { _id: 0 } })
+        return BlogModel.findOne({ id }, { projection: { _id: 0 } })
     },
     async createVideo(newVideo: VideoType): Promise<VideoType | null> {
-        await videosCollection.insertOne(newVideo)
+        await BlogModel.insertMany([newVideo])
         return this.getVideoById(newVideo.id)
     },
     async updateVideo(id: number, body: any): Promise<boolean> {
-        const res = await videosCollection.updateOne({ id }, { $set: { ...body } })
+        const res = await BlogModel.updateOne({ id }, { $set: { ...body } })
         return res.matchedCount === 1
     },
 
     async deleteVideo(id: number): Promise<boolean> {
-        const res = await videosCollection.deleteOne({ id })
+        const res = await BlogModel.deleteOne({ id })
         return res.deletedCount === 1
     },
     async deleteAll() {
-        return videosCollection.deleteMany({})
+        return BlogModel.deleteMany({})
     },
 }

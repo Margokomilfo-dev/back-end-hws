@@ -1,5 +1,5 @@
 import { BlogType } from '../routes/blogs-router'
-import { blogsCollection } from '../mongo/db'
+import { BlogModel } from '../mongo/blog/blog.model'
 
 export const blogsRepository = {
     async getBlogs(
@@ -13,26 +13,24 @@ export const blogsRepository = {
         if (searchNameTerm) {
             filter.name = { $regex: searchNameTerm, $options: 'i' }
         }
-        return blogsCollection
-            .find(filter, { projection: { _id: 0 } })
+        return BlogModel.find(filter, { projection: { _id: 0 } })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
-            .toArray()
     },
     async getBlogsCount(searchNameTerm: string | null): Promise<number> {
         let filter: any = {}
         if (searchNameTerm) {
             filter.name = { $regex: searchNameTerm, $options: 'i' }
         }
-        return blogsCollection.countDocuments(filter)
+        return BlogModel.countDocuments(filter)
     },
     async getBlogById(id: string): Promise<BlogType | null> {
-        return blogsCollection.findOne({ id }, { projection: { _id: 0 } })
+        return BlogModel.findOne({ id }, { projection: { _id: 0 } })
     },
 
     async createBlog(blog: BlogType): Promise<BlogType | null> {
-        await blogsCollection.insertOne(blog)
+        await BlogModel.insertMany([blog])
         return this.getBlogById(blog.id)
     },
 
@@ -44,15 +42,15 @@ export const blogsRepository = {
             websiteUrl: 'string'
         }
     ): Promise<boolean> {
-        const res = await blogsCollection.updateOne({ id }, { $set: { ...body } })
+        const res = await BlogModel.updateOne({ id }, { $set: { ...body } })
         return res.matchedCount === 1
     },
 
     async deleteBlog(id: string): Promise<boolean> {
-        const res = await blogsCollection.deleteOne({ id })
+        const res = await BlogModel.deleteOne({ id })
         return res.deletedCount === 1
     },
     async deleteAll() {
-        return blogsCollection.deleteMany({})
+        return BlogModel.deleteMany({})
     },
 }

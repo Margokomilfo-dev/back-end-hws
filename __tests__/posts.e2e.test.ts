@@ -1,6 +1,4 @@
-// @ts-ignore
 import request from 'supertest'
-
 import { CodeResponsesEnum } from '../src/types'
 import { PostType } from '../src/routes/posts-router'
 import { app } from '../src/settings'
@@ -9,6 +7,7 @@ import { createBlog, createPost, createUser, getTokenPostAuthLogin } from './ass
 import { UserType } from '../src/repositores/users-db-repository'
 import { CommentType } from '../src/services/comments-service'
 
+// const mongoURI = process.env.mongoURI || 'mongodb://0.0.0.0:27017'
 //от этой ошибки! -> thrown: "Exceeded timeout of 5000 ms for a test. go to the jest.config.js
 
 describe('/posts', () => {
@@ -425,4 +424,9 @@ describe('/posts', () => {
             expect(res.body.items.length).toBe(1)
         })
     })
+
+    /* Closing database connection after each test. */
+    // afterAll(async () => {
+    //     await mongoose.connection.close()
+    // })
 })

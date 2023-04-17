@@ -1,4 +1,3 @@
-// @ts-ignore
 import request from 'supertest'
 import { app } from '../src/settings'
 import { CodeResponsesEnum } from '../src/types'
