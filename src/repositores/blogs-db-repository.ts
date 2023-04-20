@@ -13,7 +13,7 @@ export const blogsRepository = {
         if (searchNameTerm) {
             filter.name = { $regex: searchNameTerm, $options: 'i' }
         }
-        return BlogModel.find(filter, { projection: { _id: 0 } })
+        return BlogModel.find(filter, { _id: 0, __v: 0 })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })

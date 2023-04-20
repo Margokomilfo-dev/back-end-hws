@@ -25,7 +25,10 @@ export const usersRepository = {
             ]
         }
         return UserModel.find(filter, {
-            projection: { _id: 0, passwordHash: 0, confirmationData: 0 },
+            _id: 0,
+            passwordHash: 0,
+            confirmationData: 0,
+            __v: 0,
         })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
@@ -51,10 +54,7 @@ export const usersRepository = {
         return UserModel.countDocuments(filter)
     },
     async getUserById(id: string): Promise<UserType | null> {
-        return UserModel.findOne(
-            { id },
-            { projection: { _id: 0, passwordHash: 0, confirmationData: 0 } }
-        )
+        return UserModel.findOne({ id }, { _id: 0, passwordHash: 0, __v: 0, confirmationData: 0 })
     },
     async _getUserById(id: string): Promise<UserType | null> {
         return UserModel.findOne({ id })

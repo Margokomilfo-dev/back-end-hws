@@ -8,7 +8,7 @@ export const postsRepository = {
         sortBy: string,
         sortDirection: string
     ): Promise<PostType[]> {
-        return PostsModel.find({}, { projection: { _id: 0 } })
+        return PostsModel.find({}, { _id: 0, __v: 0 })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
@@ -26,7 +26,7 @@ export const postsRepository = {
         sortBy: string,
         sortDirection: string
     ): Promise<Array<PostType>> {
-        return PostsModel.find({ blogId }, { projection: { _id: 0 } })
+        return PostsModel.find({ blogId }, { _id: 0, __v: 0 })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })

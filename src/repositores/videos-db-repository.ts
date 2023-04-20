@@ -3,7 +3,7 @@ import { VideoModel } from '../mongo/video/video.model'
 
 export const videosRepository = {
     async getVideos() {
-        return VideoModel.find({}, { projection: { _id: 0 } })
+        return VideoModel.find({}, { _id: 0, __v: 0 })
     },
     async getVideoById(id: number): Promise<VideoType | null> {
         return VideoModel.findOne({ id }, { projection: { _id: 0 } })
