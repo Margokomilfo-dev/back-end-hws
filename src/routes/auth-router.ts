@@ -25,6 +25,7 @@ import { firstPartsOfJWTToken, getJWTPayload } from '../assets/jwt-parse'
 import { securityService } from '../services/security-service'
 import { rateLimitMiddleware } from '../middlewares/rate-limit-middleware'
 import { emailService } from '../services/email-service'
+import { userIsExistMiddleware } from '../middlewares/user-isExist-middleware'
 
 export const authRouter = Router({})
 
@@ -106,19 +107,14 @@ authRouter.post(
     rateLimitMiddleware,
     newPasswordValidator,
     recoveryCodeValidator,
+    userIsExistMiddleware,
     errorsResultMiddleware,
     async (req: Request, res: Response) => {
         let newPassword = req.body.newPassword
         let recoveryCode = req.body.recoveryCode
 
         const user = await usersService.getUserByConfirmationCode(recoveryCode)
-        if (!user) {
-            res.status(CodeResponsesEnum.Incorrect_values_400).send({
-                errorsMessages: [{ message: 'incorrectCode', field: 'recoveryCode' }],
-            })
-            return
-        }
-        const updatedUser = await usersService.updateUserPassword(user.id, newPassword)
+        const updatedUser = await usersService.updateUserPassword(user!.id, newPassword)
 
         if (updatedUser) {
             res.sendStatus(CodeResponsesEnum.Not_content_204)
