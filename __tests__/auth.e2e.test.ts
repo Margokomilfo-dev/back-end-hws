@@ -6,6 +6,12 @@ import { createUser } from './assets'
 import { usersService } from '../src/services/users-service'
 import { SecurityType } from '../src/repositores/security-db-repository'
 import { securityService } from '../src/services/security-service'
+import mongoose from 'mongoose'
+import dotenv from 'dotenv'
+dotenv.config()
+
+const dbName = 'hw'
+const mongoURI = process.env.mongoURI || `mongodb://0.0.0.0:27017/${dbName}`
 
 describe('/auth', () => {
     let user1: UserType | null
@@ -16,10 +22,16 @@ describe('/auth', () => {
     let cookie2: string[] | null
     let user2: UserType | null
     let token2: string
-    let sessions2: SecurityType[]
 
     beforeAll(async () => {
+        /* Connecting to the database before each test. */
+        await mongoose.connect(mongoURI)
         await request(app).delete('/testing/all-data').expect(204)
+    })
+
+    afterAll(async () => {
+        /* Closing database connection after each test. */
+        await mongoose.connection.close()
     })
 
     describe('POST user', () => {
@@ -269,7 +281,19 @@ describe('/auth', () => {
 
         expect(sessions.length).toBe(2)
     })
-    it('- POST login 439 error', async function () {
+    it('- POST login error (for 429)', async function () {
+        await request(app)
+            .post('/auth/login')
+            .send({ loginOrEmail: 'Dimych', password: '1236' })
+            .expect(CodeResponsesEnum.Incorrect_values_400)
+    })
+    it('- POST login error (for 429)', async function () {
+        await request(app)
+            .post('/auth/login')
+            .send({ loginOrEmail: 'Dimych', password: '1236' })
+            .expect(CodeResponsesEnum.Incorrect_values_400)
+    })
+    it('- POST login 429 error', async function () {
         await request(app)
             .post('/auth/login')
             .send({ loginOrEmail: 'Dimych', password: '1236' })

@@ -5,8 +5,13 @@ import request from 'supertest'
 import { app } from '../src/settings'
 import { createBlog, createPost } from './assets'
 import { PostType } from '../src/routes/posts-router'
+import mongoose from 'mongoose'
+import { MongoClient } from 'mongodb'
+import dotenv from 'dotenv'
+dotenv.config()
 
-//от этой ошибки! -> thrown: "Exceeded timeout of 5000 ms for a test. go to the jest.config.js
+const dbName = 'hw'
+const mongoURI = process.env.mongoURI || `mongodb://0.0.0.0:27017/${dbName}`
 
 describe('/blogs', () => {
     let newBlog: BlogType | null = null
@@ -18,7 +23,14 @@ describe('/blogs', () => {
     let newPost5: PostType | null = null
 
     beforeAll(async () => {
+        /* Connecting to the database before each test. */
+        await mongoose.connect(mongoURI)
         await request(app).delete('/testing/all-data').expect(204)
+    })
+
+    afterAll(async () => {
+        /* Closing database connection after each test. */
+        await mongoose.connection.close()
     })
 
     describe('GET', () => {

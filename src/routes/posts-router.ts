@@ -113,7 +113,6 @@ postsRouter.post(
             req.userLogin!,
             postId
         )
-
         if (newComment) {
             res.status(CodeResponsesEnum.Created_201).send(newComment) //если сделать sendStatus - не дойдем до send
         } else {

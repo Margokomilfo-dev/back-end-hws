@@ -1,5 +1,5 @@
 import { PostType } from '../routes/posts-router'
-import { postsCollection } from '../mongo/db'
+import { PostsModel } from '../mongo/posts/posts.model'
 
 export const postsRepository = {
     async getPosts(
@@ -8,18 +8,16 @@ export const postsRepository = {
         sortBy: string,
         sortDirection: string
     ): Promise<PostType[]> {
-        return postsCollection
-            .find({}, { projection: { _id: 0 } })
+        return PostsModel.find({}, { projection: { _id: 0 } })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
-            .toArray()
     },
     async getPostsCount(): Promise<number> {
-        return postsCollection.countDocuments({})
+        return PostsModel.countDocuments({})
     },
     async getPostById(id: string): Promise<PostType | null> {
-        return postsCollection.findOne({ id }, { projection: { _id: 0 } })
+        return PostsModel.findOne({ id }, { projection: { _id: 0 } })
     },
     async getPostsByBlogId(
         blogId: string,
@@ -28,18 +26,16 @@ export const postsRepository = {
         sortBy: string,
         sortDirection: string
     ): Promise<Array<PostType>> {
-        return postsCollection
-            .find({ blogId }, { projection: { _id: 0 } })
+        return PostsModel.find({ blogId }, { projection: { _id: 0 } })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
-            .toArray()
     },
     async getPostsCountByBlogId(blogId: string): Promise<number> {
-        return postsCollection.countDocuments({ blogId })
+        return PostsModel.countDocuments({ blogId })
     },
     async createPost(newPost: PostType): Promise<PostType | null> {
-        await postsCollection.insertOne(newPost)
+        await PostsModel.insertMany(newPost)
         return this.getPostById(newPost.id)
     },
     async updatePost(
@@ -51,15 +47,15 @@ export const postsRepository = {
             shortDescription: string
         }
     ): Promise<boolean> {
-        const ourPost = await postsCollection.updateOne({ id }, { $set: { ...body } })
+        const ourPost = await PostsModel.updateOne({ id }, { $set: { ...body } })
         return ourPost.matchedCount === 1
     },
 
     async deletePost(id: string): Promise<boolean> {
-        const res = await postsCollection.deleteOne({ id })
+        const res = await PostsModel.deleteOne({ id })
         return res.deletedCount === 1
     },
     async deleteAll() {
-        return postsCollection.deleteMany({})
+        return PostsModel.deleteMany({})
     },
 }

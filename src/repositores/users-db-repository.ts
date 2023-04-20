@@ -1,6 +1,6 @@
-import { usersCollection } from '../mongo/db'
 import { v4 as uuidv4 } from 'uuid'
 import dateFns from 'date-fns/addMinutes'
+import { UserModel } from '../mongo/user/user.model'
 
 export const usersRepository = {
     async getUsers(
@@ -24,14 +24,12 @@ export const usersRepository = {
                 { email: { $regex: searchEmailTerm, $options: 'i' } },
             ]
         }
-        return usersCollection
-            .find(filter, {
-                projection: { _id: 0, passwordHash: 0, confirmationData: 0 },
-            })
+        return UserModel.find(filter, {
+            projection: { _id: 0, passwordHash: 0, confirmationData: 0 },
+        })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
-            .toArray()
     },
     async getUsersCount(
         searchLoginTerm: string | null,
@@ -50,20 +48,20 @@ export const usersRepository = {
                 { email: { $regex: searchEmailTerm, $options: 'i' } },
             ]
         }
-        return usersCollection.countDocuments(filter)
+        return UserModel.countDocuments(filter)
     },
     async getUserById(id: string): Promise<UserType | null> {
-        return usersCollection.findOne(
+        return UserModel.findOne(
             { id },
             { projection: { _id: 0, passwordHash: 0, confirmationData: 0 } }
         )
     },
     async _getUserById(id: string): Promise<UserType | null> {
-        return usersCollection.findOne({ id })
+        return UserModel.findOne({ id })
     },
 
     async getAndUpdateUserByConfirmationCode(code: string): Promise<UserType | null> {
-        const res = await usersCollection.findOneAndUpdate(
+        return UserModel.findOneAndUpdate(
             {
                 $and: [
                     { 'confirmationData.code': code },
@@ -72,10 +70,9 @@ export const usersRepository = {
             },
             { $set: { 'confirmationData.isConfirmed': true } }
         )
-        return res.value
     },
     async getUserByConfirmationCode(code: string): Promise<UserType | null> {
-        return usersCollection.findOne({
+        return UserModel.findOne({
             $and: [
                 { 'confirmationData.code': code },
                 { 'confirmationData.data': { $gte: new Date() } },
@@ -83,7 +80,7 @@ export const usersRepository = {
         })
     },
     async updateUserConfirmationCode(id: string): Promise<UserType | null> {
-        await usersCollection.findOneAndUpdate(
+        await UserModel.findOneAndUpdate(
             { id },
             {
                 $set: {
@@ -92,57 +89,25 @@ export const usersRepository = {
                 },
             }
         )
-        return usersCollection.findOne({ id })
+        return UserModel.findOne({ id })
     },
 
-    // async updateRefreshToken(
-    //     id: string,
-    //     refreshTokenPart: string | null,
-    //     deviceId: string
-    // ): Promise<UserType | null> {
-    //     const user = await usersCollection.findOne({ id })
-    //     if (!user) {
-    //         return null
-    //     }
-    //     if (refreshTokenPart) {
-    //         const devices = user.tokensBase.map((d) =>
-    //             d.deviceId === deviceId ? { ...d, refreshTokenData: refreshTokenPart } : d
-    //         )
-    //         await usersCollection.findOneAndUpdate(
-    //             { id, 'tokensBase.dId': deviceId },
-    //             { $set: { tokensBase: devices } }
-    //         )
-    //     } else {
-    //         const devices = user?.tokensBase.filter((d) => d.deviceId !== deviceId)
-    //         await usersCollection.findOneAndUpdate(
-    //             { id, 'tokensBase.deviceId': deviceId },
-    //             { $set: { tokensBase: devices } }
-    //         )
-    //     }
-    //     return usersCollection.findOne({ id })
-    // },
-
-    // async updateTokensBase(id: string, data: TokensBaseType): Promise<UserType | null> {
-    //     await usersCollection.findOneAndUpdate({ id }, { $push: { tokensBase: data } })
-    //     return usersCollection.findOne({ id })
-    // },
-
     async getUserByLoginOrEmail(loginOrEmail: string) {
-        return usersCollection.findOne({
+        return UserModel.findOne({
             $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
         })
     },
 
     async createUser(newUser: UserType) {
-        await usersCollection.insertOne(newUser)
+        await UserModel.insertMany(newUser)
         return this.getUserById(newUser.id)
     },
     async deleteUser(id: string): Promise<boolean> {
-        const res = await usersCollection.deleteOne({ id })
+        const res = await UserModel.deleteOne({ id })
         return res.deletedCount === 1
     },
     async deleteAll() {
-        return usersCollection.deleteMany({})
+        return UserModel.deleteMany({})
     },
 }
 export type UserType = {

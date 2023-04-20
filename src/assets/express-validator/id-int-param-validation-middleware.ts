@@ -6,7 +6,12 @@ import { commentsService } from '../../services/comments-service'
 
 export const idIntParamValidationMiddleware = (req: Request, res: Response, next: NextFunction) => {
     //if NaN - return !id === false
-    if (req.params.id && parseInt(req.params.id)) {
+    if (req.params.id) {
+        const result = Number(req.params.id)
+        if (isNaN(result)) {
+            res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
+            return
+        }
         next()
     } else {
         res.sendStatus(CodeResponsesEnum.Incorrect_values_400)

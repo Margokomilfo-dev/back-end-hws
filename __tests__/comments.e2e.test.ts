@@ -8,8 +8,12 @@ import { BlogType } from '../src/routes/blogs-router'
 import { createBlog, createComment, createPost, createUser, getTokenPostAuthLogin } from './assets'
 import { UserType } from '../src/repositores/users-db-repository'
 import { CommentType } from '../src/services/comments-service'
+import mongoose from 'mongoose'
+import dotenv from 'dotenv'
+dotenv.config()
 
-//от этой ошибки! -> thrown: "Exceeded timeout of 5000 ms for a test. go to the jest.config.js
+const dbName = 'hw'
+const mongoURI = process.env.mongoURI || `mongodb://0.0.0.0:27017/${dbName}`
 
 describe('/comments', () => {
     let user: UserType | null = null
@@ -23,8 +27,16 @@ describe('/comments', () => {
     let comment1: CommentType | null = null
 
     beforeAll(async () => {
+        /* Connecting to the database before each test. */
+        await mongoose.connect(mongoURI)
         await request(app).delete('/testing/all-data').expect(204)
     })
+
+    afterAll(async () => {
+        /* Closing database connection after each test. */
+        await mongoose.connection.close()
+    })
+
     describe('preparing', () => {
         it('POST users', async () => {
             user = await createUser({

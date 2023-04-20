@@ -7,6 +7,12 @@ import { userLogin } from './assets'
 import { usersService } from '../src/services/users-service'
 import { SecurityType } from '../src/repositores/security-db-repository'
 import { securityService } from '../src/services/security-service'
+import mongoose from 'mongoose'
+import dotenv from 'dotenv'
+dotenv.config()
+
+const dbName = 'hw'
+const mongoURI = process.env.mongoURI || `mongodb://0.0.0.0:27017/${dbName}`
 
 describe('/secure', () => {
     let sessions: SecurityType[]
@@ -21,8 +27,16 @@ describe('/secure', () => {
     let user2: UserType | null
 
     beforeAll(async () => {
+        /* Connecting to the database before each test. */
+        await mongoose.connect(mongoURI)
         await request(app).delete('/testing/all-data').expect(204)
     })
+
+    afterAll(async () => {
+        /* Closing database connection after each test. */
+        await mongoose.connection.close()
+    })
+
     describe('POST auth/registration', () => {
         it('+ POST registration', async function () {
             await request(app)
@@ -188,7 +202,6 @@ describe('/secure', () => {
                 .expect(CodeResponsesEnum.Success_200)
 
             expect(res.body.length).toBe(2)
-            console.log(res.body)
         })
     })
     describe('DELETE sessions', () => {

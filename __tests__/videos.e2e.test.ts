@@ -2,6 +2,12 @@ import request from 'supertest'
 import { VideoType } from '../src/routes/videos-router'
 import { CodeResponsesEnum } from '../src/types'
 import { app } from '../src/settings'
+import mongoose from 'mongoose'
+import dotenv from 'dotenv'
+dotenv.config()
+
+const dbName = 'hw'
+const mongoURI = process.env.mongoURI || `mongodb://0.0.0.0:27017/${dbName}`
 
 //от этой ошибки! -> thrown: "Exceeded timeout of 5000 ms for a test. go to the jest.config.js
 
@@ -9,7 +15,14 @@ describe('/videos', () => {
     let newVideo: VideoType | null = null
 
     beforeAll(async () => {
+        /* Connecting to the database before each test. */
+        await mongoose.connect(mongoURI)
         await request(app).delete('/testing/all-data').expect(204)
+    })
+
+    afterAll(async () => {
+        /* Closing database connection after each test. */
+        await mongoose.connection.close()
     })
 
     it('GET products = []', async () => {
@@ -291,13 +304,13 @@ describe('/videos', () => {
     })
 
     it('- DELETE product by incorrect ID', async () => {
-        await request(app).delete('/videos/1kcnsdk').expect(CodeResponsesEnum.Not_found_404)
+        await request(app).delete('/videos/1kcnsdk').expect(CodeResponsesEnum.Incorrect_values_400)
 
         const res = await request(app).get('/videos/')
         expect(res.body[0]).toEqual(newVideo)
     })
     it('- DELETE product by incorrect ID', async () => {
-        await request(app).delete('/videos/876328').expect(CodeResponsesEnum.Not_found_404)
+        await request(app).delete('/videos/111').expect(CodeResponsesEnum.Not_found_404)
 
         const res = await request(app).get('/videos/')
         expect(res.body[0]).toEqual(newVideo)

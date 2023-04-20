@@ -4,6 +4,12 @@ import request from 'supertest'
 import { app } from '../src/settings'
 import { UserType } from '../src/repositores/users-db-repository'
 import { createUser } from './assets'
+import mongoose from 'mongoose'
+import dotenv from 'dotenv'
+dotenv.config()
+
+const dbName = 'hw'
+const mongoURI = process.env.mongoURI || `mongodb://0.0.0.0:27017/${dbName}`
 
 describe('/users', () => {
     let user1: UserType | null = null
@@ -11,7 +17,14 @@ describe('/users', () => {
     let user3: UserType | null = null
 
     beforeAll(async () => {
+        /* Connecting to the database before each test. */
+        await mongoose.connect(mongoURI)
         await request(app).delete('/testing/all-data').expect(204)
+    })
+
+    afterAll(async () => {
+        /* Closing database connection after each test. */
+        await mongoose.connection.close()
     })
 
     describe('GET', () => {
