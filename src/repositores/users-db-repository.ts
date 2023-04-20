@@ -86,6 +86,22 @@ export const usersRepository = {
                 $set: {
                     'confirmationData.code': uuidv4(),
                     'confirmationData.data': dateFns(new Date(), 10),
+                    'confirmationData.isConfirmed': false,
+                },
+            }
+        )
+        return UserModel.findOne({ id })
+    },
+
+    async updateUserPassword(id: string, passwordHash: string): Promise<UserType | null> {
+        await UserModel.findOneAndUpdate(
+            { id },
+            {
+                $set: {
+                    passwordHash,
+                    'confirmationData.code': uuidv4(),
+                    'confirmationData.data': dateFns(new Date(), 10),
+                    'confirmationData.isConfirmed': true,
                 },
             }
         )

@@ -4,7 +4,9 @@ import {
     codeValidator,
     emailValidator,
     loginValidator,
+    newPasswordValidator,
     passwordValidator,
+    recoveryCodeValidator,
     userLoginOrEmailValidator,
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
@@ -22,6 +24,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { firstPartsOfJWTToken, getJWTPayload } from '../assets/jwt-parse'
 import { securityService } from '../services/security-service'
 import { rateLimitMiddleware } from '../middlewares/rate-limit-middleware'
+import { emailService } from '../services/email-service'
 
 export const authRouter = Router({})
 
@@ -71,6 +74,57 @@ authRouter.post(
 )
 
 authRouter.post(
+    '/password-recovery',
+    rateLimitMiddleware,
+    emailValidator,
+    errorsResultMiddleware,
+    async (req: Request, res: Response) => {
+        let email = req.body.email
+
+        const user = await usersService.getUserByLoginOrEmail(email)
+        if (!user) {
+            res.sendStatus(CodeResponsesEnum.Not_content_204)
+            return
+        }
+        const updatedUser = await usersService.updateUserConfirmationCode(user.id)
+        await emailService.sendEmail(
+            email,
+            'Email resending confirmation',
+            `<h1>Password recovery confirmation</h1>
+                     <p>To finish password recovery please follow the link below:
+                        <a href='https://somesite.com/password-recovery?recoveryCode=${
+                            updatedUser!.confirmationData.code
+                        }'>recovery password</a>
+                     </p>`
+        )
+        res.sendStatus(CodeResponsesEnum.Not_content_204)
+    }
+)
+
+authRouter.post(
+    '/new-password',
+    rateLimitMiddleware,
+    newPasswordValidator,
+    recoveryCodeValidator,
+    errorsResultMiddleware,
+    async (req: Request, res: Response) => {
+        let newPassword = req.body.newPassword
+        let recoveryCode = req.body.recoveryCode
+
+        const user = await usersService.getUserByConfirmationCode(recoveryCode)
+        if (!user) {
+            res.sendStatus(CodeResponsesEnum.Not_found_404)
+            return
+        }
+        const updatedUser = await usersService.updateUserPassword(user.id, newPassword)
+
+        if (updatedUser) {
+            res.sendStatus(CodeResponsesEnum.Not_content_204)
+        } else res.sendStatus(CodeResponsesEnum.Not_content_204)
+    }
+)
+
+authRouter.post(
     '/refresh-token',
     checkCookiesAndUserMiddleware,
     async (req: Request, res: Response) => {
@@ -108,7 +162,6 @@ authRouter.post(
         })
     }
 )
-
 authRouter.post(
     '/registration',
     rateLimitMiddleware,

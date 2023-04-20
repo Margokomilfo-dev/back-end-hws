@@ -179,6 +179,67 @@ describe('/auth', () => {
                 .expect(CodeResponsesEnum.Not_content_204)
         })
     })
+    describe('POST auth/password-recovery', () => {
+        it('- POST no correct email', async function () {
+            await request(app)
+                .post('/auth/password-recovery')
+                .send({ email: 'm#gmail.com' })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [{ message: 'not correct', field: 'email' }],
+                })
+        })
+        it('- POST no existed correct email', async function () {
+            await request(app)
+                .post('/auth/password-recovery')
+                .send({ email: 'm@gmail.com' })
+                .expect(CodeResponsesEnum.Not_content_204)
+        })
+        it('+ POST correct code', async function () {
+            await request(app)
+                .post('/auth/password-recovery')
+                .send({ email: user2!.email })
+                .expect(CodeResponsesEnum.Not_content_204)
+
+            user2 = await usersService.getUserByLoginOrEmail('margokomilfo.dek@gmail.com')
+        })
+    })
+    describe('POST auth/new-password', () => {
+        it('- POST not correct data', async function () {
+            await request(app)
+                .post('/auth/new-password')
+                .send({ recoveryCode: user2!.confirmationData.code })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [{ message: 'password is required', field: 'newPassword' }],
+                })
+        })
+        it('- POST not correct data', async function () {
+            await request(app)
+                .post('/auth/new-password')
+                .send({ newPassword: '87654321' })
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        { message: 'recoveryCode is required', field: 'recoveryCode' },
+                    ],
+                })
+        })
+        it('- POST not correct data', async function () {
+            await request(app)
+                .post('/auth/new-password')
+                .send()
+                .expect(CodeResponsesEnum.Incorrect_values_400, {
+                    errorsMessages: [
+                        { message: 'password is required', field: 'newPassword' },
+                        { message: 'recoveryCode is required', field: 'recoveryCode' },
+                    ],
+                })
+        })
+        it('+ POST correct code', async function () {
+            await request(app)
+                .post('/auth/new-password')
+                .send({ newPassword: '87654321', recoveryCode: user2!.confirmationData.code })
+                .expect(CodeResponsesEnum.Not_content_204)
+        })
+    })
 
     describe('POST auth/login', () => {
         it('+ POST login user', async function () {

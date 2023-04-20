@@ -97,6 +97,18 @@ export const passwordValidator = body('password')
     .isLength({ min: 6, max: 20 })
     .withMessage('password should contain 6 - 20 symbols')
 
+export const newPasswordValidator = body('newPassword')
+    .trim()
+    .notEmpty()
+    .withMessage('password is required')
+    .isLength({ min: 6, max: 20 })
+    .withMessage('newPassword should contain 6 - 20 symbols')
+
+export const recoveryCodeValidator = body('recoveryCode')
+    .trim()
+    .notEmpty()
+    .withMessage('recoveryCode is required')
+
 export const userLoginOrEmailValidator = body('loginOrEmail')
     .trim()
     .notEmpty()

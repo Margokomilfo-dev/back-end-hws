@@ -49,6 +49,7 @@ export const usersService = {
     // async updateTokensBase(id: string, data: TokensBaseType): Promise<UserType | null> {
     //     return usersRepository.updateTokensBase(id, data)
     // },
+
     async getUserByLoginOrEmail(loginOrEmail: string): Promise<UserType | null> {
         return usersRepository.getUserByLoginOrEmail(loginOrEmail)
     },
@@ -74,6 +75,15 @@ export const usersService = {
             },
         }
         return usersRepository.createUser(newUser)
+    },
+    async updateUserPassword(id: string, newPassword: string): Promise<UserType | null> {
+        const user = await usersRepository.getUserById(id)
+        if (!user) {
+            return null
+        }
+        const salt = await cryptoService._generateSalt()
+        const passwordHash = await cryptoService._generateHash(newPassword, salt)
+        return usersRepository.updateUserPassword(id, passwordHash)
     },
     async deleteUser(id: string) {
         return usersRepository.deleteUser(id)
