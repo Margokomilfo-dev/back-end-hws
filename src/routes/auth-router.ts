@@ -113,7 +113,7 @@ authRouter.post(
 
         const user = await usersService.getUserByConfirmationCode(recoveryCode)
         if (!user) {
-            res.sendStatus(CodeResponsesEnum.Not_found_404)
+            res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
             return
         }
         const updatedUser = await usersService.updateUserPassword(user.id, newPassword)
