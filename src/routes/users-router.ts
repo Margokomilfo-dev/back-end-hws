@@ -14,41 +14,37 @@ import { basicAuthorizationMiddleware } from '../middlewares/basic-authorization
 
 export const usersRouter = Router({})
 
-usersRouter.get('/', basicAuthorizationMiddleware, async (req: Request, res: Response) => {
-    // searchLoginTerm: string, searchEmailTerm: string
-    const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
+class UserController {
+    async getUsers(req: Request, res: Response) {
+        const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
 
-    let searchLoginTerm = req.query.searchLoginTerm ? req.query.searchLoginTerm.toString() : null
+        let searchLoginTerm = req.query.searchLoginTerm
+            ? req.query.searchLoginTerm.toString()
+            : null
 
-    let searchEmailTerm = req.query.searchEmailTerm ? req.query.searchEmailTerm.toString() : null
+        let searchEmailTerm = req.query.searchEmailTerm
+            ? req.query.searchEmailTerm.toString()
+            : null
 
-    const users = await usersService.getUsers(
-        pageNumber,
-        pageSize,
-        sortBy,
-        sortDirection,
-        searchLoginTerm,
-        searchEmailTerm
-    )
-    const usersCount = await usersRepository.getUsersCount(searchLoginTerm, searchEmailTerm)
-    const result = {
-        pagesCount: Math.ceil(usersCount / pageSize),
-        page: pageNumber,
-        pageSize,
-        totalCount: usersCount,
-        items: users,
+        const users = await usersService.getUsers(
+            pageNumber,
+            pageSize,
+            sortBy,
+            sortDirection,
+            searchLoginTerm,
+            searchEmailTerm
+        )
+        const usersCount = await usersRepository.getUsersCount(searchLoginTerm, searchEmailTerm)
+        const result = {
+            pagesCount: Math.ceil(usersCount / pageSize),
+            page: pageNumber,
+            pageSize,
+            totalCount: usersCount,
+            items: users,
+        }
+        res.status(CodeResponsesEnum.Success_200).send(result)
     }
-    res.status(CodeResponsesEnum.Success_200).send(result)
-})
-
-usersRouter.post(
-    '/',
-    basicAuthorizationMiddleware,
-    loginValidator,
-    passwordValidator,
-    emailValidator,
-    errorsResultMiddleware,
-    async (req: Request, res: Response) => {
+    async createUser(req: Request, res: Response) {
         const login = req.body.login
         const email = req.body.email
         const password = req.body.password
@@ -61,13 +57,7 @@ usersRouter.post(
             res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
         }
     }
-)
-
-usersRouter.delete(
-    '/:id',
-    basicAuthorizationMiddleware,
-    userExistedParamValidationMiddleware,
-    async (req: Request, res: Response) => {
+    async deleteUser(req: Request, res: Response) {
         const id = req.params.id
         const isDeleted = await usersService.deleteUser(id)
         if (isDeleted) {
@@ -76,4 +66,23 @@ usersRouter.delete(
             res.sendStatus(CodeResponsesEnum.Not_found_404)
         }
     }
+}
+
+const userController = new UserController()
+
+usersRouter.get('/', basicAuthorizationMiddleware, userController.getUsers)
+usersRouter.post(
+    '/',
+    basicAuthorizationMiddleware,
+    loginValidator,
+    passwordValidator,
+    emailValidator,
+    errorsResultMiddleware,
+    userController.createUser
+)
+usersRouter.delete(
+    '/:id',
+    basicAuthorizationMiddleware,
+    userExistedParamValidationMiddleware,
+    userController.deleteUser
 )

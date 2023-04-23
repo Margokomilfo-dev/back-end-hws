@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid'
 import dateFns from 'date-fns/addMinutes'
 import { UserModel } from '../mongo/user/user.model'
 
-export const usersRepository = {
+class UserRepository {
     async getUsers(
         pageNumber: number,
         pageSize: number,
@@ -33,7 +33,7 @@ export const usersRepository = {
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
-    },
+    }
     async getUsersCount(
         searchLoginTerm: string | null,
         searchEmailTerm: string | null
@@ -52,13 +52,13 @@ export const usersRepository = {
             ]
         }
         return UserModel.countDocuments(filter)
-    },
+    }
     async getUserById(id: string): Promise<UserType | null> {
         return UserModel.findOne({ id }, { _id: 0, passwordHash: 0, __v: 0, confirmationData: 0 })
-    },
+    }
     async _getUserById(id: string): Promise<UserType | null> {
         return UserModel.findOne({ id })
-    },
+    }
 
     async getAndUpdateUserByConfirmationCode(code: string): Promise<UserType | null> {
         return UserModel.findOneAndUpdate(
@@ -70,7 +70,7 @@ export const usersRepository = {
             },
             { $set: { 'confirmationData.isConfirmed': true } }
         )
-    },
+    }
     async getUserByConfirmationCode(code: string): Promise<UserType | null> {
         return UserModel.findOne({
             $and: [
@@ -78,7 +78,7 @@ export const usersRepository = {
                 { 'confirmationData.data': { $gte: new Date() } },
             ],
         })
-    },
+    }
     async updateUserConfirmationCode(id: string): Promise<UserType | null> {
         await UserModel.findOneAndUpdate(
             { id },
@@ -91,8 +91,7 @@ export const usersRepository = {
             }
         )
         return UserModel.findOne({ id })
-    },
-
+    }
     async updateUserPassword(id: string, passwordHash: string): Promise<UserType | null> {
         await UserModel.findOneAndUpdate(
             { id },
@@ -106,33 +105,37 @@ export const usersRepository = {
             }
         )
         return UserModel.findOne({ id })
-    },
+    }
 
     async getUserByLoginOrEmail(loginOrEmail: string) {
         return UserModel.findOne({
             $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
         })
-    },
+    }
 
     async createUser(newUser: UserType) {
         await UserModel.insertMany(newUser)
         return this.getUserById(newUser.id)
-    },
+    }
     async deleteUser(id: string): Promise<boolean> {
         const res = await UserModel.deleteOne({ id })
         return res.deletedCount === 1
-    },
+    }
     async deleteAll() {
         return UserModel.deleteMany({})
-    },
+    }
 }
-export type UserType = {
-    id: string
-    login: string
-    email: string
-    createdAt: string
-    passwordHash: string
-    confirmationData: ConfirmationDataType
+export const usersRepository = new UserRepository()
+
+export class UserType {
+    constructor(
+        public id: string,
+        public login: string,
+        public email: string,
+        public createdAt: string,
+        public passwordHash: string,
+        public confirmationData: ConfirmationDataType
+    ) {}
 }
 
 export type ConfirmationDataType = {
