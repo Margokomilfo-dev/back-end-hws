@@ -1,9 +1,9 @@
 import request from 'supertest'
-import { VideoType } from '../src/routes/videos-router'
 import { CodeResponsesEnum } from '../src/types'
 import { app } from '../src/settings'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
+import { VideoType } from '../src/repositores/videos-db-repository'
 dotenv.config()
 
 const dbName = 'hw'

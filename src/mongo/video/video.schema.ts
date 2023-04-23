@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
-import { VideoType } from '../../routes/videos-router'
 import { WithId } from 'mongodb'
+import { VideoType } from '../../repositores/videos-db-repository'
 
 export const VideoSchema = new mongoose.Schema<WithId<VideoType>>({
     id: { type: Number, require: true },

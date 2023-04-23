@@ -1,6 +1,6 @@
 import { validationResult } from 'express-validator'
 import { NextFunction, Request, Response } from 'express'
-import { ResolutionsEnum } from '../../routes/videos-router'
+import { ResolutionsEnum } from '../../repositores/videos-db-repository'
 
 export const errorsResultMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req)
