@@ -5,33 +5,20 @@ import { jwtService } from '../services/jwt-service'
 import { securityService } from '../services/security-service'
 
 export const securityRouter = Router({})
-
-//здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
-securityRouter.get(
-    '/devices',
-    checkCookiesAndUserMiddleware,
-    async (req: Request, res: Response) => {
+class SecurityController {
+    async getDevices(req: Request, res: Response) {
         const refreshToken = req.cookies.refreshToken
         const data = await jwtService.verifyAndGetUserIdByToken(refreshToken)
         const devices = await securityService.getSessionsByUserId(data!.userId)
         res.status(CodeResponsesEnum.Success_200).send(devices)
     }
-)
-
-securityRouter.delete(
-    '/devices',
-    checkCookiesAndUserMiddleware,
-    async (req: Request, res: Response) => {
+    async deleteDevices(req: Request, res: Response) {
         const refreshToken = req.cookies.refreshToken
         const data = await jwtService.verifyAndGetUserIdByToken(refreshToken)
         await securityService.deleteAllOtherSessions(data!.userId, data!.deviceId)
         res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
-)
-securityRouter.delete(
-    '/devices/:deviceId',
-    checkCookiesAndUserMiddleware,
-    async (req: Request, res: Response) => {
+    async deleteDevice(req: Request, res: Response) {
         const deviceId = req.params.deviceId
         const refreshToken = req.cookies.refreshToken
         const data = await jwtService.verifyAndGetUserIdByToken(refreshToken)
@@ -51,4 +38,14 @@ securityRouter.delete(
         }
         res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
+}
+const securityController = new SecurityController()
+
+//здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
+securityRouter.get('/devices', checkCookiesAndUserMiddleware, securityController.getDevices)
+securityRouter.delete('/devices', checkCookiesAndUserMiddleware, securityController.deleteDevices)
+securityRouter.delete(
+    '/devices/:deviceId',
+    checkCookiesAndUserMiddleware,
+    securityController.deleteDevice
 )
