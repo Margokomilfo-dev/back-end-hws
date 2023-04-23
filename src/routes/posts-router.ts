@@ -15,7 +15,7 @@ import {
 import { _customIsBlogValidator } from '../assets/express-validator/custom-validators'
 import { basicAuthorizationMiddleware } from '../middlewares/basic-authorization-middleware'
 import { postsService } from '../services/posts-service'
-import { blogsService } from '../services/blogs-service'
+import { blogService } from '../services/blogs-service'
 import { paginationQueries } from '../assets/pagination'
 import { commentsService } from '../services/comments-service'
 import { bearerAuthorizationMiddleware } from '../middlewares/bearer-authorization-middleware'
@@ -80,7 +80,7 @@ postsRouter.post(
     errorsResultMiddleware,
     async (req: Request, res: Response) => {
         const blogId = req.body.blogId
-        const blog = await blogsService.getBlogById(blogId)
+        const blog = await blogService.getBlogById(blogId)
 
         const newPost = await postsService.createPost(req.body, blog!.name)
 

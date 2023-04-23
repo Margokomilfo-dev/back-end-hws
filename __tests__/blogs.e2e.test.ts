@@ -1,13 +1,12 @@
 import { CodeResponsesEnum } from '../src/types'
-import { BlogType } from '../src/routes/blogs-router'
 // @ts-ignore
 import request from 'supertest'
 import { app } from '../src/settings'
 import { createBlog, createPost } from './assets'
 import { PostType } from '../src/routes/posts-router'
 import mongoose from 'mongoose'
-import { MongoClient } from 'mongodb'
 import dotenv from 'dotenv'
+import { BlogType } from '../src/repositores/blogs-db-repository'
 dotenv.config()
 
 const dbName = 'hw'
@@ -412,7 +411,14 @@ describe('/blogs', () => {
 
             const res = await request(app).get('/blogs/')
             const ourBlog = res.body.items.find((i: BlogType) => i.id === newBlog!.id)
-            expect(ourBlog).toEqual(updatedBlog)
+            expect(ourBlog).toEqual({
+                createdAt: updatedBlog.createdAt,
+                description: updatedBlog.description,
+                id: updatedBlog.id,
+                isMembership: updatedBlog.isMembership,
+                name: updatedBlog.name,
+                websiteUrl: updatedBlog.websiteUrl,
+            })
             newBlog = updatedBlog
         })
     })

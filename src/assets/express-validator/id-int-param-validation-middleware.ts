@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
 import { CodeResponsesEnum } from '../../types'
-import { blogsService } from '../../services/blogs-service'
+
 import { usersService } from '../../services/users-service'
 import { commentsService } from '../../services/comments-service'
+import { blogService } from '../../services/blogs-service'
 
 export const idIntParamValidationMiddleware = (req: Request, res: Response, next: NextFunction) => {
     //if NaN - return !id === false
@@ -38,7 +39,7 @@ export const blogIdStringParamValidationMiddleware = async (
 ) => {
     let blogId = req.params.blogId?.toString().trim()
     if (blogId) {
-        const res_ = await blogsService.getBlogById(blogId)
+        const res_ = await blogService.getBlogById(blogId)
         if (res_) {
             next()
         } else {

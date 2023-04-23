@@ -67,6 +67,7 @@ authRouter.post(
                 httpOnly: true,
                 secure: true,
             })
+
             res.status(CodeResponsesEnum.Success_200).send({
                 accessToken: token,
             })
@@ -99,26 +100,6 @@ authRouter.post(
                      </p>`
         )
         res.sendStatus(CodeResponsesEnum.Not_content_204)
-    }
-)
-
-authRouter.post(
-    '/new-password',
-    rateLimitMiddleware,
-    newPasswordValidator,
-    recoveryCodeValidator,
-    userIsExistMiddleware,
-    errorsResultMiddleware,
-    async (req: Request, res: Response) => {
-        let newPassword = req.body.newPassword
-        let recoveryCode = req.body.recoveryCode
-
-        const user = await usersService.getUserByConfirmationCode(recoveryCode)
-        const updatedUser = await usersService.updateUserPassword(user!.id, newPassword)
-
-        if (updatedUser) {
-            res.sendStatus(CodeResponsesEnum.Not_content_204)
-        } else res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
 )
 
@@ -158,6 +139,26 @@ authRouter.post(
         res.status(CodeResponsesEnum.Success_200).send({
             accessToken: token,
         })
+    }
+)
+
+authRouter.post(
+    '/new-password',
+    rateLimitMiddleware,
+    newPasswordValidator,
+    recoveryCodeValidator,
+    errorsResultMiddleware,
+    userIsExistMiddleware,
+    async (req: Request, res: Response) => {
+        let newPassword = req.body.newPassword
+        let recoveryCode = req.body.recoveryCode
+
+        const user = await usersService.getUserByConfirmationCode(recoveryCode)
+        const updatedUser = await usersService.updateUserPassword(user!.id, newPassword)
+
+        if (updatedUser) {
+            res.sendStatus(CodeResponsesEnum.Not_content_204)
+        } else res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
 )
 authRouter.post(

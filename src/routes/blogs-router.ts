@@ -15,48 +15,41 @@ import {
     idStringParamValidationMiddleware,
 } from '../assets/express-validator/id-int-param-validation-middleware'
 import { basicAuthorizationMiddleware } from '../middlewares/basic-authorization-middleware'
-import { blogsService } from '../services/blogs-service'
+import { blogService } from '../services/blogs-service'
 import { postsService } from '../services/posts-service'
 import { paginationQueries } from '../assets/pagination'
 
 export const blogsRouter = Router({})
 
-blogsRouter.get('/', async (req: Request, res: Response) => {
-    const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
+class BlogsController {
+    async getBlogs(req: Request, res: Response) {
+        const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
 
-    let searchNameTerm = req.query.searchNameTerm ? req.query.searchNameTerm.toString() : null
+        let searchNameTerm = req.query.searchNameTerm ? req.query.searchNameTerm.toString() : null
 
-    const blogs = await blogsService.getBlogs(
-        pageNumber,
-        pageSize,
-        sortBy,
-        sortDirection,
-        searchNameTerm
-    )
-    const blogsCount = await blogsService.getBlogsCount(searchNameTerm)
-    const result = {
-        pagesCount: Math.ceil(blogsCount / pageSize),
-        page: pageNumber,
-        pageSize,
-        totalCount: blogsCount,
-        items: blogs,
+        const blogs = await blogService.getBlogs(
+            pageNumber,
+            pageSize,
+            sortBy,
+            sortDirection,
+            searchNameTerm
+        )
+        const blogsCount = await blogService.getBlogsCount(searchNameTerm)
+        const result = {
+            pagesCount: Math.ceil(blogsCount / pageSize),
+            page: pageNumber,
+            pageSize,
+            totalCount: blogsCount,
+            items: blogs,
+        }
+        res.status(CodeResponsesEnum.Success_200).send(result)
     }
-    res.status(CodeResponsesEnum.Success_200).send(result)
-})
-
-blogsRouter.post(
-    '/',
-    basicAuthorizationMiddleware,
-    blogNameValidator,
-    blogDescriptionValidator,
-    blogWebsiteUrlValidator,
-    errorsResultMiddleware,
-    async (req: Request, res: Response) => {
+    async createBlog(req: Request, res: Response) {
         const name = req.body.name
         const description = req.body.description
         const websiteUrl = req.body.websiteUrl
 
-        const newBlog = await blogsService.createBlog(name, description, websiteUrl)
+        const newBlog = await blogService.createBlog(name, description, websiteUrl)
 
         if (newBlog) {
             res.status(CodeResponsesEnum.Created_201).send(newBlog) //если сделать sendStatus - не дойдем до send
@@ -64,18 +57,8 @@ blogsRouter.post(
             res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
         }
     }
-)
-
-blogsRouter.post(
-    '/:blogId/posts',
-    basicAuthorizationMiddleware,
-    blogIdStringParamValidationMiddleware,
-    postTitleValidator,
-    postShortDescriptionValidator,
-    postContentValidator,
-    errorsResultMiddleware,
-    async (req: Request, res: Response) => {
-        const blog = await blogsService.getBlogById(req.params.blogId)
+    async createPostForBlog(req: Request, res: Response) {
+        const blog = await blogService.getBlogById(req.params.blogId)
         const newPost = await postsService.createPost(
             {
                 title: req.body.title,
@@ -92,24 +75,17 @@ blogsRouter.post(
             res.sendStatus(CodeResponsesEnum.Incorrect_values_400)
         }
     }
-)
+    async getBlog(req: Request, res: Response) {
+        const id = req.params.id
 
-//здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
-blogsRouter.get('/:id', idStringParamValidationMiddleware, async (req: Request, res: Response) => {
-    const id = req.params.id
-
-    const blog = await blogsService.getBlogById(id)
-    if (blog) {
-        res.status(CodeResponsesEnum.Success_200).send(blog)
-    } else {
-        res.sendStatus(CodeResponsesEnum.Not_found_404)
+        const blog = await blogService.getBlogById(id)
+        if (blog) {
+            res.status(CodeResponsesEnum.Success_200).send(blog)
+        } else {
+            res.sendStatus(CodeResponsesEnum.Not_found_404)
+        }
     }
-})
-
-blogsRouter.get(
-    '/:blogId/posts',
-    blogIdStringParamValidationMiddleware,
-    async (req: Request, res: Response) => {
+    async getPostsByBlogId(req: Request, res: Response) {
         const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
 
         const id = req.params.blogId
@@ -132,6 +108,58 @@ blogsRouter.get(
 
         res.status(CodeResponsesEnum.Success_200).send(result)
     }
+    async updateBlog(req: Request, res: Response) {
+        const id = req.params.id
+        const isUpdated = await blogService.updateBlog(id, req.body)
+        if (!isUpdated) {
+            res.sendStatus(CodeResponsesEnum.Not_found_404)
+            return
+        }
+        res.sendStatus(CodeResponsesEnum.Not_content_204)
+    }
+    async deleteBlog(req: Request, res: Response) {
+        const id = req.params.id
+        const isDeleted = await blogService.deleteBlog(id)
+        if (isDeleted) {
+            res.sendStatus(CodeResponsesEnum.Not_content_204)
+        } else {
+            res.sendStatus(CodeResponsesEnum.Not_found_404)
+        }
+    }
+}
+
+const blogsController = new BlogsController()
+
+blogsRouter.get('/', blogsController.getBlogs)
+
+blogsRouter.post(
+    '/',
+    basicAuthorizationMiddleware,
+    blogNameValidator,
+    blogDescriptionValidator,
+    blogWebsiteUrlValidator,
+    errorsResultMiddleware,
+    blogsController.createBlog
+)
+
+blogsRouter.post(
+    '/:blogId/posts',
+    basicAuthorizationMiddleware,
+    blogIdStringParamValidationMiddleware,
+    postTitleValidator,
+    postShortDescriptionValidator,
+    postContentValidator,
+    errorsResultMiddleware,
+    blogsController.createPostForBlog
+)
+
+//здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
+blogsRouter.get('/:id', idStringParamValidationMiddleware, blogsController.getBlog)
+
+blogsRouter.get(
+    '/:blogId/posts',
+    blogIdStringParamValidationMiddleware,
+    blogsController.getPostsByBlogId
 )
 
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
@@ -143,15 +171,7 @@ blogsRouter.put(
     blogDescriptionValidator,
     blogWebsiteUrlValidator,
     errorsResultMiddleware,
-    async (req: Request, res: Response) => {
-        const id = req.params.id
-        const isUpdated = await blogsService.updateBlog(id, req.body)
-        if (!isUpdated) {
-            res.sendStatus(CodeResponsesEnum.Not_found_404)
-            return
-        }
-        res.sendStatus(CodeResponsesEnum.Not_content_204)
-    }
+    blogsController.updateBlog
 )
 
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
@@ -159,22 +179,5 @@ blogsRouter.delete(
     '/:id',
     basicAuthorizationMiddleware,
     idStringParamValidationMiddleware,
-    async (req: Request, res: Response) => {
-        const id = req.params.id
-        const isDeleted = await blogsService.deleteBlog(id)
-        if (isDeleted) {
-            res.sendStatus(CodeResponsesEnum.Not_content_204)
-        } else {
-            res.sendStatus(CodeResponsesEnum.Not_found_404)
-        }
-    }
+    blogsController.deleteBlog
 )
-
-export type BlogType = {
-    id: string
-    name: string
-    description: string
-    websiteUrl: string
-    isMembership: boolean
-    createdAt: string
-}

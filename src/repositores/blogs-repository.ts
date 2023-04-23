@@ -1,4 +1,4 @@
-import { BlogType } from '../routes/blogs-router'
+import { BlogType } from './blogs-db-repository'
 
 let blogs: Array<BlogType> = [
     {

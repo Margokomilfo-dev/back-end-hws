@@ -7,7 +7,7 @@ export const userIsExistMiddleware = async (req: Request, res: Response, next: N
     const user = await usersService.getUserByConfirmationCode(recoveryCode)
     if (!user) {
         res.status(CodeResponsesEnum.Incorrect_values_400).send({
-            errorsMessages: [{ message: 'incorrectCode', field: 'recoveryCode' }],
+            errorsMessages: [{ message: 'recoveryCode is required', field: 'recoveryCode' }],
         })
         return
     }

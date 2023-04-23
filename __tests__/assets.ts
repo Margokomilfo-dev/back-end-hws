@@ -1,10 +1,10 @@
 import request from 'supertest'
 import { app } from '../src/settings'
 import { CodeResponsesEnum } from '../src/types'
-import { BlogType } from '../src/routes/blogs-router'
 import { PostType } from '../src/routes/posts-router'
 import { UserType } from '../src/repositores/users-db-repository'
 import { CommentType } from '../src/services/comments-service'
+import { BlogType } from '../src/repositores/blogs-db-repository'
 
 export const createUser = async (dto: {
     login: string
