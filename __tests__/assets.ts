@@ -3,8 +3,8 @@ import { app } from '../src/settings'
 import { CodeResponsesEnum } from '../src/types'
 import { PostType } from '../src/routes/posts-router'
 import { UserType } from '../src/repositores/users-db-repository'
-import { CommentType } from '../src/services/comments-service'
 import { BlogType } from '../src/repositores/blogs-db-repository'
+import { CommentType } from '../src/repositores/comments-db-repository'
 
 export const createUser = async (dto: {
     login: string

@@ -11,12 +11,8 @@ import { bearerAuthorizationMiddleware } from '../middlewares/bearer-authorizati
 import { commentsService } from '../services/comments-service'
 
 export const commentsRouter = Router({})
-
-//здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
-commentsRouter.get(
-    '/:id',
-    idStringParamValidationMiddleware,
-    async (req: Request, res: Response) => {
+class CommentsController {
+    async getComment(req: Request, res: Response) {
         const id = req.params.id
 
         const comment = await commentsService.getCommentById(id)
@@ -26,16 +22,7 @@ commentsRouter.get(
             res.sendStatus(CodeResponsesEnum.Not_found_404)
         }
     }
-)
-
-commentsRouter.put(
-    '/:id',
-    bearerAuthorizationMiddleware,
-    idStringParamValidationMiddleware,
-    commentContentValidator,
-    isMineCommentValidationMiddleware,
-    errorsResultMiddleware,
-    async (req: Request, res: Response) => {
+    async updateComment(req: Request, res: Response) {
         const id = req.params.id?.toString().trim()
         const content = req.body.content
 
@@ -46,15 +33,7 @@ commentsRouter.put(
         }
         res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
-)
-
-//здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
-commentsRouter.delete(
-    '/:id',
-    bearerAuthorizationMiddleware,
-    idStringParamValidationMiddleware,
-    isMineCommentValidationMiddleware,
-    async (req: Request, res: Response) => {
+    async deleteComment(req: Request, res: Response) {
         const id = req.params.id
         const isDeleted = await commentsService.deleteComment(id)
         if (isDeleted) {
@@ -63,4 +42,26 @@ commentsRouter.delete(
             res.sendStatus(CodeResponsesEnum.Not_found_404)
         }
     }
+}
+const commentController = new CommentsController()
+//здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
+commentsRouter.get('/:id', idStringParamValidationMiddleware, commentController.getComment)
+
+commentsRouter.put(
+    '/:id',
+    bearerAuthorizationMiddleware,
+    idStringParamValidationMiddleware,
+    commentContentValidator,
+    isMineCommentValidationMiddleware,
+    errorsResultMiddleware,
+    commentController.updateComment
+)
+
+//здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
+commentsRouter.delete(
+    '/:id',
+    bearerAuthorizationMiddleware,
+    idStringParamValidationMiddleware,
+    isMineCommentValidationMiddleware,
+    commentController.deleteComment
 )

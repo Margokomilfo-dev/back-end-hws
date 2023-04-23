@@ -4,12 +4,13 @@ import request from 'supertest'
 import { CodeResponsesEnum } from '../src/types'
 import { PostType } from '../src/routes/posts-router'
 import { app } from '../src/settings'
-import { BlogType } from '../src/routes/blogs-router'
 import { createBlog, createComment, createPost, createUser, getTokenPostAuthLogin } from './assets'
 import { UserType } from '../src/repositores/users-db-repository'
-import { CommentType } from '../src/services/comments-service'
+
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
+import { BlogType } from '../src/repositores/blogs-db-repository'
+import { CommentType } from '../src/repositores/comments-db-repository'
 dotenv.config()
 
 const dbName = 'hw'
@@ -57,6 +58,9 @@ describe('/comments', () => {
             })
             const res = await request(app).get('/blogs/')
             expect(res.body.items.length).toBe(1)
+            expect(res.body.items[0].id).toBe(newBlog!.id)
+            expect(res.body.items[0].name).toBe(newBlog!.name)
+            expect(res.body.items[0].description).toBe(newBlog!.description)
             expect(res.body.items).toEqual([newBlog])
         })
 

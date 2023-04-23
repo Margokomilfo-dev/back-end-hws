@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import { WithId } from 'mongodb'
-import { CommentType } from '../../services/comments-service'
+import { CommentType } from '../../repositores/comments-db-repository'
 
 export const CommentsSchema = new mongoose.Schema<WithId<CommentType>>({
     id: { type: String, require: true },

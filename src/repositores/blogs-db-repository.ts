@@ -25,7 +25,7 @@ class BlogsRepository {
         return BlogModel.countDocuments(filter)
     }
     async getBlogById(id: string): Promise<BlogType | null> {
-        return BlogModel.findOne({ id }, { projection: { _id: 0 } })
+        return BlogModel.findOne({ id }, { _id: 0, __v: 0 })
     }
     async createBlog(blog: BlogType): Promise<BlogType | null> {
         await BlogModel.insertMany([blog])
@@ -40,7 +40,7 @@ class BlogsRepository {
             websiteUrl: 'string'
         }
     ): Promise<boolean> {
-        const res = await BlogModel.updateOne({ id }, { $set: { ...body } })
+        const res = await BlogModel.updateOne({ id }, body)
         return res.matchedCount === 1
     }
 
