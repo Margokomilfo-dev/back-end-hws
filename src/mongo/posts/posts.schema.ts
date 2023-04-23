@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import { WithId } from 'mongodb'
-import { PostType } from '../../routes/posts-router'
+import { PostType } from '../../repositores/posts-db-repository'
 
 export const PostsSchema = new mongoose.Schema<WithId<PostType>>({
     id: { type: String, require: true },

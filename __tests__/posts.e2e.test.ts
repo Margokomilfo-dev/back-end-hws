@@ -1,13 +1,13 @@
 import request from 'supertest'
 import { CodeResponsesEnum } from '../src/types'
-import { PostType } from '../src/routes/posts-router'
 import { app } from '../src/settings'
-import { BlogType } from '../src/routes/blogs-router'
 import { createBlog, createPost, createUser, getTokenPostAuthLogin } from './assets'
 import { UserType } from '../src/repositores/users-db-repository'
-import { CommentType } from '../src/services/comments-service'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
+import { PostType } from '../src/repositores/posts-db-repository'
+import { CommentType } from '../src/repositores/comments-db-repository'
+import { BlogType } from '../src/repositores/blogs-db-repository'
 dotenv.config()
 
 const dbName = 'hw'

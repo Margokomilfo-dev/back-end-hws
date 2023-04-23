@@ -1,4 +1,4 @@
-import { PostType } from '../routes/posts-router'
+import { PostType } from './posts-db-repository'
 
 let posts: Array<PostType> = [
     {
