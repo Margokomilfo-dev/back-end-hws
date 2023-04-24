@@ -3,10 +3,10 @@ import { CodeResponsesEnum } from '../src/types'
 import request from 'supertest'
 import { app } from '../src/settings'
 import { createBlog, createPost } from './assets'
-import { PostType } from '../src/routes/posts-router'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import { BlogType } from '../src/repositores/blogs-db-repository'
+import { PostType } from '../src/repositores/posts-db-repository'
 dotenv.config()
 
 const dbName = 'hw'

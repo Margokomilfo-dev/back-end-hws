@@ -2,7 +2,6 @@
 import request from 'supertest'
 
 import { CodeResponsesEnum } from '../src/types'
-import { PostType } from '../src/routes/posts-router'
 import { app } from '../src/settings'
 import { createBlog, createComment, createPost, createUser, getTokenPostAuthLogin } from './assets'
 import { UserType } from '../src/repositores/users-db-repository'
@@ -11,6 +10,7 @@ import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import { BlogType } from '../src/repositores/blogs-db-repository'
 import { CommentType } from '../src/repositores/comments-db-repository'
+import { PostType } from '../src/repositores/posts-db-repository'
 dotenv.config()
 
 const dbName = 'hw'

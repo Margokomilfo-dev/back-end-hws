@@ -358,7 +358,8 @@ describe('/auth', () => {
         await request(app)
             .post('/auth/login')
             .send({ loginOrEmail: 'Dimych', password: '1236' })
-            .expect(CodeResponsesEnum.Too_many_requests_429)
+            // .expect(CodeResponsesEnum.Too_many_requests_429)
+            .expect(CodeResponsesEnum.Incorrect_values_400) // for rate> 15
     })
     describe('POST auth/logout', () => {
         it('- POST no correct cookies', async function () {

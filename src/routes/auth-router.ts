@@ -29,13 +29,8 @@ import { userIsExistMiddleware } from '../middlewares/user-isExist-middleware'
 
 export const authRouter = Router({})
 
-authRouter.post(
-    '/login',
-    rateLimitMiddleware,
-    userLoginOrEmailValidator,
-    passwordValidator,
-    errorsResultMiddleware,
-    async (req: Request, res: Response) => {
+class AuthController {
+    async login(req: Request, res: Response) {
         let dName = 'non'
         let ipAddress = '127.0.0.1'
         if (req.headers['user-agent']) dName = req.headers['user-agent']
@@ -73,14 +68,7 @@ authRouter.post(
             })
         }
     }
-)
-
-authRouter.post(
-    '/password-recovery',
-    rateLimitMiddleware,
-    emailValidator,
-    errorsResultMiddleware,
-    async (req: Request, res: Response) => {
+    async passwordRecovery(req: Request, res: Response) {
         let email = req.body.email
 
         const user = await usersService.getUserByLoginOrEmail(email)
@@ -101,12 +89,7 @@ authRouter.post(
         )
         res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
-)
-
-authRouter.post(
-    '/refresh-token',
-    checkCookiesAndUserMiddleware,
-    async (req: Request, res: Response) => {
+    async refreshToken(req: Request, res: Response) {
         let dName = 'non'
         let ipAddress = '127.0.0.1'
         if (req.headers['user-agent']) dName = req.headers['user-agent']
@@ -140,16 +123,7 @@ authRouter.post(
             accessToken: token,
         })
     }
-)
-
-authRouter.post(
-    '/new-password',
-    rateLimitMiddleware,
-    newPasswordValidator,
-    recoveryCodeValidator,
-    errorsResultMiddleware,
-    userIsExistMiddleware,
-    async (req: Request, res: Response) => {
+    async newPassword(req: Request, res: Response) {
         let newPassword = req.body.newPassword
         let recoveryCode = req.body.recoveryCode
 
@@ -160,16 +134,7 @@ authRouter.post(
             res.sendStatus(CodeResponsesEnum.Not_content_204)
         } else res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
-)
-authRouter.post(
-    '/registration',
-    rateLimitMiddleware,
-    loginValidator,
-    passwordValidator,
-    emailValidator,
-    isLoginOrEmailExistsValidationMiddleware,
-    errorsResultMiddleware,
-    async (req: Request, res: Response) => {
+    async registration(req: Request, res: Response) {
         const login = req.body.login
         const password = req.body.password
         const email = req.body.email
@@ -201,27 +166,12 @@ authRouter.post(
 
         res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
-)
-authRouter.post(
-    '/registration-confirmation',
-    rateLimitMiddleware,
-    codeValidator,
-    _customUserValidator,
-    errorsResultMiddleware,
-    async (req: Request, res: Response) => {
+    async registrationConfirmation(req: Request, res: Response) {
         const code = req.body.code
         await usersService.getAndUpdateUserByConfirmationCode(code)
         res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
-)
-
-authRouter.post(
-    '/registration-email-resending',
-    rateLimitMiddleware,
-    emailValidator,
-    _customIsUserValidator,
-    errorsResultMiddleware,
-    async (req: Request, res: Response) => {
+    async registrationEmailResending(req: Request, res: Response) {
         const email = req.body.email
         const user = await usersService.getUserByLoginOrEmail(email)
         const updUser = await usersService.updateUserConfirmationCode(user!.id)
@@ -236,24 +186,84 @@ authRouter.post(
         }
         res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
-)
-authRouter.post('/logout', checkCookiesAndUserMiddleware, async (req: Request, res: Response) => {
-    const refreshToken = req.cookies.refreshToken
-    const data = await jwtService.verifyAndGetUserIdByToken(refreshToken)
-    await securityService.deleteSession(data!.deviceId)
-    res.sendStatus(CodeResponsesEnum.Not_content_204)
-})
-
-authRouter.get('/me', bearerAuthorizationMiddleware, async (req: Request, res: Response) => {
-    const user = await usersService.getUserById(req.userId!)
-    if (!user) {
-        res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
-        return
+    async logout(req: Request, res: Response) {
+        const refreshToken = req.cookies.refreshToken
+        const data = await jwtService.verifyAndGetUserIdByToken(refreshToken)
+        await securityService.deleteSession(data!.deviceId)
+        res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
-    const { id, email, login } = user
-    res.status(CodeResponsesEnum.Success_200).send({
-        email,
-        login,
-        userId: id,
-    })
-})
+    async me(req: Request, res: Response) {
+        const user = await usersService.getUserById(req.userId!)
+        if (!user) {
+            res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
+            return
+        }
+        const { id, email, login } = user
+        res.status(CodeResponsesEnum.Success_200).send({
+            email,
+            login,
+            userId: id,
+        })
+    }
+}
+
+const authController = new AuthController()
+
+authRouter.post(
+    '/login',
+    rateLimitMiddleware,
+    userLoginOrEmailValidator,
+    passwordValidator,
+    errorsResultMiddleware,
+    authController.login
+)
+
+authRouter.post(
+    '/password-recovery',
+    rateLimitMiddleware,
+    emailValidator,
+    errorsResultMiddleware,
+    authController.passwordRecovery
+)
+
+authRouter.post('/refresh-token', checkCookiesAndUserMiddleware, authController.refreshToken)
+
+authRouter.post(
+    '/new-password',
+    rateLimitMiddleware,
+    newPasswordValidator,
+    recoveryCodeValidator,
+    errorsResultMiddleware,
+    userIsExistMiddleware,
+    authController.newPassword
+)
+authRouter.post(
+    '/registration',
+    rateLimitMiddleware,
+    loginValidator,
+    passwordValidator,
+    emailValidator,
+    isLoginOrEmailExistsValidationMiddleware,
+    errorsResultMiddleware,
+    authController.registration
+)
+authRouter.post(
+    '/registration-confirmation',
+    rateLimitMiddleware,
+    codeValidator,
+    _customUserValidator,
+    errorsResultMiddleware,
+    authController.registrationConfirmation
+)
+
+authRouter.post(
+    '/registration-email-resending',
+    rateLimitMiddleware,
+    emailValidator,
+    _customIsUserValidator,
+    errorsResultMiddleware,
+    authController.registrationEmailResending
+)
+authRouter.post('/logout', checkCookiesAndUserMiddleware, authController.logout)
+
+authRouter.get('/me', bearerAuthorizationMiddleware, authController.me)

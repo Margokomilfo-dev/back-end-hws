@@ -3,15 +3,14 @@ import { usersService } from './users-service'
 import { UserType } from '../repositores/users-db-repository'
 import { emailService } from './email-service'
 
-export const authService = {
+class AuthService {
     async checkCredentials(loginOrEmail: string, password: string): Promise<UserType | null> {
         const user = await usersService.getUserByLoginOrEmail(loginOrEmail)
         if (!user) return null
         const res = await cryptoService._compareHash(password, user)
         if (!res) return null
         return user
-    },
-
+    }
     async resendingEmail(email: string, code: string): Promise<boolean> {
         try {
             return await emailService.sendEmail(
@@ -25,7 +24,7 @@ export const authService = {
         } catch (e) {
             return false
         }
-    },
+    }
     async registrationSendEmail(email: string, code: string): Promise<boolean> {
         try {
             return emailService.sendEmail(
@@ -39,5 +38,6 @@ export const authService = {
         } catch (e) {
             return false
         }
-    },
+    }
 }
+export const authService = new AuthService()

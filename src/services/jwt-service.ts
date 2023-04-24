@@ -5,18 +5,17 @@ import { UserType } from '../repositores/users-db-repository'
 dotenv.config()
 const secret = process.env.SECRET ? process.env.SECRET : 'hello'
 
-export const jwtService = {
+class JwtService {
     async createJWTToken(user: UserType): Promise<string> {
         return jwt.sign({ userId: user.id }, secret, {
             expiresIn: '10000',
         })
-    },
+    }
     async createRefreshJWTToken(user: UserType, deviceId: string): Promise<string> {
         return jwt.sign({ userId: user.id, deviceId }, secret, {
             expiresIn: '20000',
         })
-    },
-
+    }
     async verifyAndGetUserIdByToken(
         token: string
     ): Promise<{ userId: string; deviceId: string } | null> {
@@ -26,5 +25,7 @@ export const jwtService = {
         } catch (e) {
             return null
         }
-    },
+    }
 }
+
+export const jwtService = new JwtService()
