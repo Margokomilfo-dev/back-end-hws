@@ -4,7 +4,7 @@ import { videosRouter } from './routes/videos-router'
 import { blogsRouter } from './routes/blogs-router'
 import { postsRouter } from './routes/posts-router'
 import { CodeResponsesEnum } from './types'
-import { videosRepository } from './repositores/videos-db-repository'
+import { VideosRepository } from './repositores/videos-db-repository'
 import { blogsRepository } from './repositores/blogs-db-repository'
 import { postsRepository } from './repositores/posts-db-repository'
 import { usersRepository } from './repositores/users-db-repository'
@@ -29,15 +29,24 @@ app.use('/auth', authRouter)
 app.use('/comments', commentsRouter)
 app.use('/security', securityRouter)
 
+class AppController {
+    videosRepository: VideosRepository
+    constructor() {
+        this.videosRepository = new VideosRepository()
+    }
+    async deleteAll(req: Request, res: Response) {
+        await this.videosRepository.deleteAll()
+        await blogsRepository.deleteAll()
+        await postsRepository.deleteAll()
+        await usersRepository.deleteAll()
+        await commentsRepository.deleteAll()
+        await securityRepository.deleteAll()
+        res.sendStatus(CodeResponsesEnum.Not_content_204)
+    }
+}
+const appController = new AppController()
+
 app.get('/', (req: Request, res: Response) => {
     res.send('Hello back-end HomeWorks in it-incubator!!!')
 })
-app.delete('/testing/all-data', async (req: Request, res: Response) => {
-    await videosRepository.deleteAll()
-    await blogsRepository.deleteAll()
-    await postsRepository.deleteAll()
-    await usersRepository.deleteAll()
-    await commentsRepository.deleteAll()
-    await securityRepository.deleteAll()
-    res.sendStatus(CodeResponsesEnum.Not_content_204)
-})
+app.delete('/testing/all-data', appController.deleteAll.bind(appController))

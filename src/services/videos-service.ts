@@ -1,13 +1,20 @@
 import addDays from 'date-fns/addDays'
-import { videosRepository, VideoType } from '../repositores/videos-db-repository'
+import {
+    VideosRepository,
+    VideoType,
+} from '../repositores/videos-db-repository'
 
 class VideoService {
+    videosRepository: VideosRepository
+    constructor() {
+        this.videosRepository = new VideosRepository()
+    }
     async getVideos() {
-        return videosRepository.getVideos()
+        return this.videosRepository.getVideos()
     }
 
     async getVideoById(id: number): Promise<VideoType | null> {
-        return videosRepository.getVideoById(id)
+        return this.videosRepository.getVideoById(id)
     }
 
     async createVideo(
@@ -26,19 +33,19 @@ class VideoService {
             availableResolutions ? availableResolutions : null
         )
 
-        return videosRepository.createVideo(newVideo)
+        return this.videosRepository.createVideo(newVideo)
     }
 
     async updateVideo(id: number, body: any): Promise<boolean> {
-        return videosRepository.updateVideo(id, body)
+        return this.videosRepository.updateVideo(id, body)
     }
 
     async deleteVideo(id: number): Promise<boolean> {
-        return videosRepository.deleteVideo(id)
+        return this.videosRepository.deleteVideo(id)
     }
 
     async deleteAll() {
-        return videosRepository.deleteAll()
+        return this.videosRepository.deleteAll()
     }
 }
 

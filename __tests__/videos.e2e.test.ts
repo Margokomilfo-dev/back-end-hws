@@ -48,7 +48,9 @@ describe('/videos', () => {
             .post('/videos/')
             .send({ title: '', author: 'author' })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
-                errorsMessages: [{ message: 'title is required', field: 'title' }],
+                errorsMessages: [
+                    { message: 'title is required', field: 'title' },
+                ],
             })
 
         const res = await request(app).get('/videos/')
@@ -59,7 +61,9 @@ describe('/videos', () => {
             .post('/videos/')
             .send({ title: 'title', author: '' })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
-                errorsMessages: [{ message: 'author is required', field: 'author' }],
+                errorsMessages: [
+                    { message: 'author is required', field: 'author' },
+                ],
             })
 
         const res = await request(app).get('/videos/')
@@ -70,7 +74,9 @@ describe('/videos', () => {
             .post('/videos/')
             .send({ title: 'title', author: 'author more 20 symbols' })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
-                errorsMessages: [{ message: 'more than 20 symbols', field: 'author' }],
+                errorsMessages: [
+                    { message: 'more than 20 symbols', field: 'author' },
+                ],
             })
 
         const res = await request(app).get('/videos/')
@@ -218,7 +224,9 @@ describe('/videos', () => {
             .put('/videos/' + newVideo!.id)
             .send({ title: 'new Title =)', author: '' })
             .expect(CodeResponsesEnum.Incorrect_values_400, {
-                errorsMessages: [{ message: 'author is required', field: 'author' }],
+                errorsMessages: [
+                    { message: 'author is required', field: 'author' },
+                ],
             })
 
         const res = await request(app).get('/videos/')
@@ -304,13 +312,17 @@ describe('/videos', () => {
     })
 
     it('- DELETE product by incorrect ID', async () => {
-        await request(app).delete('/videos/1kcnsdk').expect(CodeResponsesEnum.Incorrect_values_400)
+        await request(app)
+            .delete('/videos/1kcnsdk')
+            .expect(CodeResponsesEnum.Incorrect_values_400)
 
         const res = await request(app).get('/videos/')
         expect(res.body[0]).toEqual(newVideo)
     })
     it('- DELETE product by incorrect ID', async () => {
-        await request(app).delete('/videos/111').expect(CodeResponsesEnum.Not_found_404)
+        await request(app)
+            .delete('/videos/111')
+            .expect(CodeResponsesEnum.Not_found_404)
 
         const res = await request(app).get('/videos/')
         expect(res.body[0]).toEqual(newVideo)

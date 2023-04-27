@@ -1,6 +1,6 @@
 import { VideoModel } from '../mongo/video/video.model'
 
-class VideosRepository {
+export class VideosRepository {
     async getVideos() {
         return VideoModel.find({}, { _id: 0, __v: 0 })
     }
@@ -29,7 +29,7 @@ class VideosRepository {
     }
 }
 
-export const videosRepository = new VideosRepository()
+//export const videosRepository = new VideosRepository()
 
 export class VideoType {
     constructor(
