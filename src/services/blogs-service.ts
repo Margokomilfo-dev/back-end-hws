@@ -1,6 +1,10 @@
-import { blogsRepository, BlogType } from '../repositores/blogs-db-repository'
+import { BlogsRepository, BlogType } from '../repositores/blogs-db-repository'
 
-class BlogService {
+export class BlogService {
+    blogsRepository: BlogsRepository
+    constructor() {
+        this.blogsRepository = new BlogsRepository()
+    }
     async getBlogs(
         pageNumber: number,
         pageSize: number,
@@ -8,15 +12,21 @@ class BlogService {
         sortDirection: string,
         searchNameTerm: string | null
     ): Promise<BlogType[]> {
-        return blogsRepository.getBlogs(pageNumber, pageSize, sortBy, sortDirection, searchNameTerm)
+        return this.blogsRepository.getBlogs(
+            pageNumber,
+            pageSize,
+            sortBy,
+            sortDirection,
+            searchNameTerm
+        )
     }
 
     async getBlogsCount(searchNameTerm: string | null): Promise<number> {
-        return blogsRepository.getBlogsCount(searchNameTerm)
+        return this.blogsRepository.getBlogsCount(searchNameTerm)
     }
 
     async getBlogById(id: string): Promise<BlogType | null> {
-        return blogsRepository.getBlogById(id)
+        return this.blogsRepository.getBlogById(id)
     }
 
     async createBlog(
@@ -32,7 +42,7 @@ class BlogService {
             false,
             new Date().toISOString()
         )
-        return blogsRepository.createBlog(blog)
+        return this.blogsRepository.createBlog(blog)
     }
 
     async updateBlog(
@@ -43,16 +53,16 @@ class BlogService {
             websiteUrl: 'string'
         }
     ): Promise<boolean> {
-        return blogsRepository.updateBlog(id, body)
+        return this.blogsRepository.updateBlog(id, body)
     }
 
     async deleteBlog(id: string): Promise<boolean> {
-        return blogsRepository.deleteBlog(id)
+        return this.blogsRepository.deleteBlog(id)
     }
 
     async deleteAll() {
-        return blogsRepository.deleteAll()
+        return this.blogsRepository.deleteAll()
     }
 }
 
-export const blogService = new BlogService()
+//export const blogService = new BlogService()

@@ -1,19 +1,31 @@
-import { cryptoService } from './crypto-service'
-import { usersService } from './users-service'
+import { CryptoService } from './crypto-service'
+import { UsersService } from './users-service'
 import { UserType } from '../repositores/users-db-repository'
-import { emailService } from './email-service'
+import { EmailService } from './email-service'
 
-class AuthService {
-    async checkCredentials(loginOrEmail: string, password: string): Promise<UserType | null> {
-        const user = await usersService.getUserByLoginOrEmail(loginOrEmail)
+export class AuthService {
+    usersService: UsersService
+    cryptoService: CryptoService
+    emailService: EmailService
+    constructor() {
+        this.usersService = new UsersService()
+        this.cryptoService = new CryptoService()
+        this.emailService = new EmailService()
+    }
+
+    async checkCredentials(
+        loginOrEmail: string,
+        password: string
+    ): Promise<UserType | null> {
+        const user = await this.usersService.getUserByLoginOrEmail(loginOrEmail)
         if (!user) return null
-        const res = await cryptoService._compareHash(password, user)
+        const res = await this.cryptoService._compareHash(password, user)
         if (!res) return null
         return user
     }
     async resendingEmail(email: string, code: string): Promise<boolean> {
         try {
-            return await emailService.sendEmail(
+            return await this.emailService.sendEmail(
                 email,
                 'Email resending confirmation',
                 `<h1>Email resending confirmation</h1>
@@ -27,7 +39,7 @@ class AuthService {
     }
     async registrationSendEmail(email: string, code: string): Promise<boolean> {
         try {
-            return emailService.sendEmail(
+            return this.emailService.sendEmail(
                 email,
                 'Registration confirmation',
                 `<h1>Thank for your registration</h1>
@@ -40,4 +52,4 @@ class AuthService {
         }
     }
 }
-export const authService = new AuthService()
+//export const authService = new AuthService()

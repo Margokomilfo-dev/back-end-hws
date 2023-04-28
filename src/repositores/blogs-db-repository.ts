@@ -1,6 +1,6 @@
 import { BlogModel } from '../mongo/blog/blog.model'
 
-class BlogsRepository {
+export class BlogsRepository {
     async getBlogs(
         pageNumber: number,
         pageSize: number,
@@ -53,7 +53,7 @@ class BlogsRepository {
     }
 }
 
-export const blogsRepository = new BlogsRepository()
+//export const blogsRepository = new BlogsRepository()
 
 // export type BlogType = {
 //     id: string

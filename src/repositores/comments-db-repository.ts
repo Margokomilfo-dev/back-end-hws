@@ -1,6 +1,6 @@
 import { CommentsModel } from '../mongo/comments/comments.model'
 
-class CommentRepository {
+export class CommentRepository {
     async createComment(comment: CommentType): Promise<CommentType | null> {
         await CommentsModel.insertMany(comment)
         return this.getCommentById(comment.id)
@@ -43,7 +43,7 @@ class CommentRepository {
     }
 }
 
-export const commentsRepository = new CommentRepository()
+//export const commentsRepository = new CommentRepository()
 
 export class CommentType {
     constructor(

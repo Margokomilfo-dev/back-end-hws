@@ -1,9 +1,15 @@
-import { usersRepository, UserType } from '../repositores/users-db-repository'
-import { cryptoService } from './crypto-service'
+import { UsersRepository, UserType } from '../repositores/users-db-repository'
+import { CryptoService } from './crypto-service'
 import { v4 as uuidv4 } from 'uuid'
 import dateFns from 'date-fns/addMinutes'
 
-class UsersService {
+export class UsersService {
+    usersRepository: UsersRepository
+    cryptoService: CryptoService
+    constructor() {
+        this.usersRepository = new UsersRepository()
+        this.cryptoService = new CryptoService()
+    }
     async getUsers(
         pageNumber: number,
         pageSize: number,
@@ -12,7 +18,7 @@ class UsersService {
         searchLoginTerm: string | null,
         searchEmailTerm: string | null
     ): Promise<UserType[]> {
-        return usersRepository.getUsers(
+        return this.usersRepository.getUsers(
             pageNumber,
             pageSize,
             sortBy,
@@ -23,37 +29,48 @@ class UsersService {
     }
 
     async getUserById(id: string): Promise<UserType | null> {
-        return usersRepository.getUserById(id)
+        return this.usersRepository.getUserById(id)
     }
 
     async _getUserById(id: string): Promise<UserType | null> {
-        return usersRepository._getUserById(id)
+        return this.usersRepository._getUserById(id)
     }
 
-    async getAndUpdateUserByConfirmationCode(code: string): Promise<UserType | null> {
-        return usersRepository.getAndUpdateUserByConfirmationCode(code)
+    async getAndUpdateUserByConfirmationCode(
+        code: string
+    ): Promise<UserType | null> {
+        return this.usersRepository.getAndUpdateUserByConfirmationCode(code)
     }
 
     async getUserByConfirmationCode(code: string): Promise<UserType | null> {
-        return usersRepository.getUserByConfirmationCode(code)
+        return this.usersRepository.getUserByConfirmationCode(code)
     }
 
     async updateUserConfirmationCode(id: string): Promise<UserType | null> {
-        return usersRepository.updateUserConfirmationCode(id)
+        return this.usersRepository.updateUserConfirmationCode(id)
     }
 
-    async getUserByLoginOrEmail(loginOrEmail: string): Promise<UserType | null> {
-        return usersRepository.getUserByLoginOrEmail(loginOrEmail)
+    async getUserByLoginOrEmail(
+        loginOrEmail: string
+    ): Promise<UserType | null> {
+        return this.usersRepository.getUserByLoginOrEmail(loginOrEmail)
     }
 
-    async createUser(login: string, email: string, password: string): Promise<UserType | null> {
-        const getUser1 = await usersRepository.getUserByLoginOrEmail(login)
-        const getUser2 = await usersRepository.getUserByLoginOrEmail(email)
+    async createUser(
+        login: string,
+        email: string,
+        password: string
+    ): Promise<UserType | null> {
+        const getUser1 = await this.usersRepository.getUserByLoginOrEmail(login)
+        const getUser2 = await this.usersRepository.getUserByLoginOrEmail(email)
         if (getUser1 || getUser2) {
             return null
         }
-        const salt = await cryptoService._generateSalt()
-        const passwordHash = await cryptoService._generateHash(password, salt)
+        const salt = await this.cryptoService._generateSalt()
+        const passwordHash = await this.cryptoService._generateHash(
+            password,
+            salt
+        )
         const newUser = new UserType(
             new Date().getTime().toString(),
             login,
@@ -66,22 +83,28 @@ class UsersService {
                 code: uuidv4(),
             }
         )
-        return usersRepository.createUser(newUser)
+        return this.usersRepository.createUser(newUser)
     }
 
-    async updateUserPassword(id: string, newPassword: string): Promise<UserType | null> {
-        const user = await usersRepository.getUserById(id)
+    async updateUserPassword(
+        id: string,
+        newPassword: string
+    ): Promise<UserType | null> {
+        const user = await this.usersRepository.getUserById(id)
         if (!user) {
             return null
         }
-        const salt = await cryptoService._generateSalt()
-        const passwordHash = await cryptoService._generateHash(newPassword, salt)
-        return usersRepository.updateUserPassword(id, passwordHash)
+        const salt = await this.cryptoService._generateSalt()
+        const passwordHash = await this.cryptoService._generateHash(
+            newPassword,
+            salt
+        )
+        return this.usersRepository.updateUserPassword(id, passwordHash)
     }
 
     async deleteUser(id: string) {
-        return usersRepository.deleteUser(id)
+        return this.usersRepository.deleteUser(id)
     }
 }
 
-export const usersService = new UsersService()
+export const usersService = new UsersService() //for tests

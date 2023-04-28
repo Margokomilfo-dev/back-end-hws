@@ -5,7 +5,7 @@ dotenv.config()
 const EMAIL = process.env.EMAIL
 const SECRET_CODE = process.env.SECRET_CODE
 
-class EmailService {
+export class EmailService {
     async sendEmail(email: string, subject: string, message: string) {
         let transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -25,4 +25,4 @@ class EmailService {
     }
 }
 
-export const emailService = new EmailService()
+//export const emailService = new EmailService()

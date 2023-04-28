@@ -4,7 +4,7 @@ import {
     VideoType,
 } from '../repositores/videos-db-repository'
 
-class VideoService {
+export class VideosService {
     videosRepository: VideosRepository
     constructor() {
         this.videosRepository = new VideosRepository()
@@ -49,4 +49,4 @@ class VideoService {
     }
 }
 
-export const videosService = new VideoService()
+//export const videosService = new VideoService()

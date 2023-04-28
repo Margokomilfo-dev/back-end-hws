@@ -8,26 +8,37 @@ import {
     postShortDescriptionValidator,
     postTitleValidator,
 } from '../assets/express-validator/field-validators'
-import {
-    idStringParamValidationMiddleware,
-    postIdStringParamValidationMiddleware,
-} from '../assets/express-validator/id-int-param-validation-middleware'
-import { _customIsBlogValidator } from '../assets/express-validator/custom-validators'
+import { paramsValidatorsMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
 import { basicAuthorizationMiddleware } from '../middlewares/basic-authorization-middleware'
-import { postsService } from '../services/posts-service'
-import { blogService } from '../services/blogs-service'
+import { PostsService } from '../services/posts-service'
+import { BlogService } from '../services/blogs-service'
 import { paginationQueries } from '../assets/pagination'
-import { commentsService } from '../services/comments-service'
+import { CommentsService } from '../services/comments-service'
+import { customValidator } from '../assets/express-validator/custom-validators'
 import { bearerAuthorizationMiddleware } from '../middlewares/bearer-authorization-middleware'
 
 export const postsRouter = Router({})
 
-class PostsController {
+export class PostsController {
+    postsService: PostsService
+    commentsService: CommentsService
+    blogService: BlogService
+    constructor() {
+        this.postsService = new PostsService()
+        this.commentsService = new CommentsService()
+        this.blogService = new BlogService()
+    }
     async getPosts(req: Request, res: Response) {
-        const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
+        const { pageNumber, pageSize, sortBy, sortDirection } =
+            paginationQueries(req)
 
-        const posts = await postsService.getPosts(pageNumber, pageSize, sortBy, sortDirection)
-        const postsCount = await postsService.getPostsCount()
+        const posts = await this.postsService.getPosts(
+            pageNumber,
+            pageSize,
+            sortBy,
+            sortDirection
+        )
+        const postsCount = await this.postsService.getPostsCount()
 
         const result = {
             pagesCount: Math.ceil(postsCount / pageSize),
@@ -40,21 +51,23 @@ class PostsController {
     }
 
     async getCommentsByPostId(req: Request, res: Response) {
-        const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
+        const { pageNumber, pageSize, sortBy, sortDirection } =
+            paginationQueries(req)
         const postId = req.params.postId.toString().trim()
-        const post = await postsService.getPostById(postId)
+        const post = await this.postsService.getPostById(postId)
         if (!post) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
         }
-        const comments = await commentsService.getCommentsByPostId(
+        const comments = await this.commentsService.getCommentsByPostId(
             postId,
             pageNumber,
             pageSize,
             sortBy,
             sortDirection
         )
-        const commentsCount = await commentsService.getCommentsCountByPostId(postId)
+        const commentsCount =
+            await this.commentsService.getCommentsCountByPostId(postId)
 
         const result = {
             pagesCount: Math.ceil(commentsCount / pageSize),
@@ -68,9 +81,9 @@ class PostsController {
 
     async createPost(req: Request, res: Response) {
         const blogId = req.body.blogId
-        const blog = await blogService.getBlogById(blogId)
+        const blog = await this.blogService.getBlogById(blogId)
 
-        const newPost = await postsService.createPost(req.body, blog!.name)
+        const newPost = await this.postsService.createPost(req.body, blog!.name)
 
         if (newPost) {
             res.status(CodeResponsesEnum.Created_201).send(newPost) //если сделать sendStatus - не дойдем до send
@@ -82,13 +95,13 @@ class PostsController {
     async createCommentByPostId(req: Request, res: Response) {
         const postId = req.params.postId.toString().trim()
         const content = req.body.content.toString().trim()
-        const post = await postsService.getPostById(postId)
+        const post = await this.postsService.getPostById(postId)
         if (!post) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
         }
 
-        const newComment = await commentsService.createComment(
+        const newComment = await this.commentsService.createComment(
             content,
             req.userId!,
             req.userLogin!,
@@ -103,7 +116,7 @@ class PostsController {
 
     async getComment(req: Request, res: Response) {
         const id = req.params.id
-        const post = await postsService.getPostById(id)
+        const post = await this.postsService.getPostById(id)
         if (post) {
             res.status(CodeResponsesEnum.Success_200).send(post)
         } else {
@@ -113,7 +126,7 @@ class PostsController {
 
     async updateComment(req: Request, res: Response) {
         const id = req.params.id
-        const isUpdated = await postsService.updatePost(id, req.body)
+        const isUpdated = await this.postsService.updatePost(id, req.body)
         if (!isUpdated) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
@@ -123,7 +136,7 @@ class PostsController {
 
     async deleteComment(req: Request, res: Response) {
         const id = req.params.id
-        const isDeleted = await postsService.deletePost(id)
+        const isDeleted = await this.postsService.deletePost(id)
         if (isDeleted) {
             res.sendStatus(CodeResponsesEnum.Not_content_204)
         } else {
@@ -134,12 +147,14 @@ class PostsController {
 
 const postsController = new PostsController()
 
-postsRouter.get('/', postsController.getPosts)
+postsRouter.get('/', postsController.getPosts.bind(postsController))
 
 postsRouter.get(
     '/:postId/comments',
-    postIdStringParamValidationMiddleware,
-    postsController.getCommentsByPostId
+    paramsValidatorsMiddleware.postIdStringParamValidationMiddleware.bind(
+        paramsValidatorsMiddleware
+    ),
+    postsController.getCommentsByPostId.bind(postsController)
 )
 
 postsRouter.post(
@@ -149,39 +164,45 @@ postsRouter.post(
     postShortDescriptionValidator,
     postContentValidator,
     postBlogIdValidator,
-    _customIsBlogValidator,
+    customValidator._customIsBlogValidator,
     errorsResultMiddleware,
-    postsController.createPost
+    postsController.createPost.bind(postsController)
 )
 
 postsRouter.post(
     '/:postId/comments',
-    bearerAuthorizationMiddleware,
-    postIdStringParamValidationMiddleware,
+    bearerAuthorizationMiddleware.auth.bind(bearerAuthorizationMiddleware),
+    paramsValidatorsMiddleware.postIdStringParamValidationMiddleware.bind(
+        paramsValidatorsMiddleware
+    ),
     commentContentValidator,
     errorsResultMiddleware,
-    postsController.createCommentByPostId
+    postsController.createCommentByPostId.bind(postsController)
 )
 
-postsRouter.get('/:id', postsController.getComment)
+postsRouter.get('/:id', postsController.getComment.bind(postsController))
 
 postsRouter.put(
     '/:id',
     basicAuthorizationMiddleware,
-    idStringParamValidationMiddleware,
+    paramsValidatorsMiddleware.idStringParamValidationMiddleware.bind(
+        paramsValidatorsMiddleware
+    ),
     postTitleValidator,
     postShortDescriptionValidator,
     postContentValidator,
     postBlogIdValidator,
-    _customIsBlogValidator,
+    customValidator._customIsBlogValidator.bind(customValidator),
     errorsResultMiddleware,
-    postsController.updateComment
+    postsController.updateComment.bind(postsController)
 )
 
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
 postsRouter.delete(
     '/:id',
     basicAuthorizationMiddleware,
-    idStringParamValidationMiddleware,
-    postsController.deleteComment
+    paramsValidatorsMiddleware.idStringParamValidationMiddleware.bind(
+        paramsValidatorsMiddleware
+    ),
+    postsController.deleteComment.bind(postsController)
 )

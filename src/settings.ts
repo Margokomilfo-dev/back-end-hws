@@ -5,16 +5,16 @@ import { blogsRouter } from './routes/blogs-router'
 import { postsRouter } from './routes/posts-router'
 import { CodeResponsesEnum } from './types'
 import { VideosRepository } from './repositores/videos-db-repository'
-import { blogsRepository } from './repositores/blogs-db-repository'
-import { postsRepository } from './repositores/posts-db-repository'
-import { usersRepository } from './repositores/users-db-repository'
+import { BlogsRepository } from './repositores/blogs-db-repository'
+import { PostsRepository } from './repositores/posts-db-repository'
+import { UsersRepository } from './repositores/users-db-repository'
 import { usersRouter } from './routes/users-router'
 import { authRouter } from './routes/auth-router'
 import { commentsRouter } from './routes/comments-router'
-import { commentsRepository } from './repositores/comments-db-repository'
+import { CommentRepository } from './repositores/comments-db-repository'
 import cookieParser from 'cookie-parser'
 import { securityRouter } from './routes/security-router'
-import { securityRepository } from './repositores/security-db-repository'
+import { SecurityRepository } from './repositores/security-db-repository'
 
 export const app = express()
 app.set('trust proxy', true)
@@ -31,16 +31,26 @@ app.use('/security', securityRouter)
 
 class AppController {
     videosRepository: VideosRepository
+    blogsRepository: BlogsRepository
+    commentsRepository: CommentRepository
+    usersRepository: UsersRepository
+    postsRepository: PostsRepository
+    securityRepository: SecurityRepository
     constructor() {
         this.videosRepository = new VideosRepository()
+        this.blogsRepository = new BlogsRepository()
+        this.commentsRepository = new CommentRepository()
+        this.usersRepository = new UsersRepository()
+        this.postsRepository = new PostsRepository()
+        this.securityRepository = new SecurityRepository()
     }
     async deleteAll(req: Request, res: Response) {
         await this.videosRepository.deleteAll()
-        await blogsRepository.deleteAll()
-        await postsRepository.deleteAll()
-        await usersRepository.deleteAll()
-        await commentsRepository.deleteAll()
-        await securityRepository.deleteAll()
+        await this.blogsRepository.deleteAll()
+        await this.postsRepository.deleteAll()
+        await this.usersRepository.deleteAll()
+        await this.commentsRepository.deleteAll()
+        await this.securityRepository.deleteAll()
         res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
 }

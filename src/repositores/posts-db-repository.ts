@@ -1,6 +1,6 @@
 import { PostsModel } from '../mongo/posts/posts.model'
 
-class PostsRepository {
+export class PostsRepository {
     async getPosts(
         pageNumber: number,
         pageSize: number,
@@ -60,7 +60,7 @@ class PostsRepository {
         return PostsModel.deleteMany({})
     }
 }
-export const postsRepository = new PostsRepository()
+//export const postsRepository = new PostsRepository()
 
 export class PostType {
     constructor(

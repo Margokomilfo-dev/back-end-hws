@@ -2,7 +2,11 @@ import { validationResult } from 'express-validator'
 import { NextFunction, Request, Response } from 'express'
 import { ResolutionsEnum } from '../../repositores/videos-db-repository'
 
-export const errorsResultMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const errorsResultMiddleware = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     const errors = validationResult(req)
     if (req.body.availableResolutions && req.body.availableResolutions.length) {
         req.body.availableResolutions.forEach((resolution: string) => {
@@ -18,12 +22,16 @@ export const errorsResultMiddleware = (req: Request, res: Response, next: NextFu
             }
         })
     }
+
     if (!errors.isEmpty()) {
         res.status(400).send({
-            errorsMessages: errors.array({ onlyFirstError: true }).map((err) => {
-                return { message: err.msg, field: err.param }
-            }),
+            errorsMessages: errors
+                .array({ onlyFirstError: true })
+                .map((err) => {
+                    return { message: err.msg, field: err.param }
+                }),
         })
+
         return
     } else {
         next()

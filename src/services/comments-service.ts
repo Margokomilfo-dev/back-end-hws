@@ -1,8 +1,15 @@
-import { commentsRepository, CommentType } from '../repositores/comments-db-repository'
+import {
+    CommentRepository,
+    CommentType,
+} from '../repositores/comments-db-repository'
 
-class CommentsService {
+export class CommentsService {
+    commentsRepository: CommentRepository
+    constructor() {
+        this.commentsRepository = new CommentRepository()
+    }
     async getCommentById(id: string): Promise<CommentType | null> {
-        return commentsRepository.getCommentById(id)
+        return this.commentsRepository.getCommentById(id)
     }
 
     async getCommentsByPostId(
@@ -12,7 +19,7 @@ class CommentsService {
         sortBy: string,
         sortDirection: string
     ): Promise<CommentType[]> {
-        return commentsRepository.getCommentsByPostId(
+        return this.commentsRepository.getCommentsByPostId(
             postId,
             pageNumber,
             pageSize,
@@ -22,7 +29,7 @@ class CommentsService {
     }
 
     async getCommentsCountByPostId(postId: string): Promise<number> {
-        return commentsRepository.getCommentsCountByPostId(postId)
+        return this.commentsRepository.getCommentsCountByPostId(postId)
     }
 
     async createComment(
@@ -41,20 +48,20 @@ class CommentsService {
             },
             postId
         )
-        return commentsRepository.createComment(comment)
+        return this.commentsRepository.createComment(comment)
     }
 
     async updateComment(id: string, content: string): Promise<boolean> {
-        return commentsRepository.updateComment(id, content)
+        return this.commentsRepository.updateComment(id, content)
     }
 
     async deleteComment(id: string): Promise<boolean> {
-        return commentsRepository.deleteComment(id)
+        return this.commentsRepository.deleteComment(id)
     }
 
     async deleteAll() {
-        return commentsRepository.deleteAll()
+        return this.commentsRepository.deleteAll()
     }
 }
 
-export const commentsService = new CommentsService()
+//export const commentsService = new CommentsService()

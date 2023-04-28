@@ -10,31 +10,37 @@ import {
     postTitleValidator,
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
-import {
-    blogIdStringParamValidationMiddleware,
-    idStringParamValidationMiddleware,
-} from '../assets/express-validator/id-int-param-validation-middleware'
+import { paramsValidatorsMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
 import { basicAuthorizationMiddleware } from '../middlewares/basic-authorization-middleware'
-import { blogService } from '../services/blogs-service'
-import { postsService } from '../services/posts-service'
+import { BlogService } from '../services/blogs-service'
+import { PostsService } from '../services/posts-service'
 import { paginationQueries } from '../assets/pagination'
 
 export const blogsRouter = Router({})
 
 class BlogsController {
+    postsService: PostsService
+    blogService: BlogService
+    constructor() {
+        this.postsService = new PostsService()
+        this.blogService = new BlogService()
+    }
     async getBlogs(req: Request, res: Response) {
-        const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
+        const { pageNumber, pageSize, sortBy, sortDirection } =
+            paginationQueries(req)
 
-        let searchNameTerm = req.query.searchNameTerm ? req.query.searchNameTerm.toString() : null
+        let searchNameTerm = req.query.searchNameTerm
+            ? req.query.searchNameTerm.toString()
+            : null
 
-        const blogs = await blogService.getBlogs(
+        const blogs = await this.blogService.getBlogs(
             pageNumber,
             pageSize,
             sortBy,
             sortDirection,
             searchNameTerm
         )
-        const blogsCount = await blogService.getBlogsCount(searchNameTerm)
+        const blogsCount = await this.blogService.getBlogsCount(searchNameTerm)
         const result = {
             pagesCount: Math.ceil(blogsCount / pageSize),
             page: pageNumber,
@@ -49,7 +55,11 @@ class BlogsController {
         const description = req.body.description
         const websiteUrl = req.body.websiteUrl
 
-        const newBlog = await blogService.createBlog(name, description, websiteUrl)
+        const newBlog = await this.blogService.createBlog(
+            name,
+            description,
+            websiteUrl
+        )
 
         if (newBlog) {
             res.status(CodeResponsesEnum.Created_201).send(newBlog) //если сделать sendStatus - не дойдем до send
@@ -58,8 +68,8 @@ class BlogsController {
         }
     }
     async createPostForBlog(req: Request, res: Response) {
-        const blog = await blogService.getBlogById(req.params.blogId)
-        const newPost = await postsService.createPost(
+        const blog = await this.blogService.getBlogById(req.params.blogId)
+        const newPost = await this.postsService.createPost(
             {
                 title: req.body.title,
                 content: req.body.content,
@@ -78,7 +88,7 @@ class BlogsController {
     async getBlog(req: Request, res: Response) {
         const id = req.params.id
 
-        const blog = await blogService.getBlogById(id)
+        const blog = await this.blogService.getBlogById(id)
         if (blog) {
             res.status(CodeResponsesEnum.Success_200).send(blog)
         } else {
@@ -86,18 +96,19 @@ class BlogsController {
         }
     }
     async getPostsByBlogId(req: Request, res: Response) {
-        const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
+        const { pageNumber, pageSize, sortBy, sortDirection } =
+            paginationQueries(req)
 
         const id = req.params.blogId
 
-        const posts = await postsService.getPostsByBlogId(
+        const posts = await this.postsService.getPostsByBlogId(
             id,
             pageNumber,
             pageSize,
             sortBy,
             sortDirection
         )
-        const postsCount = await postsService.getPostsCountByBlogId(id)
+        const postsCount = await this.postsService.getPostsCountByBlogId(id)
         const result = {
             pagesCount: Math.ceil(postsCount / pageSize),
             page: pageNumber,
@@ -110,7 +121,7 @@ class BlogsController {
     }
     async updateBlog(req: Request, res: Response) {
         const id = req.params.id
-        const isUpdated = await blogService.updateBlog(id, req.body)
+        const isUpdated = await this.blogService.updateBlog(id, req.body)
         if (!isUpdated) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
@@ -119,7 +130,7 @@ class BlogsController {
     }
     async deleteBlog(req: Request, res: Response) {
         const id = req.params.id
-        const isDeleted = await blogService.deleteBlog(id)
+        const isDeleted = await this.blogService.deleteBlog(id)
         if (isDeleted) {
             res.sendStatus(CodeResponsesEnum.Not_content_204)
         } else {
@@ -130,8 +141,7 @@ class BlogsController {
 
 const blogsController = new BlogsController()
 
-blogsRouter.get('/', blogsController.getBlogs)
-
+blogsRouter.get('/', blogsController.getBlogs.bind(blogsController))
 blogsRouter.post(
     '/',
     basicAuthorizationMiddleware,
@@ -139,45 +149,59 @@ blogsRouter.post(
     blogDescriptionValidator,
     blogWebsiteUrlValidator,
     errorsResultMiddleware,
-    blogsController.createBlog
+    blogsController.createBlog.bind(blogsController)
 )
 
 blogsRouter.post(
     '/:blogId/posts',
     basicAuthorizationMiddleware,
-    blogIdStringParamValidationMiddleware,
+    paramsValidatorsMiddleware.blogIdStringParamValidationMiddleware.bind(
+        paramsValidatorsMiddleware
+    ),
     postTitleValidator,
     postShortDescriptionValidator,
     postContentValidator,
     errorsResultMiddleware,
-    blogsController.createPostForBlog
+    blogsController.createPostForBlog.bind(blogsController)
 )
 
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
-blogsRouter.get('/:id', idStringParamValidationMiddleware, blogsController.getBlog)
+blogsRouter.get(
+    '/:id',
+    paramsValidatorsMiddleware.idStringParamValidationMiddleware.bind(
+        paramsValidatorsMiddleware
+    ),
+    blogsController.getBlog.bind(blogsController)
+)
 
 blogsRouter.get(
     '/:blogId/posts',
-    blogIdStringParamValidationMiddleware,
-    blogsController.getPostsByBlogId
+    paramsValidatorsMiddleware.blogIdStringParamValidationMiddleware.bind(
+        paramsValidatorsMiddleware
+    ),
+    blogsController.getPostsByBlogId.bind(blogsController)
 )
 
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
 blogsRouter.put(
     '/:id',
     basicAuthorizationMiddleware,
-    idStringParamValidationMiddleware,
+    paramsValidatorsMiddleware.idStringParamValidationMiddleware.bind(
+        paramsValidatorsMiddleware
+    ),
     blogNameValidator,
     blogDescriptionValidator,
     blogWebsiteUrlValidator,
     errorsResultMiddleware,
-    blogsController.updateBlog
+    blogsController.updateBlog.bind(blogsController)
 )
 
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404
 blogsRouter.delete(
     '/:id',
     basicAuthorizationMiddleware,
-    idStringParamValidationMiddleware,
-    blogsController.deleteBlog
+    paramsValidatorsMiddleware.idStringParamValidationMiddleware.bind(
+        paramsValidatorsMiddleware
+    ),
+    blogsController.deleteBlog.bind(blogsController)
 )

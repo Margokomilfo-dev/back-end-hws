@@ -10,26 +10,35 @@ import {
     userLoginOrEmailValidator,
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
-import { authService } from '../services/auth-service'
-import { bearerAuthorizationMiddleware } from '../middlewares/bearer-authorization-middleware'
-import { jwtService } from '../services/jwt-service'
-import { usersService } from '../services/users-service'
-import {
-    _customIsUserValidator,
-    _customUserValidator,
-} from '../assets/express-validator/custom-validators'
-import { isLoginOrEmailExistsValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
+import { AuthService } from '../services/auth-service'
+import { JwtService } from '../services/jwt-service'
+import { UsersService } from '../services/users-service'
+import { paramsValidatorsMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
 import { checkCookiesAndUserMiddleware } from '../middlewares/getCookiesMiddleware'
 import { v4 as uuidv4 } from 'uuid'
 import { firstPartsOfJWTToken, getJWTPayload } from '../assets/jwt-parse'
-import { securityService } from '../services/security-service'
+import { SecurityService } from '../services/security-service'
 import { rateLimitMiddleware } from '../middlewares/rate-limit-middleware'
-import { emailService } from '../services/email-service'
-import { userIsExistMiddleware } from '../middlewares/user-isExist-middleware'
+import { EmailService } from '../services/email-service'
+import { commonMiddleware } from '../middlewares/common-middleware'
+import { customValidator } from '../assets/express-validator/custom-validators'
+import { bearerAuthorizationMiddleware } from '../middlewares/bearer-authorization-middleware'
 
 export const authRouter = Router({})
 
 class AuthController {
+    usersService: UsersService
+    authService: AuthService
+    securityService: SecurityService
+    jwtService: JwtService
+    emailService: EmailService
+    constructor() {
+        this.usersService = new UsersService()
+        this.authService = new AuthService()
+        this.securityService = new SecurityService()
+        this.jwtService = new JwtService()
+        this.emailService = new EmailService()
+    }
     async login(req: Request, res: Response) {
         let dName = 'non'
         let ipAddress = '127.0.0.1'
@@ -39,17 +48,23 @@ class AuthController {
         const password = req.body.password
         const loginOrEmail = req.body.loginOrEmail
 
-        const user = await authService.checkCredentials(loginOrEmail, password)
+        const user = await this.authService.checkCredentials(
+            loginOrEmail,
+            password
+        )
         if (!user) {
             res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
         } else {
             const deviceId = uuidv4()
-            const token = await jwtService.createJWTToken(user)
+            const token = await this.jwtService.createJWTToken(user)
 
-            const refreshToken = await jwtService.createRefreshJWTToken(user, deviceId)
+            const refreshToken = await this.jwtService.createRefreshJWTToken(
+                user,
+                deviceId
+            )
             const refreshTokenPart = firstPartsOfJWTToken(refreshToken)
             const payload = getJWTPayload(refreshToken)
-            await securityService.create(
+            await this.securityService.create(
                 deviceId,
                 user.id,
                 dName,
@@ -71,13 +86,15 @@ class AuthController {
     async passwordRecovery(req: Request, res: Response) {
         let email = req.body.email
 
-        const user = await usersService.getUserByLoginOrEmail(email)
+        const user = await this.usersService.getUserByLoginOrEmail(email)
         if (!user) {
             res.sendStatus(CodeResponsesEnum.Not_content_204)
             return
         }
-        const updatedUser = await usersService.updateUserConfirmationCode(user.id)
-        await emailService.sendEmail(
+        const updatedUser = await this.usersService.updateUserConfirmationCode(
+            user.id
+        )
+        await this.emailService.sendEmail(
             email,
             'Email resending confirmation',
             `<h1>Password recovery confirmation</h1>
@@ -97,15 +114,20 @@ class AuthController {
         const refreshToken = req.cookies.refreshToken
         const payload = getJWTPayload(refreshToken)
 
-        const data = await jwtService.verifyAndGetUserIdByToken(refreshToken)
-        const user = await usersService._getUserById(data!.userId)
+        const data = await this.jwtService.verifyAndGetUserIdByToken(
+            refreshToken
+        )
+        const user = await this.usersService._getUserById(data!.userId)
 
-        const token = await jwtService.createJWTToken(user!)
-        const newRefreshToken = await jwtService.createRefreshJWTToken(user!, payload!.deviceId)
+        const token = await this.jwtService.createJWTToken(user!)
+        const newRefreshToken = await this.jwtService.createRefreshJWTToken(
+            user!,
+            payload!.deviceId
+        )
         const newRefreshTokenPart = firstPartsOfJWTToken(newRefreshToken)
         const newPayload = getJWTPayload(newRefreshToken)
 
-        await securityService.update(payload!.deviceId, {
+        await this.securityService.update(payload!.deviceId, {
             deviceId: payload!.deviceId,
             userId: user!.id,
             ip: ipAddress,
@@ -127,8 +149,13 @@ class AuthController {
         let newPassword = req.body.newPassword
         let recoveryCode = req.body.recoveryCode
 
-        const user = await usersService.getUserByConfirmationCode(recoveryCode)
-        const updatedUser = await usersService.updateUserPassword(user!.id, newPassword)
+        const user = await this.usersService.getUserByConfirmationCode(
+            recoveryCode
+        )
+        const updatedUser = await this.usersService.updateUserPassword(
+            user!.id,
+            newPassword
+        )
 
         if (updatedUser) {
             res.sendStatus(CodeResponsesEnum.Not_content_204)
@@ -139,18 +166,25 @@ class AuthController {
         const password = req.body.password
         const email = req.body.email
 
-        const createdUser = await usersService.createUser(login, email, password)
+        const createdUser = await this.usersService.createUser(
+            login,
+            email,
+            password
+        )
 
         if (!createdUser) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
         }
-        const user = await usersService._getUserById(createdUser.id)
+        const user = await this.usersService._getUserById(createdUser.id)
         if (!user) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
         }
-        const sendEmail = await authService.registrationSendEmail(email, user.confirmationData.code)
+        const sendEmail = await this.authService.registrationSendEmail(
+            email,
+            user.confirmationData.code
+        )
         if (!sendEmail) {
             res.status(CodeResponsesEnum.Incorrect_values_400).send({
                 errorsMessages: [
@@ -168,18 +202,23 @@ class AuthController {
     }
     async registrationConfirmation(req: Request, res: Response) {
         const code = req.body.code
-        await usersService.getAndUpdateUserByConfirmationCode(code)
+        await this.usersService.getAndUpdateUserByConfirmationCode(code)
         res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
     async registrationEmailResending(req: Request, res: Response) {
         const email = req.body.email
-        const user = await usersService.getUserByLoginOrEmail(email)
-        const updUser = await usersService.updateUserConfirmationCode(user!.id)
+        const user = await this.usersService.getUserByLoginOrEmail(email)
+        const updUser = await this.usersService.updateUserConfirmationCode(
+            user!.id
+        )
         if (!updUser) {
             res.sendStatus(405)
             return
         }
-        const sendEmail = await authService.resendingEmail(email, updUser.confirmationData.code)
+        const sendEmail = await this.authService.resendingEmail(
+            email,
+            updUser.confirmationData.code
+        )
         if (!sendEmail) {
             res.sendStatus(406)
             return
@@ -188,12 +227,14 @@ class AuthController {
     }
     async logout(req: Request, res: Response) {
         const refreshToken = req.cookies.refreshToken
-        const data = await jwtService.verifyAndGetUserIdByToken(refreshToken)
-        await securityService.deleteSession(data!.deviceId)
+        const data = await this.jwtService.verifyAndGetUserIdByToken(
+            refreshToken
+        )
+        await this.securityService.deleteSession(data!.deviceId)
         res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
     async me(req: Request, res: Response) {
-        const user = await usersService.getUserById(req.userId!)
+        const user = await this.usersService.getUserById(req.userId!)
         if (!user) {
             res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
             return
@@ -211,59 +252,77 @@ const authController = new AuthController()
 
 authRouter.post(
     '/login',
-    rateLimitMiddleware,
+    rateLimitMiddleware.middleware.bind(rateLimitMiddleware),
     userLoginOrEmailValidator,
     passwordValidator,
     errorsResultMiddleware,
-    authController.login
+    authController.login.bind(authController)
 )
 
 authRouter.post(
     '/password-recovery',
-    rateLimitMiddleware,
+    rateLimitMiddleware.middleware.bind(rateLimitMiddleware),
     emailValidator,
     errorsResultMiddleware,
-    authController.passwordRecovery
+    authController.passwordRecovery.bind(authController)
 )
 
-authRouter.post('/refresh-token', checkCookiesAndUserMiddleware, authController.refreshToken)
+authRouter.post(
+    '/refresh-token',
+    checkCookiesAndUserMiddleware.checkCookiesAndUser.bind(
+        checkCookiesAndUserMiddleware
+    ),
+    authController.refreshToken.bind(authController)
+)
 
 authRouter.post(
     '/new-password',
-    rateLimitMiddleware,
+    rateLimitMiddleware.middleware.bind(rateLimitMiddleware),
     newPasswordValidator,
     recoveryCodeValidator,
     errorsResultMiddleware,
-    userIsExistMiddleware,
-    authController.newPassword
+    commonMiddleware.userIsExist.bind(commonMiddleware),
+    authController.newPassword.bind(authController)
 )
 authRouter.post(
     '/registration',
-    rateLimitMiddleware,
+    rateLimitMiddleware.middleware.bind(rateLimitMiddleware),
     loginValidator,
     passwordValidator,
     emailValidator,
-    isLoginOrEmailExistsValidationMiddleware,
+    paramsValidatorsMiddleware.isLoginOrEmailExistsValidationMiddleware.bind(
+        paramsValidatorsMiddleware
+    ),
     errorsResultMiddleware,
-    authController.registration
+    authController.registration.bind(authController)
 )
 authRouter.post(
     '/registration-confirmation',
-    rateLimitMiddleware,
+    rateLimitMiddleware.middleware.bind(rateLimitMiddleware),
     codeValidator,
-    _customUserValidator,
+    customValidator._customUserValidator.bind(customValidator),
     errorsResultMiddleware,
-    authController.registrationConfirmation
+    authController.registrationConfirmation.bind(authController)
 )
 
 authRouter.post(
     '/registration-email-resending',
-    rateLimitMiddleware,
+    rateLimitMiddleware.middleware.bind(rateLimitMiddleware),
     emailValidator,
-    _customIsUserValidator,
+    customValidator._customIsUserValidator.bind(customValidator),
     errorsResultMiddleware,
-    authController.registrationEmailResending
+    authController.registrationEmailResending.bind(authController)
 )
-authRouter.post('/logout', checkCookiesAndUserMiddleware, authController.logout)
+authRouter.post(
+    '/logout',
+    checkCookiesAndUserMiddleware.checkCookiesAndUser.bind(
+        checkCookiesAndUserMiddleware
+    ),
+    authController.logout.bind(authController)
+)
 
-authRouter.get('/me', bearerAuthorizationMiddleware, authController.me)
+authRouter.get(
+    '/me',
+    bearerAuthorizationMiddleware.auth.bind(bearerAuthorizationMiddleware),
+    authController.me.bind(authController)
+)

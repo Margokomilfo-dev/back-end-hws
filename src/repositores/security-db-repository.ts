@@ -1,6 +1,6 @@
 import { SecurityModel } from '../mongo/security/security.model'
 
-class SecurityRepository {
+export class SecurityRepository {
     async create(data: SecurityType): Promise<void> {
         await SecurityModel.insertMany(data)
     }
@@ -9,7 +9,9 @@ class SecurityRepository {
         return SecurityModel.findOne({ deviceId })
     }
 
-    async _getSessionByDeviceId(deviceId: string): Promise<SecurityType | null> {
+    async _getSessionByDeviceId(
+        deviceId: string
+    ): Promise<SecurityType | null> {
         return SecurityModel.findOne({ deviceId })
     }
 
@@ -21,10 +23,16 @@ class SecurityRepository {
     }
 
     async getSessionsByUserId(userId: string): Promise<SecurityType[]> {
-        return SecurityModel.find({ userId }, { userId: 0, refreshTokenData: 0, _id: 0, __v: 0 })
+        return SecurityModel.find(
+            { userId },
+            { userId: 0, refreshTokenData: 0, _id: 0, __v: 0 }
+        )
     }
 
-    async update(deviceId: string, data: SecurityType): Promise<SecurityType | null> {
+    async update(
+        deviceId: string,
+        data: SecurityType
+    ): Promise<SecurityType | null> {
         await SecurityModel.findOneAndUpdate({ deviceId }, data)
         return SecurityModel.findOne({ deviceId })
     }
@@ -39,8 +47,14 @@ class SecurityRepository {
         return res.deletedCount > 0
     }
 
-    async deleteAllOtherSessions(userId: string, deviceId: string): Promise<boolean> {
-        const res = await SecurityModel.deleteMany({ userId, deviceId: { $ne: deviceId } })
+    async deleteAllOtherSessions(
+        userId: string,
+        deviceId: string
+    ): Promise<boolean> {
+        const res = await SecurityModel.deleteMany({
+            userId,
+            deviceId: { $ne: deviceId },
+        })
         return res.deletedCount > 0
     }
 
@@ -49,7 +63,7 @@ class SecurityRepository {
     }
 }
 
-export const securityRepository = new SecurityRepository()
+//export const securityRepository = new SecurityRepository()
 
 export class SecurityType {
     constructor(

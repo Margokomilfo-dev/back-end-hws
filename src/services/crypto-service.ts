@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import { UserType } from '../repositores/users-db-repository'
 
-class CryptoService {
+export class CryptoService {
     async _generateSalt() {
         return bcrypt.genSalt(10)
     }
@@ -13,4 +13,4 @@ class CryptoService {
     }
 }
 
-export const cryptoService = new CryptoService()
+//export const cryptoService = new CryptoService()

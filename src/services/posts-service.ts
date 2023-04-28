@@ -1,21 +1,31 @@
-import { postsRepository, PostType } from '../repositores/posts-db-repository'
+import { PostsRepository, PostType } from '../repositores/posts-db-repository'
 
-class PostsService {
+export class PostsService {
+    postsRepository: PostsRepository
+    constructor() {
+        this.postsRepository = new PostsRepository()
+    }
+
     async getPosts(
         pageNumber: number,
         pageSize: number,
         sortBy: string,
         sortDirection: string
     ): Promise<PostType[]> {
-        return postsRepository.getPosts(pageNumber, pageSize, sortBy, sortDirection)
+        return this.postsRepository.getPosts(
+            pageNumber,
+            pageSize,
+            sortBy,
+            sortDirection
+        )
     }
 
     async getPostsCount(): Promise<number> {
-        return postsRepository.getPostsCount()
+        return this.postsRepository.getPostsCount()
     }
 
     async getPostById(id: string): Promise<PostType | null> {
-        return postsRepository.getPostById(id)
+        return this.postsRepository.getPostById(id)
     }
 
     async getPostsByBlogId(
@@ -25,11 +35,17 @@ class PostsService {
         sortBy: string,
         sortDirection: string
     ): Promise<PostType[]> {
-        return postsRepository.getPostsByBlogId(blogId, pageNumber, pageSize, sortBy, sortDirection)
+        return this.postsRepository.getPostsByBlogId(
+            blogId,
+            pageNumber,
+            pageSize,
+            sortBy,
+            sortDirection
+        )
     }
 
     async getPostsCountByBlogId(blogId: string): Promise<number> {
-        return postsRepository.getPostsCountByBlogId(blogId)
+        return this.postsRepository.getPostsCountByBlogId(blogId)
     }
 
     async createPost(
@@ -51,7 +67,7 @@ class PostsService {
             new Date().toISOString()
         )
 
-        return postsRepository.createPost(newPost)
+        return this.postsRepository.createPost(newPost)
     }
     async updatePost(
         id: string,
@@ -62,14 +78,14 @@ class PostsService {
             shortDescription: string
         }
     ): Promise<boolean> {
-        return postsRepository.updatePost(id, body)
+        return this.postsRepository.updatePost(id, body)
     }
 
     async deletePost(id: string): Promise<boolean> {
-        return postsRepository.deletePost(id)
+        return this.postsRepository.deletePost(id)
     }
     async deleteAll() {
-        return postsRepository.deleteAll()
+        return this.postsRepository.deleteAll()
     }
 }
-export const postsService = new PostsService()
+//export const postsService = new PostsService()

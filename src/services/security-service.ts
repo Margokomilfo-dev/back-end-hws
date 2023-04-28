@@ -1,6 +1,13 @@
-import { securityRepository, SecurityType } from '../repositores/security-db-repository'
+import {
+    SecurityRepository,
+    SecurityType,
+} from '../repositores/security-db-repository'
 
-class SecurityService {
+export class SecurityService {
+    securityRepository: SecurityRepository
+    constructor() {
+        this.securityRepository = new SecurityRepository()
+    }
     async create(
         deviceId: string,
         userId: string,
@@ -17,41 +24,50 @@ class SecurityService {
             deviceId,
             new Date(iAt).toISOString()
         )
-        await securityRepository.create(data)
+        await this.securityRepository.create(data)
     }
     async getSessionByDeviceId(deviceId: string): Promise<SecurityType | null> {
-        return securityRepository.getSessionByDeviceId(deviceId)
+        return this.securityRepository.getSessionByDeviceId(deviceId)
     }
 
     async _getSessionByUserId(userId: string): Promise<SecurityType | null> {
-        return securityRepository._getSessionByDeviceId(userId)
+        return this.securityRepository._getSessionByDeviceId(userId)
     }
 
     async _getSessionByUserIdAndDeviceId(
         userId: string,
         deviceId: string
     ): Promise<SecurityType | null> {
-        return securityRepository._getSessionByUserIdAndDeviceId(userId, deviceId)
+        return this.securityRepository._getSessionByUserIdAndDeviceId(
+            userId,
+            deviceId
+        )
     }
 
     async getSessionsByUserId(userId: string): Promise<SecurityType[]> {
-        return securityRepository.getSessionsByUserId(userId)
+        return this.securityRepository.getSessionsByUserId(userId)
     }
 
-    async update(deviceId: string, data: SecurityType): Promise<SecurityType | null> {
-        return securityRepository.update(deviceId, data)
+    async update(
+        deviceId: string,
+        data: SecurityType
+    ): Promise<SecurityType | null> {
+        return this.securityRepository.update(deviceId, data)
     }
     async deleteSession(deviceId: string): Promise<boolean> {
-        return securityRepository.deleteSession(deviceId)
+        return this.securityRepository.deleteSession(deviceId)
     }
     async deleteAllSessions(userId: string): Promise<boolean> {
-        return securityRepository.deleteAllSessions(userId)
+        return this.securityRepository.deleteAllSessions(userId)
     }
-    async deleteAllOtherSessions(userId: string, deviceId: string): Promise<boolean> {
-        return securityRepository.deleteAllOtherSessions(userId, deviceId)
+    async deleteAllOtherSessions(
+        userId: string,
+        deviceId: string
+    ): Promise<boolean> {
+        return this.securityRepository.deleteAllOtherSessions(userId, deviceId)
     }
     async deleteAll() {
-        return securityRepository.deleteAll()
+        return this.securityRepository.deleteAll()
     }
 }
-export const securityService = new SecurityService()
+export const securityService = new SecurityService() //for tests

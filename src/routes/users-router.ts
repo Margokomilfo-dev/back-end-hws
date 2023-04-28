@@ -6,17 +6,24 @@ import {
     passwordValidator,
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
-import { userExistedParamValidationMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
-import { usersService } from '../services/users-service'
+import { paramsValidatorsMiddleware } from '../assets/express-validator/id-int-param-validation-middleware'
+import { UsersService } from '../services/users-service'
 import { paginationQueries } from '../assets/pagination'
-import { usersRepository } from '../repositores/users-db-repository'
 import { basicAuthorizationMiddleware } from '../middlewares/basic-authorization-middleware'
+import { UsersRepository } from '../repositores/users-db-repository'
 
 export const usersRouter = Router({})
 
 class UserController {
+    usersService: UsersService
+    usersRepository: UsersRepository
+    constructor() {
+        this.usersService = new UsersService()
+        this.usersRepository = new UsersRepository()
+    }
     async getUsers(req: Request, res: Response) {
-        const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
+        const { pageNumber, pageSize, sortBy, sortDirection } =
+            paginationQueries(req)
 
         let searchLoginTerm = req.query.searchLoginTerm
             ? req.query.searchLoginTerm.toString()
@@ -26,7 +33,7 @@ class UserController {
             ? req.query.searchEmailTerm.toString()
             : null
 
-        const users = await usersService.getUsers(
+        const users = await this.usersService.getUsers(
             pageNumber,
             pageSize,
             sortBy,
@@ -34,7 +41,10 @@ class UserController {
             searchLoginTerm,
             searchEmailTerm
         )
-        const usersCount = await usersRepository.getUsersCount(searchLoginTerm, searchEmailTerm)
+        const usersCount = await this.usersRepository.getUsersCount(
+            searchLoginTerm,
+            searchEmailTerm
+        )
         const result = {
             pagesCount: Math.ceil(usersCount / pageSize),
             page: pageNumber,
@@ -49,7 +59,11 @@ class UserController {
         const email = req.body.email
         const password = req.body.password
 
-        const newUser = await usersService.createUser(login, email, password)
+        const newUser = await this.usersService.createUser(
+            login,
+            email,
+            password
+        )
 
         if (newUser) {
             res.status(CodeResponsesEnum.Created_201).send(newUser)
@@ -59,7 +73,7 @@ class UserController {
     }
     async deleteUser(req: Request, res: Response) {
         const id = req.params.id
-        const isDeleted = await usersService.deleteUser(id)
+        const isDeleted = await this.usersService.deleteUser(id)
         if (isDeleted) {
             res.sendStatus(CodeResponsesEnum.Not_content_204)
         } else {
@@ -70,7 +84,11 @@ class UserController {
 
 const userController = new UserController()
 
-usersRouter.get('/', basicAuthorizationMiddleware, userController.getUsers)
+usersRouter.get(
+    '/',
+    basicAuthorizationMiddleware,
+    userController.getUsers.bind(userController)
+)
 usersRouter.post(
     '/',
     basicAuthorizationMiddleware,
@@ -78,11 +96,13 @@ usersRouter.post(
     passwordValidator,
     emailValidator,
     errorsResultMiddleware,
-    userController.createUser
+    userController.createUser.bind(userController)
 )
 usersRouter.delete(
     '/:id',
     basicAuthorizationMiddleware,
-    userExistedParamValidationMiddleware,
-    userController.deleteUser
+    paramsValidatorsMiddleware.userExistedParamValidationMiddleware.bind(
+        paramsValidatorsMiddleware
+    ),
+    userController.deleteUser.bind(userController)
 )
