@@ -4,19 +4,13 @@ import { UserType } from '../repositores/users-db-repository'
 import { EmailService } from './email-service'
 
 export class AuthService {
-    usersService: UsersService
-    cryptoService: CryptoService
-    emailService: EmailService
-    constructor() {
-        this.usersService = new UsersService()
-        this.cryptoService = new CryptoService()
-        this.emailService = new EmailService()
-    }
+    constructor(
+        private usersService: UsersService,
+        private cryptoService: CryptoService,
+        private emailService: EmailService
+    ) {}
 
-    async checkCredentials(
-        loginOrEmail: string,
-        password: string
-    ): Promise<UserType | null> {
+    async checkCredentials(loginOrEmail: string, password: string): Promise<UserType | null> {
         const user = await this.usersService.getUserByLoginOrEmail(loginOrEmail)
         if (!user) return null
         const res = await this.cryptoService._compareHash(password, user)
@@ -52,4 +46,3 @@ export class AuthService {
         }
     }
 }
-//export const authService = new AuthService()

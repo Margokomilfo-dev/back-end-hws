@@ -1,13 +1,7 @@
-import {
-    CommentRepository,
-    CommentType,
-} from '../repositores/comments-db-repository'
+import { CommentRepository, CommentType } from '../repositores/comments-db-repository'
 
 export class CommentsService {
-    commentsRepository: CommentRepository
-    constructor() {
-        this.commentsRepository = new CommentRepository()
-    }
+    constructor(private commentsRepository: CommentRepository) {}
     async getCommentById(id: string): Promise<CommentType | null> {
         return this.commentsRepository.getCommentById(id)
     }
@@ -63,5 +57,3 @@ export class CommentsService {
         return this.commentsRepository.deleteAll()
     }
 }
-
-//export const commentsService = new CommentsService()

@@ -1,19 +1,23 @@
 import { CodeResponsesEnum } from '../src/types'
 import request from 'supertest'
 import { app } from '../src/settings'
-import { UserType } from '../src/repositores/users-db-repository'
+import { UsersRepository, UserType } from '../src/repositores/users-db-repository'
 import { createUser } from './assets'
-import { usersService } from '../src/services/users-service'
 import { SecurityType } from '../src/repositores/security-db-repository'
-import { securityService } from '../src/services/security-service'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
+import { UsersService } from '../src/services/users-service'
+import { CryptoService } from '../src/services/crypto-service'
+import { SecurityService } from '../src/services/security-service'
 dotenv.config()
 
 const dbName = 'hw'
 const mongoURI = process.env.mongoURI || `mongodb://0.0.0.0:27017/${dbName}`
 
 describe('/auth', () => {
+    const usersService = new UsersService(new UsersRepository(), new CryptoService())
+    const securityService = new SecurityService()
+
     let user1: UserType | null
     let cookie: string[] | null
     let sessions: SecurityType[]
@@ -93,9 +97,7 @@ describe('/auth', () => {
                 })
                 .expect(CodeResponsesEnum.Not_content_204)
 
-            user2 = await usersService.getUserByLoginOrEmail(
-                'margokomilfo.dek@gmail.com'
-            )
+            user2 = await usersService.getUserByLoginOrEmail('margokomilfo.dek@gmail.com')
         })
         it('- POST not created with the same data of user', async function () {
             await request(app)
@@ -121,9 +123,7 @@ describe('/auth', () => {
                     email: 'margokomilfo@gmail.com',
                 })
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
-                    errorsMessages: [
-                        { message: 'login is already exist', field: 'login' },
-                    ],
+                    errorsMessages: [{ message: 'login is already exist', field: 'login' }],
                 })
         })
     })
@@ -133,9 +133,7 @@ describe('/auth', () => {
                 .post('/auth/registration-email-resending')
                 .send({})
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
-                    errorsMessages: [
-                        { message: 'email is required', field: 'email' },
-                    ],
+                    errorsMessages: [{ message: 'email is required', field: 'email' }],
                 })
         })
         it('- POST not user with this email', async function () {
@@ -158,9 +156,7 @@ describe('/auth', () => {
                 .send({ email: user2!.email })
                 .expect(CodeResponsesEnum.Not_content_204)
 
-            user2 = await usersService.getUserByLoginOrEmail(
-                'margokomilfo.dek@gmail.com'
-            )
+            user2 = await usersService.getUserByLoginOrEmail('margokomilfo.dek@gmail.com')
         })
     })
     describe('POST auth/registration-confirmation', () => {
@@ -169,9 +165,7 @@ describe('/auth', () => {
                 .post('/auth/registration-confirmation')
                 .send({})
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
-                    errorsMessages: [
-                        { message: 'code is required', field: 'code' },
-                    ],
+                    errorsMessages: [{ message: 'code is required', field: 'code' }],
                 })
         })
         it('- POST incorrect code', async function () {
@@ -179,9 +173,7 @@ describe('/auth', () => {
                 .post('/auth/registration-confirmation')
                 .send({ code: 'ncksanc-sxnck-casnk' })
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
-                    errorsMessages: [
-                        { message: 'user in not found', field: 'code' },
-                    ],
+                    errorsMessages: [{ message: 'user in not found', field: 'code' }],
                 })
         })
         it('+ POST correct code', async function () {
@@ -197,9 +189,7 @@ describe('/auth', () => {
                 .post('/auth/password-recovery')
                 .send({ email: 'm#gmail.com' })
                 .expect(CodeResponsesEnum.Incorrect_values_400, {
-                    errorsMessages: [
-                        { message: 'not correct', field: 'email' },
-                    ],
+                    errorsMessages: [{ message: 'not correct', field: 'email' }],
                 })
         })
         it('- POST no existed correct email', async function () {
@@ -214,9 +204,7 @@ describe('/auth', () => {
                 .send({ email: user2!.email })
                 .expect(CodeResponsesEnum.Not_content_204)
 
-            user2 = await usersService.getUserByLoginOrEmail(
-                'margokomilfo.dek@gmail.com'
-            )
+            user2 = await usersService.getUserByLoginOrEmail('margokomilfo.dek@gmail.com')
         })
     })
     describe('POST auth/new-password', () => {
@@ -423,9 +411,7 @@ describe('/auth', () => {
     })
     describe('GET auth/me', () => {
         it('- GET no user (no token)', async function () {
-            await request(app)
-                .get('/auth/me')
-                .expect(CodeResponsesEnum.Not_Authorized_401)
+            await request(app).get('/auth/me').expect(CodeResponsesEnum.Not_Authorized_401)
         })
         it('- GET no user (bad token, no data)', async function () {
             await request(app)

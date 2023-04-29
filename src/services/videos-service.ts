@@ -1,14 +1,8 @@
 import addDays from 'date-fns/addDays'
-import {
-    VideosRepository,
-    VideoType,
-} from '../repositores/videos-db-repository'
+import { VideosRepository, VideoType } from '../repositores/videos-db-repository'
 
 export class VideosService {
-    videosRepository: VideosRepository
-    constructor() {
-        this.videosRepository = new VideosRepository()
-    }
+    constructor(private videosRepository: VideosRepository) {}
     async getVideos() {
         return this.videosRepository.getVideos()
     }
@@ -48,5 +42,3 @@ export class VideosService {
         return this.videosRepository.deleteAll()
     }
 }
-
-//export const videosService = new VideoService()

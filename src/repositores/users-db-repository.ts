@@ -54,18 +54,13 @@ export class UsersRepository {
         return UserModel.countDocuments(filter)
     }
     async getUserById(id: string): Promise<UserType | null> {
-        return UserModel.findOne(
-            { id },
-            { _id: 0, passwordHash: 0, __v: 0, confirmationData: 0 }
-        )
+        return UserModel.findOne({ id }, { _id: 0, passwordHash: 0, __v: 0, confirmationData: 0 })
     }
     async _getUserById(id: string): Promise<UserType | null> {
         return UserModel.findOne({ id })
     }
 
-    async getAndUpdateUserByConfirmationCode(
-        code: string
-    ): Promise<UserType | null> {
+    async getAndUpdateUserByConfirmationCode(code: string): Promise<UserType | null> {
         return UserModel.findOneAndUpdate(
             {
                 $and: [
@@ -97,10 +92,7 @@ export class UsersRepository {
         )
         return UserModel.findOne({ id })
     }
-    async updateUserPassword(
-        id: string,
-        passwordHash: string
-    ): Promise<UserType | null> {
+    async updateUserPassword(id: string, passwordHash: string): Promise<UserType | null> {
         await UserModel.findOneAndUpdate(
             { id },
             {
@@ -133,8 +125,6 @@ export class UsersRepository {
         return UserModel.deleteMany({})
     }
 }
-
-//export const usersRepository = new UserRepository()
 
 export class UserType {
     constructor(

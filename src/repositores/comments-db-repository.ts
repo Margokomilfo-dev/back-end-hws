@@ -43,8 +43,6 @@ export class CommentRepository {
     }
 }
 
-//export const commentsRepository = new CommentRepository()
-
 export class CommentType {
     constructor(
         public id: string,
@@ -55,13 +53,6 @@ export class CommentType {
     ) {}
 }
 
-// export type CommentType = {
-//     id: string
-//     content: string
-//     commentatorInfo: CommentatorInfoType
-//     createdAt: string
-//     postId: string
-// }
 export type CommentatorInfoType = {
     userId: string
     userLogin: string

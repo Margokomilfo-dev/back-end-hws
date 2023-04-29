@@ -9,9 +9,7 @@ export class SecurityRepository {
         return SecurityModel.findOne({ deviceId })
     }
 
-    async _getSessionByDeviceId(
-        deviceId: string
-    ): Promise<SecurityType | null> {
+    async _getSessionByDeviceId(deviceId: string): Promise<SecurityType | null> {
         return SecurityModel.findOne({ deviceId })
     }
 
@@ -23,16 +21,10 @@ export class SecurityRepository {
     }
 
     async getSessionsByUserId(userId: string): Promise<SecurityType[]> {
-        return SecurityModel.find(
-            { userId },
-            { userId: 0, refreshTokenData: 0, _id: 0, __v: 0 }
-        )
+        return SecurityModel.find({ userId }, { userId: 0, refreshTokenData: 0, _id: 0, __v: 0 })
     }
 
-    async update(
-        deviceId: string,
-        data: SecurityType
-    ): Promise<SecurityType | null> {
+    async update(deviceId: string, data: SecurityType): Promise<SecurityType | null> {
         await SecurityModel.findOneAndUpdate({ deviceId }, data)
         return SecurityModel.findOne({ deviceId })
     }
@@ -47,10 +39,7 @@ export class SecurityRepository {
         return res.deletedCount > 0
     }
 
-    async deleteAllOtherSessions(
-        userId: string,
-        deviceId: string
-    ): Promise<boolean> {
+    async deleteAllOtherSessions(userId: string, deviceId: string): Promise<boolean> {
         const res = await SecurityModel.deleteMany({
             userId,
             deviceId: { $ne: deviceId },
@@ -63,8 +52,6 @@ export class SecurityRepository {
     }
 }
 
-//export const securityRepository = new SecurityRepository()
-
 export class SecurityType {
     constructor(
         public userId: string,
@@ -75,13 +62,3 @@ export class SecurityType {
         public lastActiveDate: string
     ) {}
 }
-
-// export type SecurityType = {
-//     userId: string
-//     refreshTokenData: string
-//
-//     ip: string
-//     title: string
-//     deviceId: string
-//     lastActiveDate: string
-// }

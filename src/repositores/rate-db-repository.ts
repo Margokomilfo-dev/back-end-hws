@@ -17,7 +17,6 @@ export class RateRepository {
         })
     }
 }
-//export const rateRepository = new RateRepository()
 
 export class AttemptType {
     constructor(public url: string, public ip: string, public date: Date) {}

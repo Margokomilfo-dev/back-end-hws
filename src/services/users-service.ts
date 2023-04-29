@@ -4,12 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import dateFns from 'date-fns/addMinutes'
 
 export class UsersService {
-    usersRepository: UsersRepository
-    cryptoService: CryptoService
-    constructor() {
-        this.usersRepository = new UsersRepository()
-        this.cryptoService = new CryptoService()
-    }
+    constructor(private usersRepository: UsersRepository, private cryptoService: CryptoService) {}
     async getUsers(
         pageNumber: number,
         pageSize: number,
@@ -31,14 +26,18 @@ export class UsersService {
     async getUserById(id: string): Promise<UserType | null> {
         return this.usersRepository.getUserById(id)
     }
+    async getUsersCount(
+        searchLoginTerm: string | null,
+        searchEmailTerm: string | null
+    ): Promise<number> {
+        return this.usersRepository.getUsersCount(searchLoginTerm, searchEmailTerm)
+    }
 
     async _getUserById(id: string): Promise<UserType | null> {
         return this.usersRepository._getUserById(id)
     }
 
-    async getAndUpdateUserByConfirmationCode(
-        code: string
-    ): Promise<UserType | null> {
+    async getAndUpdateUserByConfirmationCode(code: string): Promise<UserType | null> {
         return this.usersRepository.getAndUpdateUserByConfirmationCode(code)
     }
 
@@ -50,27 +49,18 @@ export class UsersService {
         return this.usersRepository.updateUserConfirmationCode(id)
     }
 
-    async getUserByLoginOrEmail(
-        loginOrEmail: string
-    ): Promise<UserType | null> {
+    async getUserByLoginOrEmail(loginOrEmail: string): Promise<UserType | null> {
         return this.usersRepository.getUserByLoginOrEmail(loginOrEmail)
     }
 
-    async createUser(
-        login: string,
-        email: string,
-        password: string
-    ): Promise<UserType | null> {
+    async createUser(login: string, email: string, password: string): Promise<UserType | null> {
         const getUser1 = await this.usersRepository.getUserByLoginOrEmail(login)
         const getUser2 = await this.usersRepository.getUserByLoginOrEmail(email)
         if (getUser1 || getUser2) {
             return null
         }
         const salt = await this.cryptoService._generateSalt()
-        const passwordHash = await this.cryptoService._generateHash(
-            password,
-            salt
-        )
+        const passwordHash = await this.cryptoService._generateHash(password, salt)
         const newUser = new UserType(
             new Date().getTime().toString(),
             login,
@@ -86,19 +76,13 @@ export class UsersService {
         return this.usersRepository.createUser(newUser)
     }
 
-    async updateUserPassword(
-        id: string,
-        newPassword: string
-    ): Promise<UserType | null> {
+    async updateUserPassword(id: string, newPassword: string): Promise<UserType | null> {
         const user = await this.usersRepository.getUserById(id)
         if (!user) {
             return null
         }
         const salt = await this.cryptoService._generateSalt()
-        const passwordHash = await this.cryptoService._generateHash(
-            newPassword,
-            salt
-        )
+        const passwordHash = await this.cryptoService._generateHash(newPassword, salt)
         return this.usersRepository.updateUserPassword(id, passwordHash)
     }
 
@@ -106,5 +90,3 @@ export class UsersService {
         return this.usersRepository.deleteUser(id)
     }
 }
-
-export const usersService = new UsersService() //for tests

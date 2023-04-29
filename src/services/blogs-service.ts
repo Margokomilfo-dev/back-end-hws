@@ -1,10 +1,7 @@
 import { BlogsRepository, BlogType } from '../repositores/blogs-db-repository'
 
-export class BlogService {
-    blogsRepository: BlogsRepository
-    constructor() {
-        this.blogsRepository = new BlogsRepository()
-    }
+export class BlogsService {
+    constructor(private blogsRepository: BlogsRepository) {}
     async getBlogs(
         pageNumber: number,
         pageSize: number,
@@ -64,5 +61,3 @@ export class BlogService {
         return this.blogsRepository.deleteAll()
     }
 }
-
-//export const blogService = new BlogService()

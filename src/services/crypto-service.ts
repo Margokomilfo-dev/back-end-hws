@@ -12,5 +12,3 @@ export class CryptoService {
         return bcrypt.compare(password, user.passwordHash)
     }
 }
-
-//export const cryptoService = new CryptoService()

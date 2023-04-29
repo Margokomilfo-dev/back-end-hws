@@ -1,7 +1,4 @@
-import {
-    SecurityRepository,
-    SecurityType,
-} from '../repositores/security-db-repository'
+import { SecurityRepository, SecurityType } from '../repositores/security-db-repository'
 
 export class SecurityService {
     securityRepository: SecurityRepository
@@ -38,20 +35,14 @@ export class SecurityService {
         userId: string,
         deviceId: string
     ): Promise<SecurityType | null> {
-        return this.securityRepository._getSessionByUserIdAndDeviceId(
-            userId,
-            deviceId
-        )
+        return this.securityRepository._getSessionByUserIdAndDeviceId(userId, deviceId)
     }
 
     async getSessionsByUserId(userId: string): Promise<SecurityType[]> {
         return this.securityRepository.getSessionsByUserId(userId)
     }
 
-    async update(
-        deviceId: string,
-        data: SecurityType
-    ): Promise<SecurityType | null> {
+    async update(deviceId: string, data: SecurityType): Promise<SecurityType | null> {
         return this.securityRepository.update(deviceId, data)
     }
     async deleteSession(deviceId: string): Promise<boolean> {
@@ -60,14 +51,10 @@ export class SecurityService {
     async deleteAllSessions(userId: string): Promise<boolean> {
         return this.securityRepository.deleteAllSessions(userId)
     }
-    async deleteAllOtherSessions(
-        userId: string,
-        deviceId: string
-    ): Promise<boolean> {
+    async deleteAllOtherSessions(userId: string, deviceId: string): Promise<boolean> {
         return this.securityRepository.deleteAllOtherSessions(userId, deviceId)
     }
     async deleteAll() {
         return this.securityRepository.deleteAll()
     }
 }
-export const securityService = new SecurityService() //for tests

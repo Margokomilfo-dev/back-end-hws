@@ -29,8 +29,6 @@ export class VideosRepository {
     }
 }
 
-//export const videosRepository = new VideosRepository()
-
 export class VideoType {
     constructor(
         public id: number,
@@ -44,16 +42,6 @@ export class VideoType {
     ) {}
 }
 
-// export type VideoType = {
-//     id: number
-//     title: string
-//     author: string
-//     canBeDownloaded: boolean
-//     minAgeRestriction: number | null
-//     createdAt: string
-//     publicationDate: string
-//     availableResolutions: Array<string> | null
-// }
 export enum ResolutionsEnum {
     'P144' = 'P144',
     'P240' = 'P240',

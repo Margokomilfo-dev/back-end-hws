@@ -24,5 +24,3 @@ export class EmailService {
         return res.accepted && res.accepted[0] === email
     }
 }
-
-//export const emailService = new EmailService()

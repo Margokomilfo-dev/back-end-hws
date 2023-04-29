@@ -53,16 +53,6 @@ export class BlogsRepository {
     }
 }
 
-//export const blogsRepository = new BlogsRepository()
-
-// export type BlogType = {
-//     id: string
-//     name: string
-//     description: string
-//     websiteUrl: string
-//     isMembership: boolean
-//     createdAt: string
-// }
 export class BlogType {
     constructor(
         public id: string,

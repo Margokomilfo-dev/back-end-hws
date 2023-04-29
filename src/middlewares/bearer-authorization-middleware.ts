@@ -3,13 +3,8 @@ import { CodeResponsesEnum } from '../types'
 import { JwtService } from '../services/jwt-service'
 import { UsersService } from '../services/users-service'
 
-class BearerAuthorizationMiddleware {
-    usersService: UsersService
-    jwtService: JwtService
-    constructor() {
-        this.usersService = new UsersService()
-        this.jwtService = new JwtService()
-    }
+export class BearerAuthorizationMiddleware {
+    constructor(private usersService: UsersService, private jwtService: JwtService) {}
 
     async auth(req: Request, res: Response, next: NextFunction) {
         if (!req.headers.authorization) {
@@ -33,7 +28,6 @@ class BearerAuthorizationMiddleware {
         res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
     }
 }
-export const bearerAuthorizationMiddleware = new BearerAuthorizationMiddleware()
 
 // export class bearerAuthorizationMiddleware = async (
 //     req: Request,

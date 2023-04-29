@@ -60,7 +60,6 @@ export class PostsRepository {
         return PostsModel.deleteMany({})
     }
 }
-//export const postsRepository = new PostsRepository()
 
 export class PostType {
     constructor(

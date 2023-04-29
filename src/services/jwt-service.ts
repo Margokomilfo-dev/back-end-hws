@@ -11,10 +11,7 @@ export class JwtService {
             expiresIn: '10000',
         })
     }
-    async createRefreshJWTToken(
-        user: UserType,
-        deviceId: string
-    ): Promise<string> {
+    async createRefreshJWTToken(user: UserType, deviceId: string): Promise<string> {
         return jwt.sign({ userId: user.id, deviceId }, secret, {
             expiresIn: '20000',
         })

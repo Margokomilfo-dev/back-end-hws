@@ -2,19 +2,23 @@ import { CodeResponsesEnum } from '../src/types'
 // @ts-ignore
 import request from 'supertest'
 import { app } from '../src/settings'
-import { UserType } from '../src/repositores/users-db-repository'
+import { UsersRepository, UserType } from '../src/repositores/users-db-repository'
 import { userLogin } from './assets'
-import { usersService } from '../src/services/users-service'
+import { UsersService } from '../src/services/users-service'
 import { SecurityType } from '../src/repositores/security-db-repository'
-import { securityService } from '../src/services/security-service'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
+import { CryptoService } from '../src/services/crypto-service'
+import { SecurityService } from '../src/services/security-service'
+
 dotenv.config()
 
 const dbName = 'hw'
 const mongoURI = process.env.mongoURI || `mongodb://0.0.0.0:27017/${dbName}`
 
 describe('/secure', () => {
+    const usersService = new UsersService(new UsersRepository(), new CryptoService())
+    const securityService = new SecurityService()
     let sessions: SecurityType[]
     let cookie_1: string[]
     let cookie_2: string[]

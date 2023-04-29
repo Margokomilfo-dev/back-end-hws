@@ -3,18 +3,11 @@ import { CodeResponsesEnum } from '../types'
 import { UsersService } from '../services/users-service'
 import { CommentsService } from '../services/comments-service'
 
-class CommonMiddleware {
-    usersService: UsersService
-    commentsService: CommentsService
-    constructor() {
-        this.usersService = new UsersService()
-        this.commentsService = new CommentsService()
-    }
+export class CommonMiddleware {
+    constructor(private usersService: UsersService, private commentsService: CommentsService) {}
     async userIsExist(req: Request, res: Response, next: NextFunction) {
         let recoveryCode = req.body.recoveryCode
-        const user = await this.usersService.getUserByConfirmationCode(
-            recoveryCode
-        )
+        const user = await this.usersService.getUserByConfirmationCode(recoveryCode)
         if (!user) {
             res.status(CodeResponsesEnum.Incorrect_values_400).send({
                 errorsMessages: [
@@ -39,7 +32,6 @@ class CommonMiddleware {
         next()
     }
 }
-export const commonMiddleware = new CommonMiddleware()
 
 // export const userIsExistMiddleware = async (
 //     req: Request,

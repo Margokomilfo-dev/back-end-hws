@@ -3,17 +3,10 @@ import { BlogsRepository } from '../../repositores/blogs-db-repository'
 import { UsersService } from '../../services/users-service'
 
 export class CustomValidator {
-    blogsRepository: BlogsRepository
-    usersService: UsersService
-    constructor() {
-        this.blogsRepository = new BlogsRepository()
-        this.usersService = new UsersService()
-    }
+    constructor(private blogsRepository: BlogsRepository, private usersService: UsersService) {}
     _customUserValidator = body('code').custom(async (value) => {
         if (value && typeof value === 'string' && value.trim()) {
-            const user = await this.usersService.getUserByConfirmationCode(
-                value
-            )
+            const user = await this.usersService.getUserByConfirmationCode(value)
             if (!user) {
                 throw new Error('user in not found')
             }
@@ -45,4 +38,3 @@ export class CustomValidator {
         return true
     })
 }
-export const customValidator = new CustomValidator()

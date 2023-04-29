@@ -1,10 +1,7 @@
 import { PostsRepository, PostType } from '../repositores/posts-db-repository'
 
 export class PostsService {
-    postsRepository: PostsRepository
-    constructor() {
-        this.postsRepository = new PostsRepository()
-    }
+    constructor(private postsRepository: PostsRepository) {}
 
     async getPosts(
         pageNumber: number,
@@ -12,12 +9,7 @@ export class PostsService {
         sortBy: string,
         sortDirection: string
     ): Promise<PostType[]> {
-        return this.postsRepository.getPosts(
-            pageNumber,
-            pageSize,
-            sortBy,
-            sortDirection
-        )
+        return this.postsRepository.getPosts(pageNumber, pageSize, sortBy, sortDirection)
     }
 
     async getPostsCount(): Promise<number> {
