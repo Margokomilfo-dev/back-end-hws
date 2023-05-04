@@ -17,7 +17,7 @@ export class CommentRepository {
         sortBy: string,
         sortDirection: string
     ): Promise<CommentType[]> {
-        return CommentsModel.find({ postId }, { _id: 0, postId: 0 })
+        return CommentsModel.find({ postId }, { _id: 0, postId: 0, __v: 0 })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
