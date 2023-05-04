@@ -3,9 +3,11 @@ import { LikeInfoEnum, LikesRepository, StatusType } from './likes-db-repository
 
 export class CommentRepository {
     constructor(private likesRepository: LikesRepository) {}
-    async createComment(comment: CommentType): Promise<CommentType | null> {
+    async createComment(comment: CommentType): Promise<ExtendedCommentType | null> {
         await CommentsModel.insertMany(comment)
-        return this.getCommentById(comment.id)
+        const res = await this.getCommentById(comment.id)
+        if (!res) return null
+        return { ...res, likesInfo: { ...res.likesInfo, myStatus: LikeInfoEnum.None } }
     }
 
     async getCommentById(id: string): Promise<CommentType | null> {
