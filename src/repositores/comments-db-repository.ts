@@ -7,7 +7,7 @@ export class CommentRepository {
     }
 
     async getCommentById(id: string): Promise<CommentType | null> {
-        return CommentsModel.findOne({ id }, { _id: 0, postId: 0, __v: 0 })
+        return CommentsModel.findOne({ id }, { _id: 0, postId: 0, __v: 0 }).lean()
     }
 
     async getCommentsByPostId(
