@@ -1,6 +1,7 @@
 import { CommentsService } from '../services/comments-service'
 import { Request, Response } from 'express'
 import { CodeResponsesEnum } from '../types'
+import { LikeInfoEnum } from '../repositores/comments-db-repository'
 
 export class CommentsController {
     constructor(private commentsService: CommentsService) {}
@@ -8,6 +9,18 @@ export class CommentsController {
         const id = req.params.id
 
         const comment = await this.commentsService.getCommentById(id)
+
+        //если пользователь не залогинен
+        const userId = req.userId
+        if (comment && !userId) {
+            const comment_ = {
+                ...comment,
+                likesInfo: { ...comment.likesInfo, myStatus: LikeInfoEnum.None },
+            }
+            res.status(CodeResponsesEnum.Success_200).send(comment_)
+            return
+        }
+
         if (comment) {
             res.status(CodeResponsesEnum.Success_200).send(comment)
         } else {
