@@ -40,6 +40,7 @@ export class CommentRepository {
         const filter: any = {}
         let newStatus = likeStatus.status
         console.log('What: ', likeStatus.status, status)
+
         //если я еще не делала выбора myStatus === None
         if (likeStatus.status === LikeInfoEnum.None) {
             if (status === LikeInfoEnum.Like) {
@@ -78,7 +79,11 @@ export class CommentRepository {
 
         await CommentsModel.findOneAndUpdate({ id: comment.id }, filter).lean()
         console.log('AfterUpdate', newStatus, await CommentsModel.findOne({ id: comment.id }))
-        await this.likesRepository.updateLikeStatus(likeStatus.id, newStatus)
+        await this.likesRepository.updateLikeStatus(
+            likeStatus.userId,
+            likeStatus.commentId,
+            newStatus
+        )
         return true
     }
 

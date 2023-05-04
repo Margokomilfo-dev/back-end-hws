@@ -31,8 +31,10 @@ export class CommentsController {
         }
 
         if (comment && data && data.userId) {
-            console.log('USERID:', data.userId)
-            const usersStatusInfo = await this.likesService.findLikeStatus(data.userId, comment.id)
+            const usersStatusInfo = await this.likesService.getCommentStatus(
+                data.userId,
+                comment.id
+            )
 
             res.status(CodeResponsesEnum.Success_200).send({
                 ...comment,
@@ -59,6 +61,7 @@ export class CommentsController {
         const commentId = req.params.commentId?.toString().trim()
         const likeStatus = req.body.likeStatus
         const userId = req.userId
+
         const comment = await this.commentsService.updateLikeStatus(commentId, likeStatus, userId!)
         if (!comment) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)

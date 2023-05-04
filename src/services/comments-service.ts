@@ -67,10 +67,10 @@ export class CommentsService {
             return false
         }
 
-        let likeStatusData = await this.likesService.findLikeStatus(userId, comment.id)
+        let likeStatusData = await this.likesService.getCommentStatus(userId, comment.id)
 
         if (!likeStatusData) {
-            likeStatusData = await this.likesService.createStatus(userId, comment.postId, commentId)
+            likeStatusData = await this.likesService.createStatus(userId, commentId)
         }
         if (!likeStatusData) {
             return false

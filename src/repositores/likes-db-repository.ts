@@ -1,20 +1,24 @@
 import { LikesModel } from '../mongo/likes/likes.model'
 
 export class LikesRepository {
-    async createStatus(dto: StatusType): Promise<StatusType | null> {
+    async createCommentStatus(dto: StatusType): Promise<StatusType | null> {
         await LikesModel.insertMany([dto])
-        return this.getStatusById(dto.id)
+        return this.getCommentStatus(dto.userId, dto.commentId)
     }
 
-    async getStatusById(id: string): Promise<StatusType | null> {
-        return LikesModel.findOne({ id }).lean()
+    async getCommentStatus(userId: string, commentId: string): Promise<StatusType | null> {
+        return LikesModel.findOne({ userId, commentId }).lean()
     }
 
     async findLikeStatus(userId: string, commentId: string): Promise<StatusType | null> {
         return LikesModel.findOne({ userId, commentId }).lean()
     }
-    async updateLikeStatus(id: string, status: LikeInfoEnum): Promise<StatusType | null> {
-        return LikesModel.findOneAndUpdate({ id }, { status }, { new: true })
+    async updateLikeStatus(
+        userId: string,
+        commentId: string,
+        status: LikeInfoEnum
+    ): Promise<StatusType | null> {
+        return LikesModel.findOneAndUpdate({ userId, commentId }, { status }, { new: true })
     }
     async deleteAll() {
         return LikesModel.deleteMany({})
@@ -22,14 +26,7 @@ export class LikesRepository {
 }
 
 export class StatusType {
-    constructor(
-        public id: string,
-        public createdAt: string,
-        public userId: string,
-        public postId: string,
-        public commentId: string,
-        public status: LikeInfoEnum
-    ) {}
+    constructor(public userId: string, public commentId: string, public status: LikeInfoEnum) {}
 }
 
 export enum LikeInfoEnum {
