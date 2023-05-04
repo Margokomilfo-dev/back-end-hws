@@ -85,7 +85,6 @@ export class UsersService {
         const passwordHash = await this.cryptoService._generateHash(newPassword, salt)
         return this.usersRepository.updateUserPassword(id, passwordHash)
     }
-
     async deleteUser(id: string) {
         return this.usersRepository.deleteUser(id)
     }

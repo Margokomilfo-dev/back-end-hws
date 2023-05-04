@@ -17,9 +17,18 @@ export class CommentsController {
     async updateComment(req: Request, res: Response) {
         const id = req.params.id?.toString().trim()
         const content = req.body.content
-
         const isUpdated = await this.commentsService.updateComment(id, content)
         if (!isUpdated) {
+            res.sendStatus(CodeResponsesEnum.Not_found_404)
+            return
+        }
+        res.sendStatus(CodeResponsesEnum.Not_content_204)
+    }
+    async updateCommentLikes(req: Request, res: Response) {
+        const commentId = req.params.commentId?.toString().trim()
+        const likeStatus = req.body.likeStatus
+        const comment = await this.commentsService.updateLikeStatus(commentId, likeStatus)
+        if (!comment) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
         }

@@ -8,7 +8,7 @@ const secret = process.env.SECRET ? process.env.SECRET : 'hello'
 export class JwtService {
     async createJWTToken(user: UserType): Promise<string> {
         return jwt.sign({ userId: user.id }, secret, {
-            expiresIn: '10000',
+            expiresIn: '600000', //10min
         })
     }
     async createRefreshJWTToken(user: UserType, deviceId: string): Promise<string> {

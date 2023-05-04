@@ -1,4 +1,4 @@
-import { CommentRepository, CommentType } from '../repositores/comments-db-repository'
+import { CommentRepository, CommentType, LikeInfoEnum } from '../repositores/comments-db-repository'
 
 export class CommentsService {
     constructor(private commentsRepository: CommentRepository) {}
@@ -40,13 +40,21 @@ export class CommentsService {
                 userLogin,
                 userId,
             },
-            postId
+            postId,
+            {
+                likesCount: 0,
+                dislikesCount: 0,
+                myStatus: LikeInfoEnum.None,
+            }
         )
         return this.commentsRepository.createComment(comment)
     }
 
     async updateComment(id: string, content: string): Promise<boolean> {
         return this.commentsRepository.updateComment(id, content)
+    }
+    async updateLikeStatus(commentId: string, status: LikeInfoEnum) {
+        return this.commentsRepository.updateLikeStatus(commentId, status)
     }
 
     async deleteComment(id: string): Promise<boolean> {

@@ -112,7 +112,6 @@ export class UsersRepository {
             $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
         })
     }
-
     async createUser(newUser: UserType) {
         await UserModel.insertMany(newUser)
         return this.getUserById(newUser.id)

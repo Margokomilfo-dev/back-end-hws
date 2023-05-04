@@ -1,4 +1,5 @@
 import { body } from 'express-validator'
+import { LikeInfoEnum } from '../../repositores/comments-db-repository'
 
 export const videoTitleValidator = body('title')
     .trim()
@@ -136,3 +137,11 @@ export const codeValidator = body('code')
     .withMessage('code is required')
     .isLength({ min: 5, max: 100 })
     .withMessage('code should contain 5 - 100 symbols')
+
+export const likeStatusValidator = body('likeStatus')
+    .trim()
+    .notEmpty()
+    .withMessage('likeStatus is required')
+    .isString()
+    .isIn(Object.values(LikeInfoEnum))
+    .withMessage('not correct')
