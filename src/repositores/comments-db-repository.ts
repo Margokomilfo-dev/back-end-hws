@@ -1,6 +1,8 @@
 import { CommentsModel } from '../mongo/comments/comments.model'
+import { LikeInfoEnum, LikesRepository, StatusType } from './likes-db-repository'
 
 export class CommentRepository {
+    constructor(private likesRepository: LikesRepository) {}
     async createComment(comment: CommentType): Promise<CommentType | null> {
         await CommentsModel.insertMany(comment)
         return this.getCommentById(comment.id)
@@ -8,6 +10,9 @@ export class CommentRepository {
 
     async getCommentById(id: string): Promise<CommentType | null> {
         return CommentsModel.findOne({ id }, { _id: 0, postId: 0, __v: 0 }).lean()
+    }
+    async getCommentById_(id: string): Promise<CommentType | null> {
+        return CommentsModel.findOne({ id }).lean()
     }
 
     async getCommentsByPostId(
@@ -27,50 +32,54 @@ export class CommentRepository {
     async getCommentsCountByPostId(postId: string): Promise<number> {
         return CommentsModel.countDocuments({ postId })
     }
-    async updateLikeStatus(commentId: string, status: LikeInfoEnum): Promise<CommentType | null> {
-        const comment = await CommentsModel.findOne({ id: commentId })
-        if (!comment) {
-            return null
-        }
+    async updateLikeStatus(
+        comment: CommentType,
+        status: LikeInfoEnum,
+        likeStatus: StatusType
+    ): Promise<boolean> {
         const filter: any = {}
-
+        let newStatus = likeStatus.status
+        console.log('What: ', likeStatus.status, status)
         //если я еще не делала выбора myStatus === None
-        if (comment.likesInfo.myStatus === LikeInfoEnum.None) {
+        if (likeStatus.status === LikeInfoEnum.None) {
             if (status === LikeInfoEnum.Like) {
                 filter.$inc = { 'likesInfo.likesCount': 1 }
-                filter['likesInfo.myStatus'] = LikeInfoEnum.Like
+                newStatus = LikeInfoEnum.Like
             }
             if (status === LikeInfoEnum.Dislike) {
                 filter.$inc = { 'likesInfo.dislikeCount': 1 }
-                filter['likesInfo.myStatus'] = LikeInfoEnum.Dislike
+                newStatus = LikeInfoEnum.Dislike
             }
         }
 
         //если я отклоняю свой выбор (True -> True, False -> False)
-        if (comment.likesInfo.myStatus === status) {
+        else if (likeStatus.status === status) {
             if (status === LikeInfoEnum.Like) {
                 filter.$inc = { 'likesInfo.likesCount': -1 }
-                filter['likesInfo.myStatus'] = LikeInfoEnum.None
+                newStatus = LikeInfoEnum.None
             }
             if (status === LikeInfoEnum.Dislike) {
                 filter.$inc = { 'likesInfo.dislikesCount': -1 }
-                filter['likesInfo.myStatus'] = LikeInfoEnum.None
+                newStatus = LikeInfoEnum.None
             }
         }
 
         //если я изменяю свой выбор
-        if (comment.likesInfo.myStatus === LikeInfoEnum.Like && status === LikeInfoEnum.Dislike) {
+        else if (likeStatus.status === LikeInfoEnum.Like && status === LikeInfoEnum.Dislike) {
             filter.$inc = { 'likesInfo.likesCount': -1, 'likesInfo.dislikesCount': 1 }
-            filter['likesInfo.myStatus'] = LikeInfoEnum.Dislike
+            newStatus = LikeInfoEnum.Dislike
         }
+
         //если я изменяю свой выбор
-
-        if (comment.likesInfo.myStatus === LikeInfoEnum.Dislike && status === LikeInfoEnum.Like) {
+        else if (likeStatus.status === LikeInfoEnum.Dislike && status === LikeInfoEnum.Like) {
             filter.$inc = { 'likesInfo.likesCount': 1, 'likesInfo.dislikesCount': -1 }
-            filter['likesInfo.myStatus'] = LikeInfoEnum.Like
+            newStatus = LikeInfoEnum.Like
         }
 
-        return CommentsModel.findOneAndUpdate({ id: commentId }, filter, { new: true })
+        await CommentsModel.findOneAndUpdate({ id: comment.id }, filter).lean()
+        console.log('AfterUpdate', newStatus, await CommentsModel.findOne({ id: comment.id }))
+        await this.likesRepository.updateLikeStatus(likeStatus.id, newStatus)
+        return true
     }
 
     async updateComment(id: string, content: string): Promise<boolean> {
@@ -99,6 +108,20 @@ export class CommentType {
     ) {}
 }
 
+export class ExtendedCommentType {
+    constructor(
+        public id: string,
+        public content: string,
+        public createdAt: string,
+        public commentatorInfo: CommentatorInfoType,
+        public postId: string,
+        public likesInfo: {
+            likesCount: number
+            dislikesCount: number
+            myStatus: LikeInfoEnum
+        }
+    ) {}
+}
 export type CommentatorInfoType = {
     userId: string
     userLogin: string
@@ -107,11 +130,4 @@ export type CommentatorInfoType = {
 export type LikeInfoType = {
     likesCount: number
     dislikesCount: number
-    myStatus: LikeInfoEnum
-}
-
-export enum LikeInfoEnum {
-    None = 'None',
-    Like = 'Like',
-    Dislike = 'Dislike',
 }

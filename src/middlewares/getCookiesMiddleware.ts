@@ -18,24 +18,19 @@ class CheckCookiesAndUserMiddleware {
             return
         }
         const firstPartOfToken = firstPartsOfJWTToken(refreshToken)
-        const data = await this.jwtService.verifyAndGetUserIdByToken(
-            refreshToken
-        )
+        const data = await this.jwtService.verifyAndGetUserIdByToken(refreshToken)
 
         if (!data) {
             res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
             return
         }
-        const session =
-            await this.securityRepository._getSessionByUserIdAndDeviceId(
-                data.userId,
-                data.deviceId
-            )
 
-        if (
-            !session ||
-            (session && session.refreshTokenData !== firstPartOfToken)
-        ) {
+        const session = await this.securityRepository._getSessionByUserIdAndDeviceId(
+            data.userId,
+            data.deviceId
+        )
+
+        if (!session || (session && session.refreshTokenData !== firstPartOfToken)) {
             res.sendStatus(CodeResponsesEnum.Not_Authorized_401)
             return
         }

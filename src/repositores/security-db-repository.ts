@@ -4,7 +4,6 @@ export class SecurityRepository {
     async create(data: SecurityType): Promise<void> {
         await SecurityModel.insertMany(data)
     }
-
     async getSessionByDeviceId(deviceId: string): Promise<SecurityType | null> {
         return SecurityModel.findOne({ deviceId })
     }

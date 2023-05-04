@@ -1,7 +1,12 @@
-import { CommentRepository, CommentType, LikeInfoEnum } from '../repositores/comments-db-repository'
+import { CommentRepository, CommentType } from '../repositores/comments-db-repository'
+import { LikesService } from './likes-service'
+import { LikeInfoEnum } from '../repositores/likes-db-repository'
 
 export class CommentsService {
-    constructor(private commentsRepository: CommentRepository) {}
+    constructor(
+        private commentsRepository: CommentRepository,
+        private likesService: LikesService
+    ) {}
     async getCommentById(id: string): Promise<CommentType | null> {
         return this.commentsRepository.getCommentById(id)
     }
@@ -44,7 +49,6 @@ export class CommentsService {
             {
                 likesCount: 0,
                 dislikesCount: 0,
-                myStatus: LikeInfoEnum.None,
             }
         )
         return this.commentsRepository.createComment(comment)
@@ -53,8 +57,25 @@ export class CommentsService {
     async updateComment(id: string, content: string): Promise<boolean> {
         return this.commentsRepository.updateComment(id, content)
     }
-    async updateLikeStatus(commentId: string, status: LikeInfoEnum) {
-        return this.commentsRepository.updateLikeStatus(commentId, status)
+    async updateLikeStatus(
+        commentId: string,
+        status: LikeInfoEnum,
+        userId: string
+    ): Promise<boolean> {
+        const comment = await this.commentsRepository.getCommentById_(commentId)
+        if (!comment) {
+            return false
+        }
+
+        let likeStatusData = await this.likesService.findLikeStatus(userId, comment.id)
+
+        if (!likeStatusData) {
+            likeStatusData = await this.likesService.createStatus(userId, comment.postId, commentId)
+        }
+        if (!likeStatusData) {
+            return false
+        }
+        return this.commentsRepository.updateLikeStatus(comment, status, likeStatusData)
     }
 
     async deleteComment(id: string): Promise<boolean> {

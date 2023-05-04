@@ -1,5 +1,5 @@
 import { body } from 'express-validator'
-import { LikeInfoEnum } from '../../repositores/comments-db-repository'
+import { LikeInfoEnum } from '../../repositores/likes-db-repository'
 
 export const videoTitleValidator = body('title')
     .trim()

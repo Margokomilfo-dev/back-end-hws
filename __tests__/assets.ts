@@ -76,7 +76,7 @@ export const createComment = async (
         userId: user!.id,
         userLogin: user!.login,
     })
-    return res_.body
+    return { ...res_.body, likesInfo: { ...res_.body.likesInfo, myStatus: 'None' } }
 }
 
 export const getTokenPostAuthLogin = async (

@@ -24,16 +24,23 @@ import { SecurityController } from './controllers/security-controller'
 import { CustomValidator } from './assets/express-validator/custom-validators'
 import { BearerAuthorizationMiddleware } from './middlewares/bearer-authorization-middleware'
 import { CommonMiddleware } from './middlewares/common-middleware'
+import { SecurityRepository } from './repositores/security-db-repository'
+import { LikesRepository } from './repositores/likes-db-repository'
+import { LikesService } from './services/likes-service'
+import { AppController } from './controllers/app-controller'
 
 //repos
-const commentsRepository = new CommentRepository()
+const likesRepository = new LikesRepository()
+const commentsRepository = new CommentRepository(likesRepository)
 const postsRepository = new PostsRepository()
 const blogsRepository = new BlogsRepository()
 const usersRepository = new UsersRepository()
 const videosRepository = new VideosRepository()
+const securityRepository = new SecurityRepository()
 
 //services
-const commentsService = new CommentsService(commentsRepository)
+const likesService = new LikesService(likesRepository)
+const commentsService = new CommentsService(commentsRepository, likesService)
 const postsService = new PostsService(postsRepository)
 const blogsService = new BlogsService(blogsRepository)
 const cryptoService = new CryptoService()
@@ -41,11 +48,11 @@ const usersService = new UsersService(usersRepository, cryptoService)
 const videosService = new VideosService(videosRepository)
 const emailService = new EmailService()
 const authService = new AuthService(usersService, cryptoService, emailService)
-const securityService = new SecurityService()
 const jwtService = new JwtService()
+const securityService = new SecurityService(securityRepository, jwtService)
 
 //controllers
-export const commentController = new CommentsController(commentsService)
+export const commentController = new CommentsController(commentsService, jwtService, likesService)
 export const postsController = new PostsController(postsService, commentsService, blogsService)
 export const blogsController = new BlogsController(postsService, blogsService)
 export const usersController = new UsersController(usersService)
@@ -58,6 +65,15 @@ export const authController = new AuthController(
     emailService
 )
 export const securityController = new SecurityController(securityService, jwtService)
+export const appController = new AppController(
+    videosRepository,
+    blogsRepository,
+    commentsRepository,
+    usersRepository,
+    postsRepository,
+    securityRepository,
+    likesRepository
+)
 
 //common
 export const paramsValidatorsMiddleware = new ParamsValidatorsMiddleware(usersService, blogsService)

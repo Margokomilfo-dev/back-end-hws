@@ -1,10 +1,8 @@
 import { SecurityRepository, SecurityType } from '../repositores/security-db-repository'
+import { JwtService } from './jwt-service'
 
 export class SecurityService {
-    securityRepository: SecurityRepository
-    constructor() {
-        this.securityRepository = new SecurityRepository()
-    }
+    constructor(private securityRepository: SecurityRepository, private jwtService: JwtService) {}
     async create(
         deviceId: string,
         userId: string,
@@ -25,6 +23,13 @@ export class SecurityService {
     }
     async getSessionByDeviceId(deviceId: string): Promise<SecurityType | null> {
         return this.securityRepository.getSessionByDeviceId(deviceId)
+    }
+    async checkCookiesAndGetUserId(refreshToken: string | undefined): Promise<string | undefined> {
+        if (refreshToken) {
+            const data = await this.jwtService.verifyAndGetUserIdByToken(refreshToken)
+            return data?.userId
+        }
+        return undefined
     }
 
     async _getSessionByUserId(userId: string): Promise<SecurityType | null> {

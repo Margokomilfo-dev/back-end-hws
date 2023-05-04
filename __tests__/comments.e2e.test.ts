@@ -9,8 +9,9 @@ import { UserType } from '../src/repositores/users-db-repository'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import { BlogType } from '../src/repositores/blogs-db-repository'
-import { CommentType, LikeInfoEnum } from '../src/repositores/comments-db-repository'
+import { CommentType } from '../src/repositores/comments-db-repository'
 import { PostType } from '../src/repositores/posts-db-repository'
+import { LikeInfoEnum } from '../src/repositores/likes-db-repository'
 dotenv.config()
 
 const dbName = 'hw'
@@ -21,11 +22,16 @@ describe('/comments', () => {
     let newBlog: BlogType | null = null
     let newPost: PostType | null = null
     let token: string | null = null
-    let comment: CommentType | null = null
+    let comment0_1: CommentType | null = null
+    let comment0_2: CommentType | null = null
+    let comment0_3: CommentType | null = null
+    let comment0_4: CommentType | null = null
 
     let user1: UserType | null = null
     let token1: string | null = null
-    let comment1: CommentType | null = null
+    let comment1_1: CommentType | null = null
+    let comment1_2: CommentType | null = null
+    let comment1_3: CommentType | null = null
 
     beforeAll(async () => {
         /* Connecting to the database before each test. */
@@ -82,26 +88,23 @@ describe('/comments', () => {
         })
     })
     describe('GET/:id', () => {
-        it('POST comments', async () => {
-            comment = await createComment(
-                newPost!.id,
-                'comment content comment content comment content comment content',
-                user!,
-                token!
-            )
-            comment1 = await createComment(
-                newPost!.id,
-                'comment from Natali Natali Natali Natali Natali',
-                user1!,
-                token1!
-            )
+        it('POST comments bu user', async () => {
+            comment0_1 = await createComment(newPost!.id, 'comment1 comment comment', user!, token!)
+            comment0_2 = await createComment(newPost!.id, 'comment2 comment comment', user!, token!)
+            comment0_3 = await createComment(newPost!.id, 'comment3 comment comment', user!, token!)
+            comment0_4 = await createComment(newPost!.id, 'comment4 comment comment', user!, token!)
+        })
+        it('POST comments bu user1', async () => {
+            comment1_1 = await createComment(newPost!.id, 'comment11 comment comm', user1!, token1!)
+            comment1_2 = await createComment(newPost!.id, 'comment12 comment comm', user1!, token1!)
+            comment1_3 = await createComment(newPost!.id, 'comment13 comment comm', user1!, token1!)
         })
         it('- GET/:id', async () => {
             await request(app).get('/comments/2324').expect(CodeResponsesEnum.Not_found_404)
         })
         it('+ GET/:id', async () => {
-            const res = await request(app).get('/comments/' + comment!.id)
-            expect(res.body).toEqual(comment)
+            const res = await request(app).get('/comments/' + comment0_1!.id)
+            expect(res.body).toEqual(comment0_1)
         })
     })
     describe('PUT/:id', () => {
@@ -125,82 +128,110 @@ describe('/comments', () => {
         })
         it('- PUT/:id auth, correct id, not mine', async () => {
             await request(app)
-                .put('/comments/' + comment1!.id)
+                .put('/comments/' + comment1_1!.id)
                 .set('Authorization', `bearer ${token}`)
                 .send({ content: 'contentik contentik contentik contentik' })
                 .expect(CodeResponsesEnum.Forbidden_403)
         })
         it('+ PUT/:id auth, correct id', async () => {
             await request(app)
-                .put('/comments/' + comment!.id)
+                .put('/comments/' + comment0_1!.id)
                 .set('Authorization', `bearer ${token}`)
                 .send({ content: 'contentik contentik contentik contentik' })
                 .expect(CodeResponsesEnum.Not_content_204)
 
-            const res_ = await request(app).get('/comments/' + comment!.id)
+            const res_ = await request(app).get('/comments/' + comment0_1!.id)
             expect(res_.body.content).toBe('contentik contentik contentik contentik')
         })
     })
     describe('PUT/:commentId/like-status', () => {
         it('- PUT/:commentId/like-status auth, incorrect data', async () => {
             await request(app)
-                .put('/comments/' + comment1!.id + '/like-status')
+                .put('/comments/' + comment0_1!.id + '/like-status')
                 .set('Authorization', `bearer ${token}`)
                 .send({ likeStatus: 'incorrect' })
                 .expect(CodeResponsesEnum.Incorrect_values_400)
         })
         it('- PUT/:commentId/like-status auth, no auth, incorrect data', async () => {
             await request(app)
-                .put('/comments/' + comment1!.id + '/like-status')
+                .put('/comments/' + comment0_1!.id + '/like-status')
                 .set('Authorization', `bearer ${123}`)
                 .send({ likeStatus: 'incorrect' })
                 .expect(CodeResponsesEnum.Not_Authorized_401)
         })
-        it('+ PUT/:commentId/like-status auth, Like comment', async () => {
+        it('+ PUT/:commentId/like-status auth, Like comment by user', async () => {
             await request(app)
-                .put('/comments/' + comment!.id + '/like-status')
+                .put('/comments/' + comment0_1!.id + '/like-status')
                 .set('Authorization', `bearer ${token}`)
                 .send({ likeStatus: LikeInfoEnum.Like })
                 .expect(CodeResponsesEnum.Not_content_204)
 
-            const res_ = await request(app).get('/comments/' + comment!.id)
+            const res_ = await request(app)
+                .get('/comments/' + comment0_1!.id)
+                .set('Authorization', `bearer ${token}`)
+
             expect(res_.body.likesInfo.likesCount).toBe(1)
             expect(res_.body.likesInfo.dislikesCount).toBe(0)
             expect(res_.body.likesInfo.myStatus).toBe(LikeInfoEnum.Like)
         })
-        it('+ PUT/:commentId/like-status auth,  Like comment1', async () => {
+        it('+ PUT/:commentId/like-status auth,  Like comment1 by user', async () => {
             await request(app)
-                .put('/comments/' + comment1!.id + '/like-status')
+                .put('/comments/' + comment0_2!.id + '/like-status')
                 .set('Authorization', `bearer ${token}`)
                 .send({ likeStatus: LikeInfoEnum.Like })
                 .expect(CodeResponsesEnum.Not_content_204)
 
-            const res_ = await request(app).get('/comments/' + comment1!.id)
+            const res_ = await request(app)
+                .get('/comments/' + comment0_2!.id)
+                .set('Authorization', `bearer ${token}`)
             expect(res_.body.likesInfo.likesCount).toBe(1)
             expect(res_.body.likesInfo.dislikesCount).toBe(0)
             expect(res_.body.likesInfo.myStatus).toBe(LikeInfoEnum.Like)
         })
-        it('+ PUT/:commentId/like-status auth, Dislike comment1', async () => {
+
+        it('+ PUT/:commentId/like-status auth, Like comment1 by user1', async () => {
             await request(app)
-                .put('/comments/' + comment1!.id + '/like-status')
+                .put('/comments/' + comment0_1!.id + '/like-status')
+                .set('Authorization', `bearer ${token1}`)
+                .send({ likeStatus: LikeInfoEnum.Like })
+                .expect(CodeResponsesEnum.Not_content_204)
+
+            const res_ = await request(app)
+                .get('/comments/' + comment0_1!.id)
+                .set('Authorization', `bearer ${token1}`)
+
+            console.log('5:', res_.body)
+            expect(res_.body.likesInfo.likesCount).toBe(2)
+            expect(res_.body.likesInfo.dislikesCount).toBe(0)
+            expect(res_.body.likesInfo.myStatus).toBe(LikeInfoEnum.Like)
+        })
+        it('+ PUT/:commentId/like-status auth, Dislike comment1 by user', async () => {
+            console.log('6')
+            await request(app)
+                .put('/comments/' + comment0_1!.id + '/like-status')
                 .set('Authorization', `bearer ${token}`)
                 .send({ likeStatus: LikeInfoEnum.Dislike })
                 .expect(CodeResponsesEnum.Not_content_204)
 
-            const res_ = await request(app).get('/comments/' + comment1!.id)
-            expect(res_.body.likesInfo.likesCount).toBe(0)
+            const res_ = await request(app)
+                .get('/comments/' + comment0_1!.id)
+                .set('Authorization', `bearer ${token}`)
+            expect(res_.body.likesInfo.likesCount).toBe(1)
             expect(res_.body.likesInfo.dislikesCount).toBe(1)
             expect(res_.body.likesInfo.myStatus).toBe(LikeInfoEnum.Dislike)
         })
-        it('+ PUT/:commentId/like-status auth, Dislike comment1', async () => {
+        it('+ PUT/:commentId/like-status auth, Dislike comment1 by user', async () => {
+            console.log('7')
             await request(app)
-                .put('/comments/' + comment1!.id + '/like-status')
+                .put('/comments/' + comment0_1!.id + '/like-status')
                 .set('Authorization', `bearer ${token}`)
                 .send({ likeStatus: LikeInfoEnum.Dislike })
                 .expect(CodeResponsesEnum.Not_content_204)
 
-            const res_ = await request(app).get('/comments/' + comment1!.id)
-            expect(res_.body.likesInfo.likesCount).toBe(0)
+            const res_ = await request(app)
+                .get('/comments/' + comment0_1!.id)
+                .set('Authorization', `bearer ${token}`)
+            expect(res_.body.likesInfo.likesCount).toBe(1)
             expect(res_.body.likesInfo.dislikesCount).toBe(0)
             expect(res_.body.likesInfo.myStatus).toBe(LikeInfoEnum.None)
         })
@@ -219,18 +250,18 @@ describe('/comments', () => {
         })
         it('- DELETE not mine comment correct ID, auth', async () => {
             await request(app)
-                .delete('/comments/' + comment1!.id)
-                .set('authorization', `Bearer ${token}`)
+                .delete('/comments/' + comment0_1!.id)
+                .set('authorization', `Bearer ${token1}`)
                 .expect(CodeResponsesEnum.Forbidden_403)
         })
         it('+ DELETE comment by correct ID, auth', async () => {
             await request(app)
-                .delete('/comments/' + comment!.id)
+                .delete('/comments/' + comment0_1!.id)
                 .set('authorization', `Bearer ${token}`)
                 .expect(CodeResponsesEnum.Not_content_204)
 
             await request(app)
-                .get('/comments/' + comment!.id)
+                .get('/comments/' + comment0_1!.id)
                 .expect(CodeResponsesEnum.Not_found_404)
         })
     })

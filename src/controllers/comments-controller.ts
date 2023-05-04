@@ -1,18 +1,27 @@
 import { CommentsService } from '../services/comments-service'
 import { Request, Response } from 'express'
 import { CodeResponsesEnum } from '../types'
-import { LikeInfoEnum } from '../repositores/comments-db-repository'
+import { JwtService } from '../services/jwt-service'
+import { LikeInfoEnum } from '../repositores/likes-db-repository'
+import { LikesService } from '../services/likes-service'
 
 export class CommentsController {
-    constructor(private commentsService: CommentsService) {}
+    constructor(
+        private commentsService: CommentsService,
+        private jwtService: JwtService,
+        private likesService: LikesService
+    ) {}
     async getComment(req: Request, res: Response) {
         const id = req.params.id
 
         const comment = await this.commentsService.getCommentById(id)
 
         //если пользователь не залогинен
-        const userId = req.userId
-        if (comment && !userId) {
+        const token = req.headers.authorization?.split(' ')[1]
+        let data = null
+        if (token) data = await this.jwtService.verifyAndGetUserIdByToken(token)
+
+        if (comment && !data?.userId) {
             const comment_ = {
                 ...comment,
                 likesInfo: { ...comment.likesInfo, myStatus: LikeInfoEnum.None },
@@ -21,8 +30,17 @@ export class CommentsController {
             return
         }
 
-        if (comment) {
-            res.status(CodeResponsesEnum.Success_200).send(comment)
+        if (comment && data && data.userId) {
+            console.log('USERID:', data.userId)
+            const usersStatusInfo = await this.likesService.findLikeStatus(data.userId, comment.id)
+
+            res.status(CodeResponsesEnum.Success_200).send({
+                ...comment,
+                likesInfo: {
+                    ...comment.likesInfo,
+                    myStatus: usersStatusInfo ? usersStatusInfo.status : LikeInfoEnum.None,
+                },
+            })
         } else {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
         }
@@ -40,13 +58,15 @@ export class CommentsController {
     async updateCommentLikes(req: Request, res: Response) {
         const commentId = req.params.commentId?.toString().trim()
         const likeStatus = req.body.likeStatus
-        const comment = await this.commentsService.updateLikeStatus(commentId, likeStatus)
+        const userId = req.userId
+        const comment = await this.commentsService.updateLikeStatus(commentId, likeStatus, userId!)
         if (!comment) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
         }
         res.sendStatus(CodeResponsesEnum.Not_content_204)
     }
+
     async deleteComment(req: Request, res: Response) {
         const id = req.params.id
         const isDeleted = await this.commentsService.deleteComment(id)
