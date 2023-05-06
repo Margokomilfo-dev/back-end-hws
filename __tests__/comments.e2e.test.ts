@@ -161,7 +161,6 @@ describe('/comments', () => {
                 .expect(CodeResponsesEnum.Not_Authorized_401)
         })
         it('+ PUT/:commentId/like-status auth, Like comment by user', async () => {
-            console.log(1)
             await request(app)
                 .put('/comments/' + comment0_1!.id + '/like-status')
                 .set('Authorization', `bearer ${token}`)
@@ -194,7 +193,6 @@ describe('/comments', () => {
         })
 
         it('+ PUT/:commentId/like-status auth, Like comment1 by user1', async () => {
-            console.log(3)
             await request(app)
                 .put('/comments/' + comment0_1!.id + '/like-status')
                 .set('Authorization', `bearer ${token1}`)
@@ -224,7 +222,6 @@ describe('/comments', () => {
             expect(res_.body.likesInfo.myStatus).toBe(LikeInfoEnum.Dislike)
         })
         it('+ PUT/:commentId/like-status auth, Dislike comment1 by user', async () => {
-            console.log(5)
             await request(app)
                 .put('/comments/' + comment0_1!.id + '/like-status')
                 .set('Authorization', `bearer ${token}`)
