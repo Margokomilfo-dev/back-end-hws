@@ -71,6 +71,9 @@ export class CommentRepository {
                 filter.$inc = { 'likesInfo.dislikeCount': -1 }
                 newStatus = LikeInfoEnum.None
             }
+            if (status === LikeInfoEnum.None) {
+                newStatus = LikeInfoEnum.None
+            }
         }
         if (checkedStatus === LikeInfoEnum.Like) {
             if (status === LikeInfoEnum.None) {
@@ -79,6 +82,9 @@ export class CommentRepository {
             }
             if (status === LikeInfoEnum.Dislike) {
                 filter.$inc = { 'likesInfo.likesCount': 1, 'likesInfo.dislikesCount': -1 }
+                newStatus = LikeInfoEnum.Like
+            }
+            if (status === LikeInfoEnum.Like) {
                 newStatus = LikeInfoEnum.Like
             }
         }
@@ -90,6 +96,9 @@ export class CommentRepository {
             }
             if (status === LikeInfoEnum.Like) {
                 filter.$inc = { 'likesInfo.likesCount': -1, 'likesInfo.dislikesCount': 1 }
+                newStatus = LikeInfoEnum.Dislike
+            }
+            if (status === LikeInfoEnum.Dislike) {
                 newStatus = LikeInfoEnum.Dislike
             }
         }
