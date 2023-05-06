@@ -175,6 +175,53 @@ describe('/comments', () => {
             expect(res_.body.likesInfo.dislikesCount).toBe(0)
             expect(res_.body.likesInfo.myStatus).toBe(LikeInfoEnum.Like)
         })
+        it('+ PUT/:commentId/like-status auth, disLike comment by user', async () => {
+            await request(app)
+                .put('/comments/' + comment0_1!.id + '/like-status')
+                .set('Authorization', `bearer ${token}`)
+                .send({ likeStatus: LikeInfoEnum.Dislike })
+                .expect(CodeResponsesEnum.Not_content_204)
+
+            const res_ = await request(app)
+                .get('/comments/' + comment0_1!.id)
+                .set('Authorization', `bearer ${token}`)
+            console.log('Like => Dislike status', res_.body.likesInfo)
+            expect(res_.body.likesInfo.likesCount).toBe(0)
+            expect(res_.body.likesInfo.dislikesCount).toBe(1)
+            expect(res_.body.likesInfo.myStatus).toBe(LikeInfoEnum.Dislike)
+        })
+
+        it('+ PUT/:commentId/like-status auth, None comment by user', async () => {
+            await request(app)
+                .put('/comments/' + comment0_1!.id + '/like-status')
+                .set('Authorization', `bearer ${token}`)
+                .send({ likeStatus: LikeInfoEnum.None })
+                .expect(CodeResponsesEnum.Not_content_204)
+
+            const res_ = await request(app)
+                .get('/comments/' + comment0_1!.id)
+                .set('Authorization', `bearer ${token}`)
+
+            console.log('Dislike => None status', res_.body.likesInfo)
+            expect(res_.body.likesInfo.likesCount).toBe(0)
+            expect(res_.body.likesInfo.dislikesCount).toBe(0)
+            expect(res_.body.likesInfo.myStatus).toBe(LikeInfoEnum.None)
+        })
+        it('+ PUT/:commentId/like-status auth, Like comment by user', async () => {
+            await request(app)
+                .put('/comments/' + comment0_1!.id + '/like-status')
+                .set('Authorization', `bearer ${token}`)
+                .send({ likeStatus: LikeInfoEnum.Like })
+                .expect(CodeResponsesEnum.Not_content_204)
+
+            const res_ = await request(app)
+                .get('/comments/' + comment0_1!.id)
+                .set('Authorization', `bearer ${token}`)
+            console.log('None => Like status', res_.body.likesInfo)
+            expect(res_.body.likesInfo.likesCount).toBe(1)
+            expect(res_.body.likesInfo.dislikesCount).toBe(0)
+            expect(res_.body.likesInfo.myStatus).toBe(LikeInfoEnum.Like)
+        })
 
         it('+ PUT/:commentId/like-status auth,  Like comment1 by user', async () => {
             console.log(1)

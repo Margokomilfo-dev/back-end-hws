@@ -68,7 +68,7 @@ export class CommentRepository {
                 newStatus = LikeInfoEnum.None
             }
             if (status === LikeInfoEnum.Dislike) {
-                filter.$inc = { 'likesInfo.dislikeCount': -1 }
+                filter.$inc = { 'likesInfo.dislikesCount': -1 }
                 newStatus = LikeInfoEnum.None
             }
             if (status === LikeInfoEnum.None) {
@@ -88,7 +88,6 @@ export class CommentRepository {
                 newStatus = LikeInfoEnum.Like
             }
         }
-
         if (checkedStatus === LikeInfoEnum.Dislike) {
             if (status === LikeInfoEnum.None) {
                 filter.$inc = { 'likesInfo.dislikesCount': 1 }
