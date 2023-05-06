@@ -3,12 +3,13 @@ import request from 'supertest'
 import { app } from '../src/settings'
 import { UsersRepository, UserType } from '../src/repositores/users-db-repository'
 import { createUser } from './assets'
-import { SecurityType } from '../src/repositores/security-db-repository'
+import { SecurityRepository, SecurityType } from '../src/repositores/security-db-repository'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import { UsersService } from '../src/services/users-service'
 import { CryptoService } from '../src/services/crypto-service'
 import { SecurityService } from '../src/services/security-service'
+import { JwtService } from '../src/services/jwt-service'
 dotenv.config()
 
 const dbName = 'hw'
@@ -16,7 +17,7 @@ const mongoURI = process.env.mongoURI || `mongodb://0.0.0.0:27017/${dbName}`
 
 describe('/auth', () => {
     const usersService = new UsersService(new UsersRepository(), new CryptoService())
-    const securityService = new SecurityService()
+    const securityService = new SecurityService(new SecurityRepository(), new JwtService())
 
     let user1: UserType | null
     let cookie: string[] | null

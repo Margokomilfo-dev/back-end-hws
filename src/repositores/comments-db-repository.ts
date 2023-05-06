@@ -18,17 +18,36 @@ export class CommentRepository {
     }
 
     async getCommentsByPostId(
+        userId: string | null,
         postId: string,
         pageNumber: number,
         pageSize: number,
         sortBy: string,
         sortDirection: string
     ): Promise<CommentType[]> {
-        return CommentsModel.find({ postId }, { _id: 0, postId: 0, __v: 0 })
+        const res = await CommentsModel.find({ postId }, { _id: 0, postId: 0, __v: 0 })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
             .lean()
+
+        if (!userId) {
+            return res.map((comment) => ({
+                ...comment,
+                likesInfo: { ...comment.likesInfo, myStatus: LikeInfoEnum.None },
+            }))
+        }
+        const promises = res.map(async (comment) => {
+            const myStatus = await this.likesRepository.getCommentStatus(userId, comment.id)
+            return {
+                ...comment,
+                likesInfo: {
+                    ...comment.likesInfo,
+                    myStatus: myStatus ? myStatus.status : LikeInfoEnum.None,
+                },
+            }
+        })
+        return await Promise.all(promises)
     }
 
     async getCommentsCountByPostId(postId: string): Promise<number> {
@@ -41,7 +60,6 @@ export class CommentRepository {
     ): Promise<boolean> {
         const filter: any = {}
         let newStatus = likeStatus.status
-        console.log('What: ', likeStatus.status, status)
 
         //если я еще не делала выбора myStatus === None
         if (likeStatus.status === LikeInfoEnum.None) {
@@ -80,7 +98,6 @@ export class CommentRepository {
         }
 
         await CommentsModel.findOneAndUpdate({ id: comment.id }, filter).lean()
-        console.log('AfterUpdate', newStatus, await CommentsModel.findOne({ id: comment.id }))
         await this.likesRepository.updateLikeStatus(
             likeStatus.userId,
             likeStatus.commentId,

@@ -12,6 +12,7 @@ export class CommentsService {
     }
 
     async getCommentsByPostId(
+        userId: string | null,
         postId: string,
         pageNumber: number,
         pageSize: number,
@@ -19,6 +20,7 @@ export class CommentsService {
         sortDirection: string
     ): Promise<CommentType[]> {
         return this.commentsRepository.getCommentsByPostId(
+            userId,
             postId,
             pageNumber,
             pageSize,

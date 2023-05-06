@@ -144,6 +144,7 @@ describe('/comments', () => {
             expect(res_.body.content).toBe('contentik contentik contentik contentik')
         })
     })
+
     describe('PUT/:commentId/like-status', () => {
         it('- PUT/:commentId/like-status auth, incorrect data', async () => {
             await request(app)
@@ -174,6 +175,7 @@ describe('/comments', () => {
             expect(res_.body.likesInfo.dislikesCount).toBe(0)
             expect(res_.body.likesInfo.myStatus).toBe(LikeInfoEnum.Like)
         })
+
         it('+ PUT/:commentId/like-status auth,  Like comment1 by user', async () => {
             await request(app)
                 .put('/comments/' + comment0_2!.id + '/like-status')
@@ -234,6 +236,20 @@ describe('/comments', () => {
             expect(res_.body.likesInfo.likesCount).toBe(1)
             expect(res_.body.likesInfo.dislikesCount).toBe(0)
             expect(res_.body.likesInfo.myStatus).toBe(LikeInfoEnum.None)
+        })
+    })
+    describe('GET/:postId/comments', () => {
+        it('GET comments by postId', async () => {
+            const res_ = await request(app)
+                .get('/posts/' + newPost!.id + '/comments')
+                .set('Authorization', `bearer ${token}`)
+                .expect(CodeResponsesEnum.Success_200)
+            console.log(res_.body.items)
+            expect(res_.body.items.length).toBe(7)
+            expect(res_.body.pagesCount).toBe(1)
+            expect(res_.body.pageSize).toBe(10)
+            expect(res_.body.page).toBe(1)
+            expect(res_.body.totalCount).toBe(7)
         })
     })
     describe('DELETE', () => {

@@ -13,6 +13,9 @@ export class EmailService {
                 user: EMAIL,
                 pass: SECRET_CODE,
             },
+            tls: {
+                rejectUnauthorized: false,
+            },
         })
 
         const res = await transporter.sendMail({

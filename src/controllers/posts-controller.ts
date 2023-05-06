@@ -4,6 +4,7 @@ import { BlogsService } from '../services/blogs-service'
 import { Request, Response } from 'express'
 import { paginationQueries } from '../assets/pagination'
 import { CodeResponsesEnum } from '../types'
+import { getUserIdFromHeaders } from '../assets/getUserId-from-headers'
 
 export class PostsController {
     constructor(
@@ -28,14 +29,17 @@ export class PostsController {
     }
 
     async getCommentsByPostId(req: Request, res: Response) {
+        const userId = await getUserIdFromHeaders(req.headers.authorization)
         const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
         const postId = req.params.postId.toString().trim()
         const post = await this.postsService.getPostById(postId)
+
         if (!post) {
             res.sendStatus(CodeResponsesEnum.Not_found_404)
             return
         }
         const comments = await this.commentsService.getCommentsByPostId(
+            userId,
             postId,
             pageNumber,
             pageSize,
