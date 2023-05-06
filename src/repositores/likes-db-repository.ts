@@ -26,7 +26,12 @@ export class LikesRepository {
 }
 
 export class StatusType {
-    constructor(public userId: string, public commentId: string, public status: LikeInfoEnum) {}
+    constructor(
+        public userId: string,
+        public commentId: string,
+        public status: LikeInfoEnum,
+        public createdAt: string //он не изменен
+    ) {}
 }
 
 export enum LikeInfoEnum {

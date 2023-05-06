@@ -69,15 +69,15 @@ export class CommentsService {
             return false
         }
 
-        let likeStatusData = await this.likesService.getCommentStatus(userId, comment.id)
+        let myLikeStatusData = await this.likesService.getCommentStatus(userId, comment.id)
 
-        if (!likeStatusData) {
-            likeStatusData = await this.likesService.createStatus(userId, commentId)
+        if (!myLikeStatusData) {
+            myLikeStatusData = await this.likesService.createStatus(userId, commentId)
         }
-        if (!likeStatusData) {
+        if (!myLikeStatusData) {
             return false
         }
-        return this.commentsRepository.updateLikeStatus(comment, status, likeStatusData)
+        return this.commentsRepository.updateLikeStatus(comment, status, myLikeStatusData)
     }
 
     async deleteComment(id: string): Promise<boolean> {

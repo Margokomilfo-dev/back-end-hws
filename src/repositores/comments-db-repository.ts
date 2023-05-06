@@ -55,26 +55,27 @@ export class CommentRepository {
     }
     async updateLikeStatus(
         comment: CommentType,
-        status: LikeInfoEnum,
-        likeStatus: StatusType
+        checkedStatus: LikeInfoEnum,
+        myLikeStatusData: StatusType
     ): Promise<boolean> {
         const filter: any = {}
-        let newStatus = likeStatus.status
+        let newStatus = checkedStatus
+        const { status, commentId, userId } = myLikeStatusData
 
         //если я еще не делала выбора myStatus === None
-        if (likeStatus.status === LikeInfoEnum.None) {
-            if (status === LikeInfoEnum.Like) {
+        if (status === LikeInfoEnum.None) {
+            if (checkedStatus === LikeInfoEnum.Like) {
                 filter.$inc = { 'likesInfo.likesCount': 1 }
                 newStatus = LikeInfoEnum.Like
             }
-            if (status === LikeInfoEnum.Dislike) {
+            if (checkedStatus === LikeInfoEnum.Dislike) {
                 filter.$inc = { 'likesInfo.dislikeCount': 1 }
                 newStatus = LikeInfoEnum.Dislike
             }
         }
 
-        //если я отклоняю свой выбор (True -> True, False -> False)
-        else if (likeStatus.status === status) {
+        //если я отклоняю свой выбор (None -> True, None -> False)
+        else if (checkedStatus === LikeInfoEnum.None) {
             if (status === LikeInfoEnum.Like) {
                 filter.$inc = { 'likesInfo.likesCount': -1 }
                 newStatus = LikeInfoEnum.None
@@ -86,23 +87,21 @@ export class CommentRepository {
         }
 
         //если я изменяю свой выбор
-        else if (likeStatus.status === LikeInfoEnum.Like && status === LikeInfoEnum.Dislike) {
+        else if (status === LikeInfoEnum.Like && checkedStatus === LikeInfoEnum.Dislike) {
             filter.$inc = { 'likesInfo.likesCount': -1, 'likesInfo.dislikesCount': 1 }
             newStatus = LikeInfoEnum.Dislike
         }
 
         //если я изменяю свой выбор
-        else if (likeStatus.status === LikeInfoEnum.Dislike && status === LikeInfoEnum.Like) {
+        else if (status === LikeInfoEnum.Dislike && checkedStatus === LikeInfoEnum.Like) {
             filter.$inc = { 'likesInfo.likesCount': 1, 'likesInfo.dislikesCount': -1 }
             newStatus = LikeInfoEnum.Like
         }
 
         await CommentsModel.findOneAndUpdate({ id: comment.id }, filter).lean()
-        await this.likesRepository.updateLikeStatus(
-            likeStatus.userId,
-            likeStatus.commentId,
-            newStatus
-        )
+
+        console.log('STATUS:', newStatus)
+        await this.likesRepository.updateLikeStatus(userId, commentId, newStatus)
         return true
     }
 

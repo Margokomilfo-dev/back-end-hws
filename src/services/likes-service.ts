@@ -4,7 +4,12 @@ export class LikesService {
     constructor(private likesRepository: LikesRepository) {}
 
     async createStatus(userId: string, commentId: string): Promise<StatusType | null> {
-        const data: StatusType = new StatusType(userId, commentId, LikeInfoEnum.None)
+        const data: StatusType = new StatusType(
+            userId,
+            commentId,
+            LikeInfoEnum.None,
+            new Date().toISOString()
+        )
         return this.likesRepository.createCommentStatus(data)
     }
 
