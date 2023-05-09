@@ -1,4 +1,4 @@
-// @ts-ignore
+import 'reflect-metadata'
 import request from 'supertest'
 
 import { CodeResponsesEnum } from '../src/types'

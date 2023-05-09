@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import request from 'supertest'
 import { CodeResponsesEnum } from '../src/types'
 import { app } from '../src/settings'

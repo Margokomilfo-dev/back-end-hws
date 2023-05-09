@@ -2,9 +2,14 @@ import { UsersRepository, UserType } from '../repositores/users-db-repository'
 import { CryptoService } from './crypto-service'
 import { v4 as uuidv4 } from 'uuid'
 import dateFns from 'date-fns/addMinutes'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class UsersService {
-    constructor(private usersRepository: UsersRepository, private cryptoService: CryptoService) {}
+    constructor(
+        @inject(UsersRepository) protected usersRepository: UsersRepository,
+        @inject(CryptoService) protected cryptoService: CryptoService
+    ) {}
     async getUsers(
         pageNumber: number,
         pageSize: number,

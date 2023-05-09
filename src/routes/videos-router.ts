@@ -7,9 +7,13 @@ import {
     videoTitleValidator,
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
-import { paramsValidatorsMiddleware, videosController } from '../composition-root'
+import { container } from '../composition-root'
+import { VideosController } from '../controllers/video-controller'
+import { ParamsValidatorsMiddleware } from '../assets/express-validator/param-validation-middleware'
 
 export const videosRouter = Router({})
+const videosController = container.resolve(VideosController)
+const paramsValidatorsMiddleware = container.resolve(ParamsValidatorsMiddleware)
 
 videosRouter.get('/', videosController.getVideos.bind(videosController))
 videosRouter.post(

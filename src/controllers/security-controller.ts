@@ -2,9 +2,14 @@ import { SecurityService } from '../services/security-service'
 import { JwtService } from '../services/jwt-service'
 import { Request, Response } from 'express'
 import { CodeResponsesEnum } from '../types'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class SecurityController {
-    constructor(private securityService: SecurityService, private jwtService: JwtService) {}
+    constructor(
+        @inject(SecurityService) protected securityService: SecurityService,
+        @inject(JwtService) protected jwtService: JwtService
+    ) {}
     async getDevices(req: Request, res: Response) {
         const refreshToken = req.cookies.refreshToken
         const data = await this.jwtService.verifyAndGetUserIdByToken(refreshToken)

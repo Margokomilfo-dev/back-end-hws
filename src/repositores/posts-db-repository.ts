@@ -1,5 +1,7 @@
 import { PostsModel } from '../mongo/posts/posts.model'
+import { injectable } from 'inversify'
 
+@injectable()
 export class PostsRepository {
     async getPosts(
         pageNumber: number,

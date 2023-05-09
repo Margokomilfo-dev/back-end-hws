@@ -2,9 +2,14 @@ import { NextFunction, Request, Response } from 'express'
 import { CodeResponsesEnum } from '../types'
 import { JwtService } from '../services/jwt-service'
 import { UsersService } from '../services/users-service'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class BearerAuthorizationMiddleware {
-    constructor(private usersService: UsersService, private jwtService: JwtService) {}
+    constructor(
+        @inject(UsersService) protected usersService: UsersService,
+        @inject(JwtService) protected jwtService: JwtService
+    ) {}
 
     async auth(req: Request, res: Response, next: NextFunction) {
         if (!req.headers.authorization) {

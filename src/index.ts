@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { app } from './settings'
 import { runDb } from './mongo/db'
 

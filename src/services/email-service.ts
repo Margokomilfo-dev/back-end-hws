@@ -1,10 +1,12 @@
 import nodemailer from 'nodemailer'
 import dotenv from 'dotenv'
+import { injectable } from 'inversify'
 dotenv.config()
 
 const EMAIL = process.env.EMAIL
 const SECRET_CODE = process.env.SECRET_CODE
 
+@injectable()
 export class EmailService {
     async sendEmail(email: string, subject: string, message: string) {
         let transporter = nodemailer.createTransport({

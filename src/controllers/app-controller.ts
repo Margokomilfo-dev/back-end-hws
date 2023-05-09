@@ -7,16 +7,18 @@ import { SecurityRepository } from '../repositores/security-db-repository'
 import { LikesRepository } from '../repositores/likes-db-repository'
 import { Request, Response } from 'express'
 import { CodeResponsesEnum } from '../types'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class AppController {
     constructor(
-        private videosRepository: VideosRepository,
-        private blogsRepository: BlogsRepository,
-        private commentsRepository: CommentRepository,
-        private usersRepository: UsersRepository,
-        private postsRepository: PostsRepository,
-        private securityRepository: SecurityRepository,
-        private likesRepository: LikesRepository
+        @inject(VideosRepository) protected videosRepository: VideosRepository,
+        @inject(BlogsRepository) protected blogsRepository: BlogsRepository,
+        @inject(CommentRepository) protected commentsRepository: CommentRepository,
+        @inject(UsersRepository) protected usersRepository: UsersRepository,
+        @inject(PostsRepository) protected postsRepository: PostsRepository,
+        @inject(SecurityRepository) protected securityRepository: SecurityRepository,
+        @inject(LikesRepository) protected likesRepository: LikesRepository
     ) {}
     async deleteAll(req: Request, res: Response) {
         await this.videosRepository.deleteAll()

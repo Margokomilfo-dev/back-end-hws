@@ -1,9 +1,11 @@
 import { VideosService } from '../services/videos-service'
 import { Request, Response } from 'express'
 import { CodeResponsesEnum } from '../types'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class VideosController {
-    constructor(private videosService: VideosService) {}
+    constructor(@inject(VideosService) protected videosService: VideosService) {}
     async getVideos(req: Request, res: Response) {
         const videos = await this.videosService.getVideos()
         res.status(CodeResponsesEnum.Success_200).send(videos)

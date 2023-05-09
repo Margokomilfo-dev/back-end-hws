@@ -2,12 +2,14 @@ import { CryptoService } from './crypto-service'
 import { UsersService } from './users-service'
 import { UserType } from '../repositores/users-db-repository'
 import { EmailService } from './email-service'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class AuthService {
     constructor(
-        private usersService: UsersService,
-        private cryptoService: CryptoService,
-        private emailService: EmailService
+        @inject(UsersService) protected usersService: UsersService,
+        @inject(CryptoService) protected cryptoService: CryptoService,
+        @inject(EmailService) protected emailService: EmailService
     ) {}
 
     async checkCredentials(loginOrEmail: string, password: string): Promise<UserType | null> {

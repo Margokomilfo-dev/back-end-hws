@@ -1,11 +1,13 @@
 import { CommentRepository, CommentType } from '../repositores/comments-db-repository'
 import { LikesService } from './likes-service'
 import { LikeInfoEnum } from '../repositores/likes-db-repository'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class CommentsService {
     constructor(
-        private commentsRepository: CommentRepository,
-        private likesService: LikesService
+        @inject(CommentRepository) protected commentsRepository: CommentRepository,
+        @inject(LikesService) protected likesService: LikesService
     ) {}
     async getCommentById(id: string): Promise<CommentType | null> {
         return this.commentsRepository.getCommentById(id)

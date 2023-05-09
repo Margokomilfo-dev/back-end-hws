@@ -1,5 +1,7 @@
 import { VideoModel } from '../mongo/video/video.model'
+import { injectable } from 'inversify'
 
+@injectable()
 export class VideosRepository {
     async getVideos() {
         return VideoModel.find({}, { _id: 0, __v: 0 })

@@ -1,10 +1,12 @@
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { UserType } from '../repositores/users-db-repository'
+import { injectable } from 'inversify'
 
 dotenv.config()
 const secret = process.env.SECRET ? process.env.SECRET : 'hello'
 
+@injectable()
 export class JwtService {
     async createJWTToken(user: UserType): Promise<string> {
         return jwt.sign({ userId: user.id }, secret, {

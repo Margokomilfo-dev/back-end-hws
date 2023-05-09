@@ -1,10 +1,15 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { CodeResponsesEnum } from '../../types'
 import { UsersService } from '../../services/users-service'
 import { BlogsService } from '../../services/blogs-service'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class ParamsValidatorsMiddleware {
-    constructor(private usersService: UsersService, private blogService: BlogsService) {}
+    constructor(
+        @inject(UsersService) protected usersService: UsersService,
+        @inject(BlogsService) protected blogService: BlogsService
+    ) {}
     idIntParamValidationMiddleware(req: Request, res: Response, next: NextFunction) {
         //if NaN - return !id === false
         if (req.params.id) {

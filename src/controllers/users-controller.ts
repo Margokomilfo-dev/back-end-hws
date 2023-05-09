@@ -2,9 +2,11 @@ import { UsersService } from '../services/users-service'
 import { Request, Response } from 'express'
 import { paginationQueries } from '../assets/pagination'
 import { CodeResponsesEnum } from '../types'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class UsersController {
-    constructor(private usersService: UsersService) {}
+    constructor(@inject(UsersService) protected usersService: UsersService) {}
     async getUsers(req: Request, res: Response) {
         const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
 

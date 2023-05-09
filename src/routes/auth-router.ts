@@ -9,17 +9,24 @@ import {
     userLoginOrEmailValidator,
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
-import { checkCookiesAndUserMiddleware } from '../middlewares/getCookiesMiddleware'
-import { rateLimitMiddleware } from '../middlewares/rate-limit-middleware'
-import {
-    authController,
-    bearerAuthorizationMiddleware,
-    commonMiddleware,
-    customValidator,
-    paramsValidatorsMiddleware,
-} from '../composition-root'
+import { CheckCookiesAndUserMiddleware } from '../middlewares/getCookiesMiddleware'
+import { container } from '../composition-root'
+import { AuthController } from '../controllers/auth-controller'
+import { CommonMiddleware } from '../middlewares/common-middleware'
+import { ParamsValidatorsMiddleware } from '../assets/express-validator/param-validation-middleware'
+import { CustomValidator } from '../assets/express-validator/custom-validators'
+import { BearerAuthorizationMiddleware } from '../middlewares/bearer-authorization-middleware'
+import { RateLimitMiddleware } from '../middlewares/rate-limit-middleware'
 
 export const authRouter = Router({})
+
+const authController = container.resolve(AuthController)
+const commonMiddleware = container.resolve(CommonMiddleware)
+const paramsValidatorsMiddleware = container.resolve(ParamsValidatorsMiddleware)
+const customValidator = container.resolve(CustomValidator)
+const bearerAuthorizationMiddleware = container.resolve(BearerAuthorizationMiddleware)
+const rateLimitMiddleware = container.resolve(RateLimitMiddleware)
+const checkCookiesAndUserMiddleware = container.resolve(CheckCookiesAndUserMiddleware)
 
 authRouter.post(
     '/login',

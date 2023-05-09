@@ -7,14 +7,16 @@ import { Request, Response } from 'express'
 import { CodeResponsesEnum } from '../types'
 import { v4 as uuidv4 } from 'uuid'
 import { firstPartsOfJWTToken, getJWTPayload } from '../assets/jwt-parse'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class AuthController {
     constructor(
-        private usersService: UsersService,
-        private authService: AuthService,
-        private securityService: SecurityService,
-        private jwtService: JwtService,
-        private emailService: EmailService
+        @inject(UsersService) protected usersService: UsersService,
+        @inject(AuthService) protected authService: AuthService,
+        @inject(SecurityService) protected securityService: SecurityService,
+        @inject(JwtService) protected jwtService: JwtService,
+        @inject(EmailService) protected emailService: EmailService
     ) {}
     async login(req: Request, res: Response) {
         let dName = 'non'

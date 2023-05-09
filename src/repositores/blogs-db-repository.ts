@@ -1,5 +1,7 @@
 import { BlogModel } from '../mongo/blog/blog.model'
+import { injectable } from 'inversify'
 
+@injectable()
 export class BlogsRepository {
     async getBlogs(
         pageNumber: number,

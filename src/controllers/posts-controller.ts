@@ -5,12 +5,14 @@ import { Request, Response } from 'express'
 import { paginationQueries } from '../assets/pagination'
 import { CodeResponsesEnum } from '../types'
 import { getUserIdFromHeaders } from '../assets/getUserId-from-headers'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class PostsController {
     constructor(
-        private postsService: PostsService,
-        private commentsService: CommentsService,
-        private blogService: BlogsService
+        @inject(PostsService) protected postsService: PostsService,
+        @inject(CommentsService) protected commentsService: CommentsService,
+        @inject(BlogsService) protected blogService: BlogsService
     ) {}
     async getPosts(req: Request, res: Response) {
         const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)

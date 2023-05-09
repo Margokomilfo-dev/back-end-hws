@@ -1,6 +1,8 @@
 import bcrypt from 'bcrypt'
 import { UserType } from '../repositores/users-db-repository'
+import { injectable } from 'inversify'
 
+@injectable()
 export class CryptoService {
     async _generateSalt() {
         return bcrypt.genSalt(10)

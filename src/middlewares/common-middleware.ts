@@ -2,9 +2,14 @@ import { NextFunction, Request, Response } from 'express'
 import { CodeResponsesEnum } from '../types'
 import { UsersService } from '../services/users-service'
 import { CommentsService } from '../services/comments-service'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class CommonMiddleware {
-    constructor(private usersService: UsersService, private commentsService: CommentsService) {}
+    constructor(
+        @inject(UsersService) protected usersService: UsersService,
+        @inject(CommentsService) protected commentsService: CommentsService
+    ) {}
     async userIsExist(req: Request, res: Response, next: NextFunction) {
         let recoveryCode = req.body.recoveryCode
         const user = await this.usersService.getUserByConfirmationCode(recoveryCode)

@@ -1,7 +1,9 @@
 import { BlogsRepository, BlogType } from '../repositores/blogs-db-repository'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class BlogsService {
-    constructor(private blogsRepository: BlogsRepository) {}
+    constructor(@inject(BlogsRepository) protected blogsRepository: BlogsRepository) {}
     async getBlogs(
         pageNumber: number,
         pageSize: number,

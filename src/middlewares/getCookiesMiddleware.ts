@@ -3,14 +3,14 @@ import { CodeResponsesEnum } from '../types'
 import { JwtService } from '../services/jwt-service'
 import { firstPartsOfJWTToken } from '../assets/jwt-parse'
 import { SecurityRepository } from '../repositores/security-db-repository'
+import { inject, injectable } from 'inversify'
 
-class CheckCookiesAndUserMiddleware {
-    securityRepository: SecurityRepository
-    jwtService: JwtService
-    constructor() {
-        this.securityRepository = new SecurityRepository()
-        this.jwtService = new JwtService()
-    }
+@injectable()
+export class CheckCookiesAndUserMiddleware {
+    constructor(
+        @inject(SecurityRepository) protected securityRepository: SecurityRepository,
+        @inject(JwtService) protected jwtService: JwtService
+    ) {}
     async checkCookiesAndUser(req: Request, res: Response, next: NextFunction) {
         const refreshToken = req.cookies.refreshToken
         if (!refreshToken) {
@@ -38,7 +38,6 @@ class CheckCookiesAndUserMiddleware {
         next()
     }
 }
-export const checkCookiesAndUserMiddleware = new CheckCookiesAndUserMiddleware()
 
 // export const checkCookiesAndUserMiddleware = async (
 //     req: Request,

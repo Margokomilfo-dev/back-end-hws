@@ -1,10 +1,9 @@
 import { AttemptType, RateRepository } from '../repositores/rate-db-repository'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class RateService {
-    rateRepository: RateRepository
-    constructor() {
-        this.rateRepository = new RateRepository()
-    }
+    constructor(@inject(RateRepository) protected rateRepository: RateRepository) {}
     async createAttempt(attempt: AttemptType): Promise<void> {
         return this.rateRepository.createAttempt(attempt)
     }

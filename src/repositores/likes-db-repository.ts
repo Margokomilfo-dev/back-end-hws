@@ -1,5 +1,7 @@
 import { LikesModel } from '../mongo/likes/likes.model'
+import { injectable } from 'inversify'
 
+@injectable()
 export class LikesRepository {
     async createCommentStatus(dto: StatusType): Promise<StatusType | null> {
         await LikesModel.insertMany([dto])

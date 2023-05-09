@@ -1,8 +1,13 @@
 import { SecurityRepository, SecurityType } from '../repositores/security-db-repository'
 import { JwtService } from './jwt-service'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class SecurityService {
-    constructor(private securityRepository: SecurityRepository, private jwtService: JwtService) {}
+    constructor(
+        @inject(SecurityRepository) protected securityRepository: SecurityRepository,
+        @inject(JwtService) protected jwtService: JwtService
+    ) {}
     async create(
         deviceId: string,
         userId: string,

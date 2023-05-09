@@ -4,12 +4,14 @@ import { CodeResponsesEnum } from '../types'
 import { JwtService } from '../services/jwt-service'
 import { LikeInfoEnum } from '../repositores/likes-db-repository'
 import { LikesService } from '../services/likes-service'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class CommentsController {
     constructor(
-        private commentsService: CommentsService,
-        private jwtService: JwtService,
-        private likesService: LikesService
+        @inject(CommentsService) protected commentsService: CommentsService,
+        @inject(JwtService) protected jwtService: JwtService,
+        @inject(LikesService) protected likesService: LikesService
     ) {}
     async getComment(req: Request, res: Response) {
         const id = req.params.id

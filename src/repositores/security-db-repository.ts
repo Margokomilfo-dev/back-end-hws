@@ -1,5 +1,7 @@
 import { SecurityModel } from '../mongo/security/security.model'
+import { injectable } from 'inversify'
 
+@injectable()
 export class SecurityRepository {
     async create(data: SecurityType): Promise<void> {
         await SecurityModel.insertMany(data)

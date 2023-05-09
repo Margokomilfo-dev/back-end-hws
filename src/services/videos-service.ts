@@ -1,8 +1,10 @@
 import addDays from 'date-fns/addDays'
 import { VideosRepository, VideoType } from '../repositores/videos-db-repository'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class VideosService {
-    constructor(private videosRepository: VideosRepository) {}
+    constructor(@inject(VideosRepository) protected videosRepository: VideosRepository) {}
     async getVideos() {
         return this.videosRepository.getVideos()
     }

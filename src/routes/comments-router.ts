@@ -5,14 +5,18 @@ import {
     likeStatusValidator,
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
-import {
-    bearerAuthorizationMiddleware,
-    commentController,
-    commonMiddleware,
-    paramsValidatorsMiddleware,
-} from '../composition-root'
+import { container } from '../composition-root'
+import { ParamsValidatorsMiddleware } from '../assets/express-validator/param-validation-middleware'
+import { CommentsController } from '../controllers/comments-controller'
+import { CommonMiddleware } from '../middlewares/common-middleware'
+import { BearerAuthorizationMiddleware } from '../middlewares/bearer-authorization-middleware'
 
 export const commentsRouter = Router({})
+
+const commentController = container.resolve(CommentsController)
+const paramsValidatorsMiddleware = container.resolve(ParamsValidatorsMiddleware)
+const commonMiddleware = container.resolve(CommonMiddleware)
+const bearerAuthorizationMiddleware = container.resolve(BearerAuthorizationMiddleware)
 
 commentsRouter.get(
     '/:id',

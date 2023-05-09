@@ -8,14 +8,18 @@ import {
     postTitleValidator,
 } from '../assets/express-validator/field-validators'
 import { basicAuthorizationMiddleware } from '../middlewares/basic-authorization-middleware'
-import {
-    bearerAuthorizationMiddleware,
-    customValidator,
-    paramsValidatorsMiddleware,
-    postsController,
-} from '../composition-root'
+import { container } from '../composition-root'
+import { PostsController } from '../controllers/posts-controller'
+import { ParamsValidatorsMiddleware } from '../assets/express-validator/param-validation-middleware'
+import { CustomValidator } from '../assets/express-validator/custom-validators'
+import { BearerAuthorizationMiddleware } from '../middlewares/bearer-authorization-middleware'
 
 export const postsRouter = Router({})
+
+const postsController = container.resolve(PostsController)
+const paramsValidatorsMiddleware = container.resolve(ParamsValidatorsMiddleware)
+const customValidator = container.resolve(CustomValidator)
+const bearerAuthorizationMiddleware = container.resolve(BearerAuthorizationMiddleware)
 
 postsRouter.get('/', postsController.getPosts.bind(postsController))
 

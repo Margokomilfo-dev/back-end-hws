@@ -3,9 +3,14 @@ import { BlogsService } from '../services/blogs-service'
 import { Request, Response } from 'express'
 import { paginationQueries } from '../assets/pagination'
 import { CodeResponsesEnum } from '../types'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class BlogsController {
-    constructor(private postsService: PostsService, private blogService: BlogsService) {}
+    constructor(
+        @inject(PostsService) protected postsService: PostsService,
+        @inject(BlogsService) protected blogService: BlogsService
+    ) {}
     async getBlogs(req: Request, res: Response) {
         const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
 

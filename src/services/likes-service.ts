@@ -1,7 +1,9 @@
 import { LikeInfoEnum, LikesRepository, StatusType } from '../repositores/likes-db-repository'
+import { inject, injectable } from 'inversify'
 
+@injectable()
 export class LikesService {
-    constructor(private likesRepository: LikesRepository) {}
+    constructor(@inject(LikesRepository) protected likesRepository: LikesRepository) {}
 
     async createStatus(userId: string, commentId: string): Promise<StatusType | null> {
         const data: StatusType = new StatusType(

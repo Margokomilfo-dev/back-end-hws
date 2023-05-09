@@ -1,8 +1,12 @@
 import { Router } from 'express'
-import { checkCookiesAndUserMiddleware } from '../middlewares/getCookiesMiddleware'
-import { securityController } from '../composition-root'
+import { container } from '../composition-root'
+import { SecurityController } from '../controllers/security-controller'
+import { CheckCookiesAndUserMiddleware } from '../middlewares/getCookiesMiddleware'
 
 export const securityRouter = Router({})
+
+const securityController = container.resolve(SecurityController)
+const checkCookiesAndUserMiddleware = container.resolve(CheckCookiesAndUserMiddleware)
 
 securityRouter.get(
     '/devices',

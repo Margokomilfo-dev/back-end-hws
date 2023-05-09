@@ -1,6 +1,8 @@
 import dateFns from 'date-fns/addSeconds'
 import { RateModel } from '../mongo/rate/rate.model'
+import { injectable } from 'inversify'
 
+@injectable()
 export class RateRepository {
     async createAttempt(attempt: AttemptType): Promise<void> {
         await RateModel.insertMany({

@@ -1,12 +1,11 @@
 import { NextFunction, Request, Response } from 'express'
 import { CodeResponsesEnum } from '../types'
 import { RateService } from '../services/rate-service'
+import { inject, injectable } from 'inversify'
 
-class RateLimitMiddleware {
-    rateService: RateService
-    constructor() {
-        this.rateService = new RateService()
-    }
+@injectable()
+export class RateLimitMiddleware {
+    constructor(@inject(RateService) protected rateService: RateService) {}
     async middleware(req: Request, res: Response, next: NextFunction) {
         let ip = '127.0.0.1'
         if (req.ip) ip = req.ip
@@ -21,7 +20,6 @@ class RateLimitMiddleware {
         next()
     }
 }
-export const rateLimitMiddleware = new RateLimitMiddleware()
 
 // export const rateLimitMiddleware = async (
 //     req: Request,

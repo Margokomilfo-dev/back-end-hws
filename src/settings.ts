@@ -8,7 +8,10 @@ import { authRouter } from './routes/auth-router'
 import { commentsRouter } from './routes/comments-router'
 import cookieParser from 'cookie-parser'
 import { securityRouter } from './routes/security-router'
-import { appController } from './composition-root'
+import { container } from './composition-root'
+import { AppController } from './controllers/app-controller'
+
+const appController = container.resolve(AppController)
 
 export const app = express()
 app.set('trust proxy', true)

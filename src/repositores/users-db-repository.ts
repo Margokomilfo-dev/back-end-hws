@@ -1,7 +1,9 @@
 import { v4 as uuidv4 } from 'uuid'
 import dateFns from 'date-fns/addMinutes'
 import { UserModel } from '../mongo/user/user.model'
+import { injectable } from 'inversify'
 
+@injectable()
 export class UsersRepository {
     async getUsers(
         pageNumber: number,

@@ -9,9 +9,13 @@ import {
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
 import { basicAuthorizationMiddleware } from '../middlewares/basic-authorization-middleware'
-import { blogsController, paramsValidatorsMiddleware } from '../composition-root'
+import { container } from '../composition-root'
+import { BlogsController } from '../controllers/blogs-controller'
+import { ParamsValidatorsMiddleware } from '../assets/express-validator/param-validation-middleware'
 
 export const blogsRouter = Router({})
+const blogsController = container.resolve(BlogsController)
+const paramsValidatorsMiddleware = container.resolve(ParamsValidatorsMiddleware)
 
 blogsRouter.get('/', blogsController.getBlogs.bind(blogsController))
 blogsRouter.post(

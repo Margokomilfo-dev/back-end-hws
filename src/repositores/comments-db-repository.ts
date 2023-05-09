@@ -1,6 +1,8 @@
 import { CommentsModel } from '../mongo/comments/comments.model'
 import { LikeInfoEnum, LikesRepository, StatusType } from './likes-db-repository'
+import { injectable } from 'inversify'
 
+@injectable()
 export class CommentRepository {
     constructor(private likesRepository: LikesRepository) {}
     async createComment(comment: CommentType): Promise<ExtendedCommentType | null> {
