@@ -103,8 +103,6 @@ export class CommentRepository {
         }
 
         await CommentsModel.findOneAndUpdate({ id: comment.id }, filter).lean()
-
-        console.log('STATUS:', newStatus)
         await this.likesRepository.updateLikeStatus(userId, commentId, newStatus)
         return true
     }

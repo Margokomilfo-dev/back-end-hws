@@ -3,8 +3,8 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const dbName = 'hw'
-const mongoURI = process.env.mongoURI || `mongodb://0.0.0.0:27017/${dbName}`
-//const mongoURI = process.env.MONGO_URI_FOR_STUDENTS || `mongodb://0.0.0.0:27017/${dbName}`
+// const mongoURI = process.env.mongoURI || `mongodb://0.0.0.0:27017/${dbName}`
+const mongoURI = process.env.MONGO_URI_FOR_STUDENTS || `mongodb://0.0.0.0:27017/${dbName}`
 
 // const client = new MongoClient(mongoURI)
 // const db = client.db('hw')
