@@ -469,6 +469,7 @@ describe('/posts', () => {
             const getPostData = await request(app)
                 .get(`/posts/${newPost!.id}`)
                 .set('Authorization', `bearer ${token1}`)
+            expect(getPostData.body.extendedLikesInfo.myStatus).toBe(LikeInfoEnum.Like)
             expect(getPostData.body.extendedLikesInfo.newestLikes[0].userId).toBe(user1!.id)
             expect(getPostData.body.extendedLikesInfo.newestLikes[0].login).toBe(user1!.login)
             expect(getPostData.body.extendedLikesInfo.newestLikes[0].addedAt).toBeDefined()

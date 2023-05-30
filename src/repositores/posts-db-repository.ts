@@ -51,8 +51,8 @@ export class PostsRepository {
         }
 
         const res = await PostsModel.findOne({ id }, { _id: 0, __v: 0 }).lean()
-        const newestLikes = await this.likesRepository.getNewestPostLikes(id, 3)
         if (!res) return null
+        const newestLikes = await this.likesRepository.getNewestPostLikes(res.id, 3)
         return {
             ...res,
             extendedLikesInfo: {
