@@ -25,7 +25,10 @@ export class LikesRepository {
         return CommentLikesModel.findOne({ userId, commentId }).lean()
     }
     async getNewestPostLikes(postId: string, num: number): Promise<Array<PostStatusType>> {
-        return PostLikesModel.find({ postId }).sort({ createdAt: -1 }).limit(num).lean()
+        return PostLikesModel.find({ postId, status: LikeInfoEnum.Like })
+            .sort({ createdAt: -1 })
+            .limit(num)
+            .lean()
     }
     async updateCommentLikeStatus(
         userId: string,

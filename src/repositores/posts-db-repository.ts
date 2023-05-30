@@ -49,9 +49,22 @@ export class PostsRepository {
             const postStatusData = await this.likesRepository.getPostStatus(userId, id)
             if (postStatusData) myStatus = postStatusData.status
         }
+
         const res = await PostsModel.findOne({ id }, { _id: 0, __v: 0 }).lean()
+        const newestLikes = await this.likesRepository.getNewestPostLikes(id, 3)
         if (!res) return null
-        return { ...res, extendedLikesInfo: { ...res.extendedLikesInfo, myStatus } }
+        return {
+            ...res,
+            extendedLikesInfo: {
+                ...res.extendedLikesInfo,
+                myStatus,
+                newestLikes: newestLikes.map((l) => ({
+                    addedAt: l.createdAt,
+                    userId: l.userId,
+                    login: l.login,
+                })),
+            },
+        }
     }
 
     async getPostsByBlogId(
@@ -102,12 +115,6 @@ export class PostsRepository {
         const filter: any = {}
         let newStatus = checkedStatus
         const { status, postId, userId } = myLikeStatusData
-        console.log(
-            'post, mylikeststausData, checkedStatus:',
-            post,
-            myLikeStatusData,
-            checkedStatus
-        )
         if (checkedStatus === LikeInfoEnum.None) {
             if (status === LikeInfoEnum.Like) {
                 filter.$inc = { 'extendedLikesInfo.likesCount': -1 }

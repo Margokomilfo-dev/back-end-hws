@@ -223,7 +223,6 @@ describe('/comments', () => {
         })
 
         it('+ PUT/:commentId/like-status auth,  Like comment1 by user', async () => {
-            console.log(1)
             await request(app)
                 .put('/comments/' + comment0_2!.id + '/like-status')
                 .set('Authorization', `bearer ${token}`)
