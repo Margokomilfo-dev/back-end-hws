@@ -4,6 +4,7 @@ import { Request, Response } from 'express'
 import { paginationQueries } from '../assets/pagination'
 import { CodeResponsesEnum } from '../types'
 import { inject, injectable } from 'inversify'
+import { getBearerUserIdFromHeaders } from '../assets/get-bearer-user-id-from-headers'
 
 @injectable()
 export class BlogsController {
@@ -77,6 +78,9 @@ export class BlogsController {
     }
     async getPostsByBlogId(req: Request, res: Response) {
         const { pageNumber, pageSize, sortBy, sortDirection } = paginationQueries(req)
+        let userId = null
+        const user = await getBearerUserIdFromHeaders(req.headers.authorization)
+        if (user) userId = user.userId
 
         const id = req.params.blogId
 
@@ -85,7 +89,8 @@ export class BlogsController {
             pageNumber,
             pageSize,
             sortBy,
-            sortDirection
+            sortDirection,
+            userId
         )
         const postsCount = await this.postsService.getPostsCountByBlogId(id)
         const result = {

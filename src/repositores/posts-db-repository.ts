@@ -18,27 +18,7 @@ export class PostsRepository {
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
             .lean()
 
-        const promises = posts.map(async (post) => {
-            let myStatus = LikeInfoEnum.None
-            if (userId) {
-                const postStatus = await this.likesRepository.getPostStatus(userId, post.id)
-                if (postStatus) myStatus = postStatus.status
-            }
-            const newestLikes = await this.likesRepository.getNewestPostLikes(post.id, 3)
-            return {
-                ...post,
-                extendedLikesInfo: {
-                    ...post.extendedLikesInfo,
-                    myStatus,
-                    newestLikes: newestLikes.map((l) => ({
-                        addedAt: l.createdAt,
-                        userId: l.userId,
-                        login: l.login,
-                    })),
-                },
-            }
-        })
-        return await Promise.all(promises)
+        return await this.postsCorrectModelCreator(posts, userId)
     }
     async getPostsCount(): Promise<number> {
         return PostsModel.countDocuments({})
@@ -72,14 +52,18 @@ export class PostsRepository {
         pageNumber: number,
         pageSize: number,
         sortBy: string,
-        sortDirection: string
-    ): Promise<Array<PostType>> {
-        return PostsModel.find({ blogId }, { _id: 0, __v: 0 })
+        sortDirection: string,
+        userId: string | null
+    ): Promise<Array<ExtendedPostType>> {
+        const posts = await PostsModel.find({ blogId }, { _id: 0, __v: 0 })
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize)
             .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
             .lean()
+
+        return await this.postsCorrectModelCreator(posts, userId)
     }
+
     async getPostsCountByBlogId(blogId: string): Promise<number> {
         return PostsModel.countDocuments({ blogId })
     }
@@ -171,6 +155,33 @@ export class PostsRepository {
     }
     async deleteAll() {
         return PostsModel.deleteMany({})
+    }
+
+    private async postsCorrectModelCreator(
+        posts: PostType[],
+        userId: null | string
+    ): Promise<ExtendedPostType[]> {
+        const promises = posts.map(async (post) => {
+            let myStatus = LikeInfoEnum.None
+            if (userId) {
+                const postStatus = await this.likesRepository.getPostStatus(userId, post.id)
+                if (postStatus) myStatus = postStatus.status
+            }
+            const newestLikes = await this.likesRepository.getNewestPostLikes(post.id, 3)
+            return {
+                ...post,
+                extendedLikesInfo: {
+                    ...post.extendedLikesInfo,
+                    myStatus,
+                    newestLikes: newestLikes.map((l) => ({
+                        addedAt: l.createdAt,
+                        userId: l.userId,
+                        login: l.login,
+                    })),
+                },
+            }
+        })
+        return await Promise.all(promises)
     }
 }
 

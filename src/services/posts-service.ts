@@ -32,14 +32,16 @@ export class PostsService {
         pageNumber: number,
         pageSize: number,
         sortBy: string,
-        sortDirection: string
+        sortDirection: string,
+        userId: string | null
     ): Promise<PostType[]> {
         return this.postsRepository.getPostsByBlogId(
             blogId,
             pageNumber,
             pageSize,
             sortBy,
-            sortDirection
+            sortDirection,
+            userId
         )
     }
 
