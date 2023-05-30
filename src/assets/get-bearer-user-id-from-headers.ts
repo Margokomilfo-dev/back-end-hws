@@ -3,9 +3,9 @@ import { UsersService } from '../services/users-service'
 import { UsersRepository } from '../repositores/users-db-repository'
 import { CryptoService } from '../services/crypto-service'
 
-export const getUserIdFromHeaders = async (
+export const getBearerUserIdFromHeaders = async (
     authorization: string | undefined
-): Promise<null | string> => {
+): Promise<null | { userId: string; userLogin: string }> => {
     const jwtService = new JwtService()
     const usersService = new UsersService(new UsersRepository(), new CryptoService())
     if (!authorization) {
@@ -19,7 +19,7 @@ export const getUserIdFromHeaders = async (
         if (!user) {
             return null
         }
-        return user.id
+        return { userId: user.id, userLogin: user.login }
     }
     return null
 }

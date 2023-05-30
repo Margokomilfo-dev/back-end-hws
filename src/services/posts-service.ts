@@ -1,25 +1,30 @@
-import { PostsRepository, PostType } from '../repositores/posts-db-repository'
+import { ExtendedPostType, PostsRepository, PostType } from '../repositores/posts-db-repository'
 import { inject, injectable } from 'inversify'
+import { LikeInfoEnum, LikesRepository } from '../repositores/likes-db-repository'
 
 @injectable()
 export class PostsService {
-    constructor(@inject(PostsRepository) protected postsRepository: PostsRepository) {}
+    constructor(
+        @inject(PostsRepository) protected postsRepository: PostsRepository,
+        @inject(LikesRepository) protected likesRepository: LikesRepository
+    ) {}
 
     async getPosts(
         pageNumber: number,
         pageSize: number,
         sortBy: string,
-        sortDirection: string
-    ): Promise<PostType[]> {
-        return this.postsRepository.getPosts(pageNumber, pageSize, sortBy, sortDirection)
+        sortDirection: string,
+        userId: string | null
+    ): Promise<ExtendedPostType[]> {
+        return this.postsRepository.getPosts(pageNumber, pageSize, sortBy, sortDirection, userId)
     }
 
     async getPostsCount(): Promise<number> {
         return this.postsRepository.getPostsCount()
     }
 
-    async getPostById(id: string): Promise<PostType | null> {
-        return this.postsRepository.getPostById(id)
+    async getPostById(id: string, userId: string | null): Promise<PostType | null> {
+        return this.postsRepository.getPostById(id, userId)
     }
 
     async getPostsByBlogId(
@@ -49,7 +54,8 @@ export class PostsService {
             blogId: string
             shortDescription: string
         },
-        blogName: string
+        blogName: string,
+        userId: string
     ): Promise<PostType | null> {
         const newPost = new PostType(
             new Date().getTime().toString(),
@@ -58,10 +64,14 @@ export class PostsService {
             body.content,
             body.blogId,
             blogName,
-            new Date().toISOString()
+            new Date().toISOString(),
+            {
+                likesCount: 0,
+                dislikesCount: 0,
+                newestLikes: [],
+            }
         )
-
-        return this.postsRepository.createPost(newPost)
+        return this.postsRepository.createPost(newPost, userId)
     }
     async updatePost(
         id: string,
@@ -73,6 +83,28 @@ export class PostsService {
         }
     ): Promise<boolean> {
         return this.postsRepository.updatePost(id, body)
+    }
+
+    async updateLikeStatus(
+        postId: string,
+        likeStatus: LikeInfoEnum,
+        userId: string,
+        userLogin: string
+    ): Promise<boolean> {
+        const post = await this.postsRepository.getPostById(postId, userId)
+        if (!post) return false
+        let myLikeStatusData = await this.likesRepository.getPostStatus(userId, postId)
+
+        if (!myLikeStatusData)
+            myLikeStatusData = await this.likesRepository.createPostStatus({
+                userId,
+                status: LikeInfoEnum.None,
+                postId,
+                login: userLogin,
+                createdAt: new Date().toISOString(),
+            })
+        await this.postsRepository.updateLikeStatus(post, myLikeStatusData!, likeStatus)
+        return true
     }
 
     async deletePost(id: string): Promise<boolean> {

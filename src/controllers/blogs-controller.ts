@@ -55,7 +55,8 @@ export class BlogsController {
                 shortDescription: req.body.shortDescription,
                 blogId: blog!.id,
             },
-            blog!.name
+            blog!.name,
+            req.userId!
         )
 
         if (newPost) {

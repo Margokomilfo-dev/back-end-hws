@@ -1,14 +1,17 @@
 import 'reflect-metadata'
+// @ts-ignore
 import request from 'supertest'
 import { CodeResponsesEnum } from '../src/types'
 import { app } from '../src/settings'
 import { createBlog, createPost, createUser, getTokenPostAuthLogin } from './assets'
 import { UserType } from '../src/repositores/users-db-repository'
 import mongoose from 'mongoose'
+// @ts-ignore
 import dotenv from 'dotenv'
-import { PostType } from '../src/repositores/posts-db-repository'
+import { ExtendedPostType, PostType } from '../src/repositores/posts-db-repository'
 import { CommentType } from '../src/repositores/comments-db-repository'
 import { BlogType } from '../src/repositores/blogs-db-repository'
+import { LikeInfoEnum } from '../src/repositores/likes-db-repository'
 dotenv.config()
 
 const dbName = 'hw'
@@ -27,6 +30,11 @@ describe('/posts', () => {
     let user: UserType | null = null
     let token: string | null = null
 
+    let user1: UserType | null = null
+    let user2: UserType | null = null
+    let token1: string | null = null
+    let token2: string | null = null
+
     beforeAll(async () => {
         /* Connecting to the database before each test. */
         await mongoose.connect(mongoURI)
@@ -37,7 +45,25 @@ describe('/posts', () => {
         /* Closing database connection after each test. */
         await mongoose.connection.close()
     })
+    describe('preparing', () => {
+        it('POST users', async () => {
+            user1 = await createUser({
+                login: 'Dimych_',
+                email: 'dimych_@gmail.com',
+                password: '123456',
+            })
+            user2 = await createUser({
+                login: 'Natali',
+                email: 'natali@gmail.com',
+                password: '123456',
+            })
+        })
 
+        it('POST tokens', async () => {
+            token1 = await getTokenPostAuthLogin(user1!.login, '123456')
+            token2 = await getTokenPostAuthLogin(user2!.login, '123456')
+        })
+    })
     describe('GET', () => {
         it('GET posts = []', async () => {
             const res = await request(app).get('/posts/')
@@ -402,6 +428,43 @@ describe('/posts', () => {
                 content: 'string123',
             })
             newPost = res.body
+        })
+    })
+    describe('PUT/:id/like-status', () => {
+        it('+ PUT update post by ID with correct data', async () => {
+            await request(app)
+                .put('/posts/' + newPost!.id + '/like-status')
+                .set('Authorization', `bearer ${token1}`)
+                .send({
+                    likeStatus: LikeInfoEnum.Like,
+                })
+                .expect(CodeResponsesEnum.Not_content_204)
+
+            const res = await request(app)
+                .get(`/posts/${newPost!.id}`)
+                .set('Authorization', `bearer ${token1}`)
+
+            expect(res.body.blogName).toBe(newPost!.blogName)
+            expect(res.body.content).toBe('string123')
+            expect(res.body.shortDescription).toBe('string123')
+            expect(res.body.title).toBe('title123')
+            expect(res.body.id).toBe(newPost!.id)
+            expect(res.body.extendedLikesInfo).toBeDefined()
+            expect(res.body.extendedLikesInfo.myStatus).toBe(LikeInfoEnum.Like)
+            expect(res.body.extendedLikesInfo.likesCount).toBe(1)
+            newPost = res.body
+
+            const postsData = await request(app)
+                .get(`/posts`)
+                .set('Authorization', `bearer ${token1}`)
+            expect(postsData.body.items.length).toBe(2)
+
+            const ourPost = postsData.body.items.find((p: ExtendedPostType) => p.id === newPost!.id)
+
+            expect(ourPost.extendedLikesInfo.newestLikes.length).toBe(1)
+            expect(ourPost.extendedLikesInfo.newestLikes[0].userId).toBe(user1!.id)
+            expect(ourPost.extendedLikesInfo.newestLikes[0].login).toBe(user1!.login)
+            expect(ourPost.extendedLikesInfo.newestLikes[0].addedAt).toBeDefined()
         })
     })
     describe('DELETE', () => {

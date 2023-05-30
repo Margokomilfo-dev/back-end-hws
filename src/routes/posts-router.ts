@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
 import {
     commentContentValidator,
+    likeStatusValidator,
     postBlogIdValidator,
     postContentValidator,
     postShortDescriptionValidator,
@@ -54,7 +55,7 @@ postsRouter.post(
     postsController.createCommentByPostId.bind(postsController)
 )
 
-postsRouter.get('/:id', postsController.getComment.bind(postsController))
+postsRouter.get('/:id', postsController.getPost.bind(postsController))
 
 postsRouter.put(
     '/:id',
@@ -67,6 +68,16 @@ postsRouter.put(
     customValidator._customIsBlogValidator.bind(customValidator),
     errorsResultMiddleware,
     postsController.updateComment.bind(postsController)
+)
+
+postsRouter.put(
+    '/:id/like-status',
+    bearerAuthorizationMiddleware.auth.bind(bearerAuthorizationMiddleware),
+    paramsValidatorsMiddleware.idStringParamValidationMiddleware.bind(paramsValidatorsMiddleware),
+    likeStatusValidator,
+    customValidator._customIsBlogValidator.bind(customValidator),
+    errorsResultMiddleware,
+    postsController.updateLikeStatus.bind(postsController)
 )
 
 //здесь может быть ошибка, так как Ваня здесь не проверяет на id и в случае ошибки лн вернет 404

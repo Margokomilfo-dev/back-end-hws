@@ -9,6 +9,11 @@ let posts: Array<PostType> = [
         content: 'content',
         shortDescription: 'shortDescription',
         createdAt: new Date().toISOString(),
+        extendedLikesInfo: {
+            likesCount: 0,
+            newestLikes: [],
+            dislikesCount: 0,
+        },
     },
 ]
 

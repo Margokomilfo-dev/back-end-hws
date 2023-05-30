@@ -5,6 +5,7 @@ import request from 'supertest'
 import { app } from '../src/settings'
 import { createBlog, createPost } from './assets'
 import mongoose from 'mongoose'
+// @ts-ignore
 import dotenv from 'dotenv'
 import { BlogType } from '../src/repositores/blogs-db-repository'
 import { PostType } from '../src/repositores/posts-db-repository'

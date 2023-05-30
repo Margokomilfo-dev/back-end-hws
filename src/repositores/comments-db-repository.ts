@@ -1,5 +1,5 @@
 import { CommentsModel } from '../mongo/comments/comments.model'
-import { LikeInfoEnum, LikesRepository, StatusType } from './likes-db-repository'
+import { LikeInfoEnum, LikesRepository, CommentStatusType } from './likes-db-repository'
 import { injectable } from 'inversify'
 
 @injectable()
@@ -58,7 +58,7 @@ export class CommentRepository {
     async updateLikeStatus(
         comment: CommentType,
         checkedStatus: LikeInfoEnum,
-        myLikeStatusData: StatusType
+        myLikeStatusData: CommentStatusType
     ): Promise<boolean> {
         const filter: any = {}
         let newStatus = checkedStatus
@@ -105,7 +105,7 @@ export class CommentRepository {
         }
 
         await CommentsModel.findOneAndUpdate({ id: comment.id }, filter).lean()
-        await this.likesRepository.updateLikeStatus(userId, commentId, newStatus)
+        await this.likesRepository.updateCommentLikeStatus(userId, commentId, newStatus)
         return true
     }
 

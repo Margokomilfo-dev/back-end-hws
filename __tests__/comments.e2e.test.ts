@@ -1,4 +1,5 @@
 import 'reflect-metadata'
+// @ts-ignore
 import request from 'supertest'
 
 import { CodeResponsesEnum } from '../src/types'
@@ -7,6 +8,7 @@ import { createBlog, createComment, createPost, createUser, getTokenPostAuthLogi
 import { UserType } from '../src/repositores/users-db-repository'
 
 import mongoose from 'mongoose'
+// @ts-ignore
 import dotenv from 'dotenv'
 import { BlogType } from '../src/repositores/blogs-db-repository'
 import { CommentType } from '../src/repositores/comments-db-repository'
@@ -201,7 +203,6 @@ describe('/comments', () => {
                 .get('/comments/' + comment0_1!.id)
                 .set('Authorization', `bearer ${token}`)
 
-            console.log('Dislike => None status', res_.body.likesInfo)
             expect(res_.body.likesInfo.likesCount).toBe(0)
             expect(res_.body.likesInfo.dislikesCount).toBe(0)
             expect(res_.body.likesInfo.myStatus).toBe(LikeInfoEnum.None)
@@ -252,7 +253,6 @@ describe('/comments', () => {
             expect(res_.body.likesInfo.myStatus).toBe(LikeInfoEnum.Like)
         })
         it('+ PUT/:commentId/like-status auth, Dislike comment1 by user', async () => {
-            console.log('4')
             await request(app)
                 .put('/comments/' + comment0_1!.id + '/like-status')
                 .set('Authorization', `bearer ${token}`)

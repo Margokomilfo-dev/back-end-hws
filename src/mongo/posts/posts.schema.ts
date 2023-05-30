@@ -10,4 +10,15 @@ export const PostsSchema = new mongoose.Schema<WithId<PostType>>({
     blogId: { type: String, require: true },
     blogName: { type: String, require: true },
     createdAt: { type: String, require: true },
+    extendedLikesInfo: {
+        likesCount: { type: Number, default: 0 },
+        dislikesCount: { type: Number, default: 0 },
+        newestLikes: [
+            {
+                addedAt: { type: String, require: true },
+                userId: { type: String, require: true },
+                login: { type: String, require: true },
+            },
+        ],
+    },
 })

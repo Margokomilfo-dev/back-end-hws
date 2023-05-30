@@ -8,10 +8,10 @@ import {
     postTitleValidator,
 } from '../assets/express-validator/field-validators'
 import { errorsResultMiddleware } from '../assets/express-validator/errors-result-middleware'
-import { basicAuthorizationMiddleware } from '../middlewares/basic-authorization-middleware'
 import { container } from '../composition-root'
 import { BlogsController } from '../controllers/blogs-controller'
 import { ParamsValidatorsMiddleware } from '../assets/express-validator/param-validation-middleware'
+import { basicAuthorizationMiddleware } from '../middlewares/basic-authorization-middleware'
 
 export const blogsRouter = Router({})
 const blogsController = container.resolve(BlogsController)
